@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ashish Sharma Resume</title>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    @page {
+      size: A4;
+      margin:8mm;
+    }
+
+    body{
+      background:#f4f4f4;
+      padding:12px;
+      color:#333;
+    }
+
+    .resume{
+      width:210mm;
+      max-width:100%;
+      margin:auto;
+      background:#fff;
+      padding:18mm;
+      box-shadow:0 0 10px rgba(0,0,0,0.1);
+      border-radius:10px;
+    }
+
+    @media print {
+      body{
+        background:#fff;
+        padding:0;
+      }
+
+      .resume{
+        width:auto;
+        margin:0;
+        box-shadow:none;
+        border-radius:0;
+        padding:8mm;
+      }
+
+      html, body {
+        width:210mm;
+        height:297mm;
+      }
+
+      .header{
+        margin-bottom:16px;
+      }
+
+      .header h1{
+        font-size:28px;
+      }
+
+      .header h3{
+        font-size:14px;
+      }
+
+      .contact{
+        font-size:12px;
+        line-height:1.45;
+      }
+
+      .section{
+        margin-top:18px;
+      }
+
+      .section h2{
+        font-size:16px;
+        margin-bottom:12px;
+      }
+
+      p, li{
+        font-size:13px;
+        line-height:1.45;
+      }
+
+      ul{
+        margin-left:16px;
+        margin-top:8px;
+      }
+
+      .project{
+        margin-bottom:12px;
+      }
+
+      .project h3{
+        font-size:15px;
+        margin-bottom:6px;
+      }
+
+      .skills{
+        display:flex;
+        flex-wrap:wrap;
+        gap:6px;
+      }
+
+      .skills span{
+        padding:6px 10px;
+        font-size:12px;
+      }
+
+      .edu{
+        margin-bottom:10px;
+      }
+
+      .edu h3{
+        font-size:15px;
+        margin-bottom:3px;
+      }
+
+      .small{
+        font-size:12px;
+      }
+    }
+
+    .header{
+      text-align:center;
+      margin-bottom:24px;
+    }
+
+    .header h1{
+      font-size:38px;
+      margin-bottom:8px;
+      color:#111;
+    }
+
+    .header h3{
+      font-size:18px;
+      color:#666;
+      font-weight:normal;
+    }
+
+    .contact{
+      text-align:center;
+      margin-top:15px;
+      font-size:14px;
+      line-height:1.8;
+    }
+
+    .section{
+      margin-top:30px;
+    }
+
+    .section h2{
+      font-size:20px;
+      color:#111;
+      border-bottom:2px solid #333;
+      padding-bottom:5px;
+      margin-bottom:15px;
+    }
+
+    p, li{
+      font-size:15px;
+      line-height:1.7;
+    }
+
+    ul{
+      margin-left:20px;
+      margin-top:10px;
+    }
+
+    .project{
+      margin-bottom:20px;
+    }
+
+    .project h3{
+      font-size:17px;
+      margin-bottom:8px;
+    }
+
+    .skills{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+
+    .skills span{
+      background:#eee;
+      padding:8px 14px;
+      border-radius:20px;
+      font-size:14px;
+    }
+
+    .edu{
+      margin-bottom:15px;
+    }
+
+    .edu h3{
+      font-size:16px;
+      margin-bottom:4px;
+    }
+
+    .small{
+      color:#666;
+      font-size:14px;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="resume">
+
+    <div class="header">
+      <h1>ASHISH SHARMA</h1>
+      <h3>Aspiring Data Engineer</h3>
+
+      <div class="contact">
+        📞 +91 8441056586 |
+        📧 ashishsharma070704@gmail.com <br>
+
+        📍 Jaipur, Rajasthan <br>
+
+        🔗 LinkedIn: <a href="https://www.linkedin.com/in/ashish-sharma-19a1932b3/" target="_blank" rel="noopener">linkedin.com/in/ashish-sharma-19a1932b3</a> <br>
+
+        🔗 GitHub: <a href="https://github.com/AshishSharma0704/" target="_blank" rel="noopener">github.com/AshishSharma0704/</a>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Profile</h2>
+
+      <p>
+        Computer Science undergraduate passionate about Data Engineering,
+        Python, SQL, and data analytics. Skilled in database management,
+        problem-solving, and web development with hands-on project experience.
+        Interested in building efficient data systems and transforming raw data
+        into meaningful insights.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Education</h2>
+
+      <div class="edu">
+        <h3>Bachelor of Technology (CSE)</h3>
+        <div class="small">
+          Vivekananda Global University, Jaipur | 2023 – 2027
+        </div>
+      </div>
+
+      <div class="edu">
+        <h3>Class 12th</h3>
+        <div class="small">74% | 2023</div>
+      </div>
+
+      <div class="edu">
+        <h3>Class 10th</h3>
+        <div class="small">93.5% | 2021</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Skills</h2>
+
+      <div class="skills">
+        <span>Python</span>
+        <span>SQL</span>
+        <span>Pandas</span>
+        <span>NumPy</span>
+        <span>MySQL</span>
+        <span>HTML</span>
+        <span>CSS</span>
+        <span>JavaScript</span>
+        <span>Git & GitHub</span>
+        <span>Java</span>
+        <span>ETL Basics</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Projects</h2>
+
+      <div class="project">
+        <h3>Online Clothing Shopping Platform</h3>
+
+        <ul>
+          <li>
+            Developed a responsive e-commerce clothing platform with
+            product listings and shopping cart functionality.
+          </li>
+
+          <li>
+            Implemented search, category filtering, and user-friendly UI
+            using HTML, CSS, and JavaScript.
+          </li>
+
+          <li>
+            Applied database concepts for product management and smooth
+            user interaction.
+          </li>
+        </ul>
+      </div>
+
+      <div class="project">
+        <h3>Sales Data Analysis using Python</h3>
+
+        <ul>
+          <li>
+            Analyzed datasets using Python, Pandas, and NumPy.
+          </li>
+
+          <li>
+            Performed data cleaning and preprocessing to generate
+            meaningful insights.
+          </li>
+
+          <li>
+            Created reports for better business understanding and
+            decision-making.
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Certifications</h2>
+
+      <ul>
+        <li>Responsive Web Design Certification – freeCodeCamp</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>Relevant Coursework</h2>
+
+      <ul>
+        <li>Database Management Systems</li>
+        <li>Data Structures & Algorithms</li>
+        <li>Operating Systems</li>
+        <li>Computer Networks</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>Languages</h2>
+
+      <ul>
+        <li>English</li>
+        <li>Hindi</li>
+      </ul>
+    </div>
+
+  </div>
+
+</body>
+</html>

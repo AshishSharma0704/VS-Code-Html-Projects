@@ -1,0 +1,3137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealFlow - AI-Powered Hospital Operations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .emergency-mode {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+        .floating-window {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .notification-badge {
+            animation: bounce 1s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }    
+        .hms-container {max-width:700px; margin:2em auto; background:#f5f9fc; border-radius:10px; box-shadow:0 2px 8px #ccc; padding:2em;}
+        .hms-title {font-size:1.3em; margin-bottom:0.8em;}
+        .hms-block {margin-bottom:2em;}
+        .hms-label {font-weight:bold; margin:0.5em 0 0.2em; display:block;}
+        .hms-input, .hms-select {width:100%; padding:0.5em; margin-bottom:1em;}
+        .hms-btn {background:#175bd3; color:#fff; border:none; border-radius:4px; padding:0.5em 1.2em; cursor:pointer; margin-right:0.8em;}
+        .hms-btn:disabled {background:#aaa;}
+        .hms-list, .hms-card {background:#f4f4fc; border:1px solid #ccd; border-radius:6px; padding:1em; margin:0.7em 0;}
+        .hms-error {padding:0.8em; background:#fee; color:#a00; border-radius:6px; margin-bottom:1em; display:none;}
+        .hms-stats {font-size:1.08em; margin:1em 0;}
+        
+    </style>
+</head>
+<body class="min-h-screen gradient-bg">
+    <!-- Main Landing Page -->
+    <div id="landingPage" class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white/10 backdrop-blur-md border-b border-white/20">
+            <div class="container mx-auto px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                            <i class="fas fa-heartbeat text-blue-600 text-xl"></i>
+                        </div>
+                        <h1 class="text-2xl font-bold text-white">HealFlow</h1>
+                    </div>
+                    <div class="text-white/80 text-sm">
+                        <i class="fas fa-robot mr-2"></i>AI-Powered Healthcare
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <div class="flex-1 flex items-center justify-center px-6">
+            <div class="text-center max-w-4xl">
+                <h2 class="text-5xl font-bold text-white mb-6">
+                    Revolutionizing Hospital Operations with AI
+                </h2>
+                <p class="text-xl text-white/80 mb-12">
+                    Streamline patient care, optimize resources, and enhance healthcare delivery through intelligent automation
+                </p>
+                
+                <!-- Login Options -->
+                <div class="grid md:grid-cols-2 gap-8 max-w-2xl mx-auto">
+                    <!-- Patient Portal -->
+                    <div class="card-hover bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 cursor-pointer" onclick="showPatientLogin()">
+                        <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-user-injured text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white mb-3">Patient Portal</h3>
+                        <p class="text-white/70 mb-4">Access your health records, book appointments, and manage your healthcare journey</p>
+                        <div class="flex items-center justify-center text-blue-300">
+                            <span class="mr-2">Enter with Aadhaar</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+
+                    <!-- Hospital Management -->
+                    <div class="card-hover bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 cursor-pointer" onclick="showHospitalLogin()">
+                        <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-hospital text-white text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white mb-3">Hospital Management</h3>
+                        <p class="text-white/70 mb-4">Comprehensive dashboard for doctors, staff, and administrators</p>
+                        <div class="flex items-center justify-center text-green-300">
+                            <span class="mr-2">Professional Access</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Login Modal -->
+    <div id="patientLoginModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="floating-window rounded-2xl p-8 max-w-md w-full mx-4 border border-white/20">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-injured text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800">Patient Login</h3>
+                <p class="text-gray-600">Enter your Aadhaar number to access your portal</p>
+            </div>
+            
+            <form onsubmit="patientLogin(event)">
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-2">Aadhaar Number</label>
+                    <input type="text" id="patientAadhaar" placeholder="XXXX-XXXX-XXXX" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           maxlength="14" pattern="[0-9]{4}-[0-9]{4}-[0-9]{4}">
+                </div>
+                
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition-colors">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Access Portal
+                </button>
+            </form>
+            
+            <button onclick="closeModal('patientLoginModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Hospital Login Modal -->
+    <div id="hospitalLoginModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="floating-window rounded-2xl p-8 max-w-md w-full mx-4 border border-white/20">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-hospital text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800">Hospital Management</h3>
+                <p class="text-gray-600">Select your role to continue</p>
+            </div>
+            
+            <div class="space-y-4">
+                <button onclick="showDoctorLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition-colors">
+                    <i class="fas fa-user-md mr-2"></i>Doctor Portal
+                </button>
+                <button onclick="showAdminLogin()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 rounded-lg transition-colors">
+                    <i class="fas fa-user-shield mr-2"></i>Admin Dashboard
+                </button>
+            </div>
+            
+            <button onclick="closeModal('hospitalLoginModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Doctor Login Modal -->
+    <div id="doctorLoginModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="floating-window rounded-2xl p-8 max-w-md w-full mx-4 border border-white/20">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-md text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800">Doctor Login</h3>
+            </div>
+            
+            <form onsubmit="doctorLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">Doctor ID</label>
+                    <input type="text" id="doctorId" placeholder="Enter Doctor ID" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-2">Password</label>
+                    <input type="password" id="doctorPassword" placeholder="Enter Password" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition-colors">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Login
+                </button>
+            </form>
+            
+            <button onclick="closeModal('doctorLoginModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="floating-window rounded-2xl p-8 max-w-md w-full mx-4 border border-white/20">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-shield text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800">Admin Login</h3>
+            </div>
+            
+            <form onsubmit="adminLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">Admin ID</label>
+                    <input type="text" id="adminId" placeholder="Enter Admin ID" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-2">Password</label>
+                    <input type="password" id="adminPassword" placeholder="Enter Password" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                </div>
+                
+                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 rounded-lg transition-colors">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Login
+                </button>
+            </form>
+            
+            <button onclick="closeModal('adminLoginModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Patient Dashboard -->
+    <div id="patientDashboard" class="hidden min-h-screen bg-gray-50">
+        <!-- Patient Header -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-heartbeat text-white"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold text-gray-800">HealFlow Patient Portal</h1>
+                            <p class="text-sm text-gray-600">Welcome, <span id="patientName">John Doe</span></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div id="emergencyToggle" class="relative">
+                            <button onclick="toggleEmergency()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>Emergency
+                            </button>
+                        </div>
+                        <button onclick="logout()" class="text-gray-600 hover:text-gray-800">
+                            <i class="fas fa-sign-out-alt text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex">
+            <!-- Patient Sidebar -->
+            <nav class="w-64 bg-white shadow-sm h-screen sticky top-0">
+                <div class="p-6">
+                    <ul class="space-y-2">
+                        <li><a href="#" onclick="showPatientTab('dashboard')" class="patient-nav-item active flex items-center space-x-3 px-4 py-3 rounded-lg text-blue-600 bg-blue-50">
+                            <i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+                        <li><a href="#" onclick="showPatientTab('appointments')" class="patient-nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-calendar-check"></i><span>Appointments</span></a></li>
+                        <li><a href="#" onclick="showPatientTab('ehr')" class="patient-nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-file-medical"></i><span>Health Records</span></a></li>
+                        <li><a href="#" onclick="showPatientTab('hospitals')" class="patient-nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-map-marked-alt"></i><span>Find Hospitals</span></a></li>
+                        <li><a href="#" onclick="showPatientTab('emergency')" class="patient-nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-ambulance"></i><span>Emergency</span></a></li>
+                        <li><a href="#" onclick="showPatientTab('pharmacy')" class="patient-nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-pills"></i><span>Pharmacy</span></a></li>
+                        <li><a href="#" onclick="showPatientTab('tokens')" class="patient-nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-ticket-alt"></i><span>OPD Tokens</span></a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Patient Content -->
+            <main class="flex-1 p-6">
+                <!-- Patient Dashboard Tab -->
+                <div id="patientDashboardTab" class="patient-tab">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Patient Dashboard</h2>
+                        <p class="text-gray-600">Overview of your health and appointments</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white rounded-xl p-6 shadow-sm border">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-calendar-check text-blue-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-gray-800">3</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Upcoming Appointments</h3>
+                            <p class="text-sm text-gray-600">Next: Tomorrow 10:00 AM</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-sm border">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-file-medical text-green-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-gray-800">12</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Medical Reports</h3>
+                            <p class="text-sm text-gray-600">Latest: Blood Test</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-sm border">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-pills text-purple-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-gray-800">5</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Active Prescriptions</h3>
+                            <p class="text-sm text-gray-600">2 due for refill</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-sm border">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-heartbeat text-orange-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-gray-800">98%</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Health Score</h3>
+                            <p class="text-sm text-gray-600">Excellent condition</p>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="bg-white rounded-xl shadow-sm border p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Activity</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-calendar text-blue-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-medium text-gray-800">Appointment Scheduled</p>
+                                    <p class="text-sm text-gray-600">Dr. Smith - Cardiology - Tomorrow 10:00 AM</p>
+                                </div>
+                                <span class="text-sm text-gray-500">2 hours ago</span>
+                            </div>
+                            <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-file-medical text-green-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-medium text-gray-800">Lab Results Available</p>
+                                    <p class="text-sm text-gray-600">Blood Test - All parameters normal</p>
+                                </div>
+                                <span class="text-sm text-gray-500">1 day ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other patient tabs would continue here... -->
+                <div id="patientAppointmentsTab" class="patient-tab hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Appointments</h2>
+                        <p class="text-gray-600">Book and manage your appointments</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Book New Appointment -->
+                        <div class="bg-white rounded-xl shadow-sm border p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                <i class="fas fa-calendar-plus text-blue-600 mr-2"></i>Book New Appointment
+                            </h3>
+                            <form onsubmit="bookAppointment(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">Department</label>
+                                    <select name="department" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                                        <option value="">Select Department</option>
+                                        <option value="Cardiology">Cardiology</option>
+                                        <option value="Neurology">Neurology</option>
+                                        <option value="Orthopedics">Orthopedics</option>
+                                        <option value="Pediatrics">Pediatrics</option>
+                                        <option value="Dermatology">Dermatology</option>
+                                        <option value="General Medicine">General Medicine</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">Preferred Date</label>
+                                    <input type="date" name="date" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">Preferred Time</label>
+                                    <select name="time" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                                        <option value="">Select Time</option>
+                                        <option value="09:00 AM">09:00 AM</option>
+                                        <option value="10:00 AM">10:00 AM</option>
+                                        <option value="11:00 AM">11:00 AM</option>
+                                        <option value="02:00 PM">02:00 PM</option>
+                                        <option value="03:00 PM">03:00 PM</option>
+                                        <option value="04:00 PM">04:00 PM</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">Reason for Visit</label>
+                                    <textarea name="reason" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Describe your symptoms or reason for visit"></textarea>
+                                </div>
+                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition-colors">
+                                    <i class="fas fa-calendar-check mr-2"></i>Book Appointment
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Appointment Status -->
+                        <div class="bg-white rounded-xl shadow-sm border p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                <i class="fas fa-clock text-green-600 mr-2"></i>Appointment Status
+                            </h3>
+                            <div class="space-y-4" id="appointmentQueue">
+                                <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="font-medium text-green-800">Confirmed</span>
+                                        <span class="text-sm text-green-600">Tomorrow</span>
+                                    </div>
+                                    <p class="text-gray-700 font-medium">Dr. Sarah Smith - Cardiology</p>
+                                    <p class="text-sm text-gray-600">10:00 AM - Room 205</p>
+                                    <div class="mt-2 flex space-x-2">
+                                        <button onclick="rescheduleAppointment(1)" class="text-blue-600 hover:text-blue-800 text-sm">
+                                            <i class="fas fa-edit mr-1"></i>Reschedule
+                                        </button>
+                                        <button onclick="cancelAppointment(1)" class="text-red-600 hover:text-red-800 text-sm">
+                                            <i class="fas fa-times mr-1"></i>Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="font-medium text-yellow-800">Pending</span>
+                                        <span class="text-sm text-yellow-600">Dec 23</span>
+                                    </div>
+                                    <p class="text-gray-700 font-medium">Dr. Michael Johnson - Neurology</p>
+                                    <p class="text-sm text-gray-600">2:00 PM - Awaiting confirmation</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Appointments -->
+                    <div class="mt-8 bg-white rounded-xl shadow-sm border p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Appointments</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b">
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Date</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Doctor</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Department</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b">
+                                        <td class="py-3 px-4">Dec 18, 2024</td>
+                                        <td class="py-3 px-4">Dr. Sarah Smith</td>
+                                        <td class="py-3 px-4">Cardiology</td>
+                                        <td class="py-3 px-4"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Completed</span></td>
+                                        <td class="py-3 px-4">
+                                            <button onclick="viewAppointmentDetails(1)" class="text-blue-600 hover:text-blue-800 text-sm">
+                                                <i class="fas fa-eye mr-1"></i>View Details
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="patientEhrTab" class="patient-tab hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Electronic Health Records</h2>
+                        <p class="text-gray-600">Your complete medical history and reports</p>
+                    </div>
+
+                    <!-- Filter Buttons -->
+                    <div class="mb-6 flex flex-wrap gap-2">
+                        <button onclick="filterEHR('all')" class="ehr-filter active bg-blue-50 text-blue-600 px-4 py-2 rounded-lg font-medium">
+                            <i class="fas fa-list mr-2"></i>All Records
+                        </button>
+                        <button onclick="filterEHR('lab')" class="ehr-filter px-4 py-2 rounded-lg font-medium text-gray-600 hover:bg-gray-100">
+                            <i class="fas fa-vial mr-2"></i>Lab Reports
+                        </button>
+                        <button onclick="filterEHR('imaging')" class="ehr-filter px-4 py-2 rounded-lg font-medium text-gray-600 hover:bg-gray-100">
+                            <i class="fas fa-x-ray mr-2"></i>Imaging
+                        </button>
+                        <button onclick="filterEHR('prescription')" class="ehr-filter px-4 py-2 rounded-lg font-medium text-gray-600 hover:bg-gray-100">
+                            <i class="fas fa-prescription mr-2"></i>Prescriptions
+                        </button>
+                        <button onclick="filterEHR('visit')" class="ehr-filter px-4 py-2 rounded-lg font-medium text-gray-600 hover:bg-gray-100">
+                            <i class="fas fa-notes-medical mr-2"></i>Visit Notes
+                        </button>
+                    </div>
+
+                    <!-- Health Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white rounded-xl shadow-sm border p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-heartbeat text-red-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-gray-800">120/80</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Blood Pressure</h3>
+                            <p class="text-sm text-gray-600">Last checked: Dec 18, 2024</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-tint text-blue-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-gray-800">95</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Blood Sugar</h3>
+                            <p class="text-sm text-gray-600">mg/dL - Normal range</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-weight text-green-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-gray-800">72</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Weight</h3>
+                            <p class="text-sm text-gray-600">kg - Stable</p>
+                        </div>
+                    </div>
+
+                    <!-- Medical Records -->
+                    <div class="bg-white rounded-xl shadow-sm border p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Medical Records</h3>
+                        <div class="space-y-4">
+                            <!-- Lab Report -->
+                            <div class="ehr-record border border-gray-200 rounded-lg p-4" data-category="lab">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-vial text-blue-600"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-medium text-gray-800">Complete Blood Count (CBC)</h4>
+                                            <p class="text-sm text-gray-600">Dec 18, 2024 - Dr. Sarah Smith</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Normal</span>
+                                        <button onclick="downloadReport('cbc-report.pdf')" class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="ml-13 text-sm text-gray-600">
+                                    <p>Hemoglobin: 14.2 g/dL | WBC: 7,200/μL | Platelets: 250,000/μL</p>
+                                </div>
+                            </div>
+
+                            <!-- Imaging Report -->
+                            <div class="ehr-record border border-gray-200 rounded-lg p-4" data-category="imaging">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-x-ray text-purple-600"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-medium text-gray-800">Chest X-Ray</h4>
+                                            <p class="text-sm text-gray-600">Dec 15, 2024 - Radiology Dept</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Clear</span>
+                                        <button onclick="viewImage('chest-xray.jpg')" class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="ml-13 text-sm text-gray-600">
+                                    <p>No acute cardiopulmonary abnormalities detected</p>
+                                </div>
+                            </div>
+
+                            <!-- Prescription -->
+                            <div class="ehr-record border border-gray-200 rounded-lg p-4" data-category="prescription">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-prescription text-green-600"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-medium text-gray-800">Prescription - Hypertension</h4>
+                                            <p class="text-sm text-gray-600">Dec 10, 2024 - Dr. Sarah Smith</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">Active</span>
+                                        <button onclick="downloadReport('prescription.pdf')" class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="ml-13 text-sm text-gray-600">
+                                    <p>Amlodipine 5mg - Once daily | Metoprolol 25mg - Twice daily</p>
+                                </div>
+                            </div>
+
+                            <!-- Visit Notes -->
+                            <div class="ehr-record border border-gray-200 rounded-lg p-4" data-category="visit">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-notes-medical text-orange-600"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-medium text-gray-800">Cardiology Consultation</h4>
+                                            <p class="text-sm text-gray-600">Dec 5, 2024 - Dr. Sarah Smith</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="viewVisitNotes(1)" class="text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="ml-13 text-sm text-gray-600">
+                                    <p>Follow-up for hypertension management. Patient responding well to treatment.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="patientHospitalsTab" class="patient-tab hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Find Nearby Hospitals</h2>
+                        <p class="text-gray-600">Search for hospitals with available beds and get directions</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Search Filters -->
+                        <div class="bg-white rounded-xl shadow-sm border p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                <i class="fas fa-filter text-blue-600 mr-2"></i>Search Filters
+                            </h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">Specialty</label>
+                                    <select id="hospitalSpecialty" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                        <option value="">All Specialties</option>
+                                        <option value="emergency">Emergency</option>
+                                        <option value="cardiology">Cardiology</option>
+                                        <option value="neurology">Neurology</option>
+                                        <option value="orthopedics">Orthopedics</option>
+                                        <option value="pediatrics">Pediatrics</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">Distance</label>
+                                    <select id="hospitalDistance" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                        <option value="5">Within 5 km</option>
+                                        <option value="10">Within 10 km</option>
+                                        <option value="20">Within 20 km</option>
+                                        <option value="50">Within 50 km</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">Bed Availability</label>
+                                    <div class="space-y-2">
+                                        <label class="flex items-center">
+                                            <input type="checkbox" class="mr-2" checked> General Ward
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" class="mr-2" checked> ICU
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" class="mr-2"> Emergency
+                                        </label>
+                                    </div>
+                                </div>
+                                <button onclick="searchHospitals()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition-colors">
+                                    <i class="fas fa-search mr-2"></i>Search Hospitals
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Hospital Results -->
+                        <div class="lg:col-span-2 space-y-6">
+                            <!-- Map -->
+                            <div class="bg-white rounded-xl shadow-sm border p-6">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                    <i class="fas fa-map-marked-alt text-green-600 mr-2"></i>Hospital Locations
+                                </h3>
+                                <div id="hospitalMap" class="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+                                    <div class="text-center">
+                                        <i class="fas fa-map text-gray-400 text-3xl mb-2"></i>
+                                        <p class="text-gray-500">Interactive map will load here</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Hospital List -->
+                            <div class="bg-white rounded-xl shadow-sm border p-6">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Available Hospitals</h3>
+                                <div class="space-y-4" id="hospitalResults">
+                                    <!-- Hospital 1 -->
+                                    <div class="border border-gray-200 rounded-lg p-4">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div>
+                                                <h4 class="font-semibold text-gray-800">City General Hospital</h4>
+                                                <p class="text-sm text-gray-600">
+                                                    <i class="fas fa-map-marker-alt mr-1"></i>2.3 km away
+                                                </p>
+                                            </div>
+                                            <div class="text-right">
+                                                <div class="flex items-center space-x-1 mb-1">
+                                                    <span class="text-yellow-500">★★★★☆</span>
+                                                    <span class="text-sm text-gray-600">(4.2)</span>
+                                                </div>
+                                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Open 24/7</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="grid grid-cols-3 gap-4 mb-3">
+                                            <div class="text-center">
+                                                <div class="text-lg font-bold text-green-600">12</div>
+                                                <div class="text-xs text-gray-600">General Beds</div>
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="text-lg font-bold text-blue-600">3</div>
+                                                <div class="text-xs text-gray-600">ICU Beds</div>
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="text-lg font-bold text-orange-600">5</div>
+                                                <div class="text-xs text-gray-600">Emergency</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex space-x-2">
+                                            <button onclick="getDirections('City General Hospital')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm">
+                                                <i class="fas fa-directions mr-1"></i>Directions
+                                            </button>
+                                            <button onclick="callHospital('+91-11-2345-6789')" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-sm">
+                                                <i class="fas fa-phone mr-1"></i>Call
+                                            </button>
+                                            <button onclick="reserveBed('city-general')" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg text-sm">
+                                                <i class="fas fa-bed mr-1"></i>Reserve
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Hospital 2 -->
+                                    <div class="border border-gray-200 rounded-lg p-4">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div>
+                                                <h4 class="font-semibold text-gray-800">Metro Medical Center</h4>
+                                                <p class="text-sm text-gray-600">
+                                                    <i class="fas fa-map-marker-alt mr-1"></i>3.7 km away
+                                                </p>
+                                            </div>
+                                            <div class="text-right">
+                                                <div class="flex items-center space-x-1 mb-1">
+                                                    <span class="text-yellow-500">★★★★★</span>
+                                                    <span class="text-sm text-gray-600">(4.8)</span>
+                                                </div>
+                                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Open 24/7</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="grid grid-cols-3 gap-4 mb-3">
+                                            <div class="text-center">
+                                                <div class="text-lg font-bold text-green-600">8</div>
+                                                <div class="text-xs text-gray-600">General Beds</div>
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="text-lg font-bold text-blue-600">2</div>
+                                                <div class="text-xs text-gray-600">ICU Beds</div>
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="text-lg font-bold text-red-600">0</div>
+                                                <div class="text-xs text-gray-600">Emergency</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex space-x-2">
+                                            <button onclick="getDirections('Metro Medical Center')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm">
+                                                <i class="fas fa-directions mr-1"></i>Directions
+                                            </button>
+                                            <button onclick="callHospital('+91-11-9876-5432')" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-sm">
+                                                <i class="fas fa-phone mr-1"></i>Call
+                                            </button>
+                                            <button onclick="reserveBed('metro-medical')" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg text-sm">
+                                                <i class="fas fa-bed mr-1"></i>Reserve
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="patientEmergencyTab" class="patient-tab hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Emergency Services</h2>
+                        <p class="text-gray-600">Quick access to emergency services and SOS alerts</p>
+                    </div>
+
+                    <!-- SOS Alert Section -->
+                    <div class="mb-8 bg-red-50 border border-red-200 rounded-xl p-6">
+                        <div class="text-center">
+                            <div class="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4 pulse-animation">
+                                <i class="fas fa-exclamation-triangle text-white text-3xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-red-800 mb-2">Emergency SOS</h3>
+                            <p class="text-red-700 mb-6">Activate emergency alert to notify all nearby hospitals</p>
+                            
+                            <div id="sosStatus" class="hidden mb-4 p-4 bg-red-100 border border-red-300 rounded-lg">
+                                <div class="flex items-center justify-center space-x-2 mb-2">
+                                    <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                                    <span class="font-bold text-red-800">SOS ACTIVE</span>
+                                </div>
+                                <p class="text-red-700 text-sm">Emergency alert sent to nearby hospitals</p>
+                            </div>
+                            
+                            <div class="flex justify-center space-x-4">
+                                <button onclick="activateSOS()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg text-lg">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>ACTIVATE SOS
+                                </button>
+                                <button onclick="deactivateSOS()" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg text-lg">
+                                    <i class="fas fa-times mr-2"></i>DEACTIVATE
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Emergency Contacts -->
+                        <div class="bg-white rounded-xl shadow-sm border p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                <i class="fas fa-phone text-red-600 mr-2"></i>Emergency Contacts
+                            </h3>
+                            <div class="space-y-3">
+                                <button onclick="callEmergency('108')" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-lg transition-colors">
+                                    <i class="fas fa-ambulance mr-2"></i>Ambulance - 108
+                                </button>
+                                <button onclick="callEmergency('102')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition-colors">
+                                    <i class="fas fa-hospital mr-2"></i>Medical Emergency - 102
+                                </button>
+                                <button onclick="callEmergency('100')" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 rounded-lg transition-colors">
+                                    <i class="fas fa-shield-alt mr-2"></i>Police - 100
+                                </button>
+                                <button onclick="callEmergency('101')" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 rounded-lg transition-colors">
+                                    <i class="fas fa-fire mr-2"></i>Fire Department - 101
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="bg-white rounded-xl shadow-sm border p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                <i class="fas fa-bolt text-yellow-600 mr-2"></i>Quick Actions
+                            </h3>
+                            <div class="space-y-3">
+                                <button onclick="callAmbulance()" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 rounded-lg transition-colors">
+                                    <i class="fas fa-ambulance mr-2"></i>Call Nearest Ambulance
+                                </button>
+                                <button onclick="findEmergencyRoom()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 rounded-lg transition-colors">
+                                    <i class="fas fa-hospital-alt mr-2"></i>Find Emergency Room
+                                </button>
+                                <button onclick="shareLocation()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition-colors">
+                                    <i class="fas fa-map-marker-alt mr-2"></i>Share My Location
+                                </button>
+                                <button onclick="emergencyContacts()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-lg transition-colors">
+                                    <i class="fas fa-users mr-2"></i>Notify Emergency Contacts
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Emergency Information -->
+                    <div class="mt-8 bg-white rounded-xl shadow-sm border p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-info-circle text-blue-600 mr-2"></i>Emergency Information
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-medium text-gray-800 mb-2">Medical Information</h4>
+                                <div class="text-sm text-gray-600 space-y-1">
+                                    <p><strong>Blood Type:</strong> O+</p>
+                                    <p><strong>Allergies:</strong> Penicillin, Shellfish</p>
+                                    <p><strong>Chronic Conditions:</strong> Hypertension</p>
+                                    <p><strong>Emergency Contact:</strong> Jane Doe (+91-98765-43210)</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-800 mb-2">Current Medications</h4>
+                                <div class="text-sm text-gray-600 space-y-1">
+                                    <p>• Amlodipine 5mg - Once daily</p>
+                                    <p>• Metoprolol 25mg - Twice daily</p>
+                                    <p>• Aspirin 75mg - Once daily</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hospital Response Status -->
+                    <div class="mt-8 bg-white rounded-xl shadow-sm border p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-hospital text-green-600 mr-2"></i>Hospital Response Status
+                        </h3>
+                        <div id="hospitalResponses" class="space-y-3">
+                            <div class="p-3 bg-gray-50 rounded-lg">
+                                <p class="text-gray-600 text-center">No active emergency alerts</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="patientPharmacyTab" class="patient-tab hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Pharmacy Records</h2>
+                        <p class="text-gray-600">View your pharmacy bills, prescriptions, and medication history</p>
+                    </div>
+
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white rounded-xl shadow-sm border p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-pills text-green-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-gray-800">5</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Active Prescriptions</h3>
+                            <p class="text-sm text-gray-600">Currently taking</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-receipt text-blue-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-gray-800">₹2,450</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">This Month</h3>
+                            <p class="text-sm text-gray-600">Total spent</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-clock text-orange-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-gray-800">2</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Due for Refill</h3>
+                            <p class="text-sm text-gray-600">Medications</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-history text-purple-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-gray-800">23</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Total Orders</h3>
+                            <p class="text-sm text-gray-600">All time</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Recent Bills -->
+                        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-gray-800">
+                                    <i class="fas fa-file-invoice text-blue-600 mr-2"></i>Recent Bills
+                                </h3>
+                                <button onclick="downloadAllBills()" class="text-blue-600 hover:text-blue-800 text-sm">
+                                    <i class="fas fa-download mr-1"></i>Download All
+                                </button>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <!-- Bill 1 -->
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div>
+                                            <h4 class="font-medium text-gray-800">Invoice #PH-2024-001</h4>
+                                            <p class="text-sm text-gray-600">Dec 18, 2024 - City Pharmacy</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="text-lg font-bold text-gray-800">₹850</div>
+                                            <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Paid</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-sm text-gray-600 mb-3">
+                                        <p>• Amlodipine 5mg (30 tablets) - ₹320</p>
+                                        <p>• Metoprolol 25mg (60 tablets) - ₹480</p>
+                                        <p>• Vitamin D3 (30 capsules) - ₹50</p>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button onclick="downloadBill('PH-2024-001')" class="text-blue-600 hover:text-blue-800 text-sm">
+                                            <i class="fas fa-download mr-1"></i>Download
+                                        </button>
+                                        <button onclick="viewBillDetails('PH-2024-001')" class="text-green-600 hover:text-green-800 text-sm">
+                                            <i class="fas fa-eye mr-1"></i>View Details
+                                        </button>
+                                        <button onclick="reorderMedication('PH-2024-001')" class="text-purple-600 hover:text-purple-800 text-sm">
+                                            <i class="fas fa-redo mr-1"></i>Reorder
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Bill 2 -->
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div>
+                                            <h4 class="font-medium text-gray-800">Invoice #PH-2024-002</h4>
+                                            <p class="text-sm text-gray-600">Dec 15, 2024 - Metro Pharmacy</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="text-lg font-bold text-gray-800">₹1,200</div>
+                                            <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Paid</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-sm text-gray-600 mb-3">
+                                        <p>• Aspirin 75mg (90 tablets) - ₹150</p>
+                                        <p>• Atorvastatin 20mg (30 tablets) - ₹650</p>
+                                        <p>• Multivitamin (30 tablets) - ₹400</p>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button onclick="downloadBill('PH-2024-002')" class="text-blue-600 hover:text-blue-800 text-sm">
+                                            <i class="fas fa-download mr-1"></i>Download
+                                        </button>
+                                        <button onclick="viewBillDetails('PH-2024-002')" class="text-green-600 hover:text-green-800 text-sm">
+                                            <i class="fas fa-eye mr-1"></i>View Details
+                                        </button>
+                                        <button onclick="reorderMedication('PH-2024-002')" class="text-purple-600 hover:text-purple-800 text-sm">
+                                            <i class="fas fa-redo mr-1"></i>Reorder
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Bill 3 -->
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div>
+                                            <h4 class="font-medium text-gray-800">Invoice #PH-2024-003</h4>
+                                            <p class="text-sm text-gray-600">Dec 10, 2024 - Hospital Pharmacy</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <div class="text-lg font-bold text-gray-800">₹400</div>
+                                            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">Pending</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-sm text-gray-600 mb-3">
+                                        <p>• Paracetamol 500mg (20 tablets) - ₹80</p>
+                                        <p>• Cough Syrup (100ml) - ₹120</p>
+                                        <p>• Throat Lozenges (10 pieces) - ₹200</p>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button onclick="payBill('PH-2024-003')" class="text-red-600 hover:text-red-800 text-sm">
+                                            <i class="fas fa-credit-card mr-1"></i>Pay Now
+                                        </button>
+                                        <button onclick="viewBillDetails('PH-2024-003')" class="text-green-600 hover:text-green-800 text-sm">
+                                            <i class="fas fa-eye mr-1"></i>View Details
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Medication Reminders -->
+                        <div class="space-y-6">
+                            <!-- Current Medications -->
+                            <div class="bg-white rounded-xl shadow-sm border p-6">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                    <i class="fas fa-bell text-yellow-600 mr-2"></i>Medication Reminders
+                                </h3>
+                                <div class="space-y-3">
+                                    <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="font-medium text-gray-800">Amlodipine 5mg</span>
+                                            <span class="text-sm text-yellow-600">Due in 2 days</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600">Morning dose - 5 tablets left</p>
+                                    </div>
+                                    
+                                    <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="font-medium text-gray-800">Metoprolol 25mg</span>
+                                            <span class="text-sm text-red-600">Overdue</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600">Twice daily - 0 tablets left</p>
+                                    </div>
+                                    
+                                    <div class="p-3 bg-green-50 border border-green-200 rounded-lg">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="font-medium text-gray-800">Aspirin 75mg</span>
+                                            <span class="text-sm text-green-600">Well stocked</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600">Once daily - 45 tablets left</p>
+                                    </div>
+                                </div>
+                                
+                                <button onclick="setMedicationReminder()" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors">
+                                    <i class="fas fa-plus mr-2"></i>Set Reminder
+                                </button>
+                            </div>
+
+                            <!-- Quick Actions -->
+                            <div class="bg-white rounded-xl shadow-sm border p-6">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                    <i class="fas fa-bolt text-purple-600 mr-2"></i>Quick Actions
+                                </h3>
+                                <div class="space-y-3">
+                                    <button onclick="orderRefill()" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 rounded-lg transition-colors">
+                                        <i class="fas fa-redo mr-2"></i>Order Refill
+                                    </button>
+                                    <button onclick="findPharmacy()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors">
+                                        <i class="fas fa-map-marker-alt mr-2"></i>Find Pharmacy
+                                    </button>
+                                    <button onclick="uploadPrescription()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 rounded-lg transition-colors">
+                                        <i class="fas fa-upload mr-2"></i>Upload Prescription
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="patientTokensTab" class="patient-tab hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">OPD Token Management</h2>
+                        <p class="text-gray-600">Generate and track your OPD queue tokens</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Token Generation -->
+                        <div class="bg-white rounded-xl shadow-sm border p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                <i class="fas fa-ticket-alt text-blue-600 mr-2"></i>Generate New Token
+                            </h3>
+                            <form onsubmit="generateToken(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">Department</label>
+                                    <select id="tokenDepartment" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                                        <option value="">Select Department</option>
+                                        <option value="General Medicine">General Medicine</option>
+                                        <option value="Cardiology">Cardiology</option>
+                                        <option value="Neurology">Neurology</option>
+                                        <option value="Orthopedics">Orthopedics</option>
+                                        <option value="Pediatrics">Pediatrics</option>
+                                        <option value="Dermatology">Dermatology</option>
+                                        <option value="ENT">ENT</option>
+                                        <option value="Ophthalmology">Ophthalmology</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">Visit Type</label>
+                                    <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                                        <option value="">Select Visit Type</option>
+                                        <option value="consultation">Consultation</option>
+                                        <option value="follow-up">Follow-up</option>
+                                        <option value="emergency">Emergency</option>
+                                        <option value="routine-checkup">Routine Checkup</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-gray-700 font-medium mb-2">Priority</label>
+                                    <select class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                                        <option value="normal">Normal</option>
+                                        <option value="urgent">Urgent</option>
+                                        <option value="emergency">Emergency</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition-colors">
+                                    <i class="fas fa-plus mr-2"></i>Generate Token
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Current Token Display -->
+                        <div class="bg-white rounded-xl shadow-sm border p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                <i class="fas fa-clock text-green-600 mr-2"></i>Current Token Status
+                            </h3>
+                            <div id="currentToken" class="text-center py-8">
+                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-ticket-alt text-gray-400 text-2xl"></i>
+                                </div>
+                                <p class="text-gray-500">No active token</p>
+                                <p class="text-sm text-gray-400">Generate a token to see your queue position</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Queue Status -->
+                    <div class="mt-8 bg-white rounded-xl shadow-sm border p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-users text-purple-600 mr-2"></i>Department Queue Status
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-medium text-blue-800">General Medicine</h4>
+                                    <span class="text-sm text-blue-600">GM-045</span>
+                                </div>
+                                <div class="text-sm text-blue-700">
+                                    <p>Current: GM-032</p>
+                                    <p>Queue: 13 patients</p>
+                                    <p>Wait: ~35 min</p>
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-medium text-green-800">Cardiology</h4>
+                                    <span class="text-sm text-green-600">CA-023</span>
+                                </div>
+                                <div class="text-sm text-green-700">
+                                    <p>Current: CA-018</p>
+                                    <p>Queue: 5 patients</p>
+                                    <p>Wait: ~25 min</p>
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-medium text-yellow-800">Neurology</h4>
+                                    <span class="text-sm text-yellow-600">NE-015</span>
+                                </div>
+                                <div class="text-sm text-yellow-700">
+                                    <p>Current: NE-012</p>
+                                    <p>Queue: 3 patients</p>
+                                    <p>Wait: ~45 min</p>
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-medium text-purple-800">Orthopedics</h4>
+                                    <span class="text-sm text-purple-600">OR-031</span>
+                                </div>
+                                <div class="text-sm text-purple-700">
+                                    <p>Current: OR-025</p>
+                                    <p>Queue: 6 patients</p>
+                                    <p>Wait: ~40 min</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Token History -->
+                    <div class="mt-8 bg-white rounded-xl shadow-sm border p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Token History</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b">
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Token</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Department</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Date</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Wait Time</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b">
+                                        <td class="py-3 px-4 font-mono">GM-028</td>
+                                        <td class="py-3 px-4">General Medicine</td>
+                                        <td class="py-3 px-4">Dec 18, 2024</td>
+                                        <td class="py-3 px-4">32 minutes</td>
+                                        <td class="py-3 px-4"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Completed</span></td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="py-3 px-4 font-mono">CA-015</td>
+                                        <td class="py-3 px-4">Cardiology</td>
+                                        <td class="py-3 px-4">Dec 15, 2024</td>
+                                        <td class="py-3 px-4">28 minutes</td>
+                                        <td class="py-3 px-4"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Completed</span></td>
+                                    </tr>
+                                    <tr class="border-b">
+                                        <td class="py-3 px-4 font-mono">OR-022</td>
+                                        <td class="py-3 px-4">Orthopedics</td>
+                                        <td class="py-3 px-4">Dec 10, 2024</td>
+                                        <td class="py-3 px-4">45 minutes</td>
+                                        <td class="py-3 px-4"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Completed</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Doctor Dashboard -->
+    <div id="doctorDashboard" class="hidden min-h-screen bg-gray-50">
+        <header class="bg-white shadow-sm border-b">
+            <div class="px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-user-md text-white"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold text-gray-800">HealFlow Doctor Portal</h1>
+                            <p class="text-sm text-gray-600">Dr. <span id="doctorName">Sarah Smith</span> - Cardiology</p>
+                        </div>
+                    </div>
+                    <button onclick="logout()" class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-sign-out-alt text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex">
+            <!-- Doctor Sidebar -->
+            <nav class="w-64 bg-white shadow-sm h-screen sticky top-0">
+                <div class="p-6">
+                    <ul class="space-y-2">
+                        <li><a href="#" onclick="showDoctorTab('dashboard')" class="doctor-nav-item active flex items-center space-x-3 px-4 py-3 rounded-lg text-blue-600 bg-blue-50">
+                            <i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+                        <li><a href="#" onclick="showDoctorTab('appointments')" class="doctor-nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-calendar-check"></i><span>Appointments</span></a></li>
+                        <li><a href="#" onclick="showDoctorTab('patients')" class="doctor-nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-users"></i><span>My Patients</span></a></li>
+                        <li><a href="#" onclick="showDoctorTab('ai-assistant')" class="doctor-nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-robot"></i><span>AI Assistant</span></a></li>
+                        <li><a href="#" onclick="showDoctorTab('reports')" class="doctor-nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-file-medical-alt"></i><span>Reports Library</span></a></li>
+                        <li><a href="#" onclick="showDoctorTab('prescriptions')" class="doctor-nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-prescription"></i><span>Prescriptions</span></a></li>
+                        <li><a href="#" onclick="showDoctorTab('resources')" class="doctor-nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-tools"></i><span>Resources</span></a></li>
+                        <li><a href="#" onclick="showDoctorTab('ipd-opd')" class="doctor-nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-bed"></i><span>IPD/OPD</span></a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Doctor Content -->
+            <main class="flex-1 p-6">
+                <!-- Doctor Dashboard Tab -->
+                <div id="doctorDashboardTab" class="doctor-tab">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Doctor Dashboard</h2>
+                        <p class="text-gray-600">Overview of your practice and patient care</p>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white rounded-xl p-6 shadow-sm border">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-calendar-check text-blue-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-gray-800">8</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Today's Appointments</h3>
+                            <p class="text-sm text-gray-600">3 completed, 5 pending</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-sm border">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-users text-green-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-gray-800">156</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Total Patients</h3>
+                            <p class="text-sm text-gray-600">Active under care</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-sm border">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-prescription text-purple-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-gray-800">23</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Prescriptions</h3>
+                            <p class="text-sm text-gray-600">This week</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-sm border">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-star text-orange-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-gray-800">4.8</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Patient Rating</h3>
+                            <p class="text-sm text-gray-600">Based on 89 reviews</p>
+                        </div>
+                    </div>
+
+                    <!-- Today's Schedule -->
+                    <div class="bg-white rounded-xl shadow-sm border p-6 mb-8">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Today's Schedule</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                    <div>
+                                        <p class="font-medium text-gray-800">John Doe - Follow-up</p>
+                                        <p class="text-sm text-gray-600">Hypertension management</p>
+                                    </div>
+                                </div>
+                                <span class="text-sm text-blue-600 font-medium">10:00 AM</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                    <div>
+                                        <p class="font-medium text-gray-800">Jane Smith - Consultation</p>
+                                        <p class="text-sm text-gray-600">Chest pain evaluation</p>
+                                    </div>
+                                </div>
+                                <span class="text-sm text-green-600 font-medium">11:30 AM</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Assistant Tab -->
+                <div id="doctorAi-assistantTab" class="doctor-tab hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">AI Health Assistant</h2>
+                        <p class="text-gray-600">Get AI-powered medical insights and assistance</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Chat Interface -->
+                        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                <i class="fas fa-comments text-blue-600 mr-2"></i>AI Chat Assistant
+                            </h3>
+                            
+                            <div id="aiChatMessages" class="h-96 overflow-y-auto border border-gray-200 rounded-lg p-4 mb-4 space-y-4">
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-robot text-white text-sm"></i>
+                                    </div>
+                                    <div class="bg-gray-100 rounded-lg p-3 max-w-md">
+                                        <p class="text-gray-800">Hello Dr. Smith! I'm your AI medical assistant. How can I help you today? I can assist with:</p>
+                                        <ul class="text-sm text-gray-600 mt-2 list-disc list-inside">
+                                            <li>Symptom analysis</li>
+                                            <li>Differential diagnosis</li>
+                                            <li>Treatment recommendations</li>
+                                            <li>Drug interactions</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <form onsubmit="sendAIMessage(event)" class="flex space-x-2">
+                                <input type="text" id="aiMessageInput" placeholder="Ask me anything about medical conditions, treatments, or drug interactions..." 
+                                       class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="space-y-6">
+                            <div class="bg-white rounded-xl shadow-sm border p-6">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                    <i class="fas fa-bolt text-yellow-600 mr-2"></i>Quick AI Actions
+                                </h3>
+                                <div class="space-y-3">
+                                    <button onclick="aiQuickAction('symptoms')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors">
+                                        <i class="fas fa-stethoscope mr-2"></i>Analyze Symptoms
+                                    </button>
+                                    <button onclick="aiQuickAction('diagnosis')" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 rounded-lg transition-colors">
+                                        <i class="fas fa-search-plus mr-2"></i>Differential Diagnosis
+                                    </button>
+                                    <button onclick="aiQuickAction('treatment')" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 rounded-lg transition-colors">
+                                        <i class="fas fa-pills mr-2"></i>Treatment Options
+                                    </button>
+                                    <button onclick="aiQuickAction('drug')" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 rounded-lg transition-colors">
+                                        <i class="fas fa-exclamation-triangle mr-2"></i>Drug Interactions
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="bg-white rounded-xl shadow-sm border p-6">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                    <i class="fas fa-chart-line text-green-600 mr-2"></i>AI Insights
+                                </h3>
+                                <div class="space-y-3">
+                                    <div class="p-3 bg-blue-50 rounded-lg">
+                                        <p class="text-sm font-medium text-blue-800">Pattern Recognition</p>
+                                        <p class="text-xs text-blue-600">3 similar cases this month</p>
+                                    </div>
+                                    <div class="p-3 bg-green-50 rounded-lg">
+                                        <p class="text-sm font-medium text-green-800">Treatment Success</p>
+                                        <p class="text-xs text-green-600">92% positive outcomes</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other Doctor Tabs -->
+                <div id="doctorAppointmentsTab" class="doctor-tab hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Appointments</h2>
+                    <p class="text-gray-600">Manage your appointment schedule</p>
+                </div>
+
+                <div id="doctorPatientsTab" class="doctor-tab hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">My Patients</h2>
+                    <p class="text-gray-600">View and manage your patient records</p>
+                </div>
+
+                <div id="doctorReportsTab" class="doctor-tab hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Reports Library</h2>
+                    <p class="text-gray-600">Access all patient reports and test results</p>
+                </div>
+
+                <div id="doctorPrescriptionsTab" class="doctor-tab hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Prescription Maker</h2>
+                    <p class="text-gray-600">Create and manage prescriptions</p>
+                </div>
+
+                <div id="doctorResourcesTab" class="doctor-tab hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Resource Allocation</h2>
+                    <p class="text-gray-600">Manage medical equipment and supplies</p>
+                </div>
+
+                <div id="doctorIpd-opdTab" class="doctor-tab hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">IPD/OPD Management</h2>
+                    <p class="text-gray-600">Manage inpatient and outpatient services</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="hidden min-h-screen bg-gray-50">
+        <header class="bg-white shadow-sm border-b">
+            <div class="px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-user-shield text-white"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-bold text-gray-800">HealFlow Admin Dashboard</h1>
+                            <p class="text-sm text-gray-600">Administrator - <span id="adminName">System Admin</span></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-sm text-gray-600">
+                            <i class="fas fa-clock mr-1"></i>
+                            <span id="currentTime">12:00:00 PM</span>
+                        </div>
+                        <button onclick="logout()" class="text-gray-600 hover:text-gray-800">
+                            <i class="fas fa-sign-out-alt text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex">
+            <!-- Admin Sidebar -->
+            <nav class="w-64 bg-white shadow-sm h-screen sticky top-0">
+                <div class="p-6">
+                    <ul class="space-y-2">
+                        <li><a href="#" onclick="showAdminTab('dashboard')" class="admin-nav-item active flex items-center space-x-3 px-4 py-3 rounded-lg text-purple-600 bg-purple-50">
+                            <i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+                        <li><a href="#" onclick="showAdminTab('analytics')" class="admin-nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-chart-bar"></i><span>Analytics</span></a></li>
+                        <li><a href="#" onclick="showAdminTab('inventory')" class="admin-nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-boxes"></i><span>Inventory</span></a></li>
+                        <li><a href="#" onclick="showAdminTab('finances')" class="admin-nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-dollar-sign"></i><span>Finances</span></a></li>
+                        <li><a href="#" onclick="showAdminTab('staff')" class="admin-nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-users-cog"></i><span>Staff Management</span></a></li>
+                        <li><a href="#" onclick="showAdminTab('beds')" class="admin-nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-bed"></i><span>Bed Management</span></a></li>
+                        <li><a href="#" onclick="showAdminTab('reports')" class="admin-nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-file-alt"></i><span>Reports</span></a></li>
+                        <li><a href="#" onclick="showAdminTab('settings')" class="admin-nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-cog"></i><span>Settings</span></a></li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Admin Content -->
+            <main class="flex-1 p-6">
+                <!-- Admin Dashboard Tab -->
+                <div id="adminDashboardTab" class="admin-tab">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Hospital Overview</h2>
+                        <p class="text-gray-600">Real-time monitoring of all hospital operations</p>
+                    </div>
+
+                    <!-- Key Metrics -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white rounded-xl p-6 shadow-sm border">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-users text-blue-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-gray-800">342</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Total Patients</h3>
+                            <p class="text-sm text-gray-600">+12% from last month</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-sm border">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-bed text-green-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-gray-800">78%</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Bed Occupancy</h3>
+                            <p class="text-sm text-gray-600">156/200 beds occupied</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-sm border">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-dollar-sign text-purple-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-gray-800">₹2.4M</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Monthly Revenue</h3>
+                            <p class="text-sm text-gray-600">+8% from last month</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-sm border">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-user-md text-orange-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-gray-800">45</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Active Staff</h3>
+                            <p class="text-sm text-gray-600">12 doctors, 33 nurses</p>
+                        </div>
+                    </div>
+
+                    <!-- Real-time Alerts -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                        <div class="bg-white rounded-xl shadow-sm border p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                <i class="fas fa-exclamation-triangle text-red-600 mr-2"></i>Critical Alerts
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-medium text-red-800">ICU Bed Critical</span>
+                                        <span class="text-sm text-red-600">2 min ago</span>
+                                    </div>
+                                    <p class="text-sm text-red-700">Only 1 ICU bed available</p>
+                                </div>
+                                <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-medium text-yellow-800">Inventory Low</span>
+                                        <span class="text-sm text-yellow-600">15 min ago</span>
+                                    </div>
+                                    <p class="text-sm text-yellow-700">Paracetamol stock below minimum</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                                <i class="fas fa-chart-line text-green-600 mr-2"></i>Today's Performance
+                            </h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm text-gray-600">Patient Satisfaction</span>
+                                        <span class="text-sm font-medium">94%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-green-600 h-2 rounded-full" style="width: 94%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm text-gray-600">Staff Efficiency</span>
+                                        <span class="text-sm font-medium">87%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-blue-600 h-2 rounded-full" style="width: 87%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm text-gray-600">Equipment Uptime</span>
+                                        <span class="text-sm font-medium">98%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-purple-600 h-2 rounded-full" style="width: 98%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Department Status -->
+                    <div class="bg-white rounded-xl shadow-sm border p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Department Status</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                <h4 class="font-medium text-blue-800 mb-2">Emergency</h4>
+                                <div class="text-sm text-blue-700">
+                                    <p>Active: 8 patients</p>
+                                    <p>Staff: 6/8 on duty</p>
+                                    <p>Status: <span class="font-medium">Normal</span></p>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                <h4 class="font-medium text-green-800 mb-2">ICU</h4>
+                                <div class="text-sm text-green-700">
+                                    <p>Occupied: 9/10 beds</p>
+                                    <p>Staff: 12/12 on duty</p>
+                                    <p>Status: <span class="font-medium">Critical</span></p>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <h4 class="font-medium text-yellow-800 mb-2">Surgery</h4>
+                                <div class="text-sm text-yellow-700">
+                                    <p>Active: 3 operations</p>
+                                    <p>Staff: 8/10 on duty</p>
+                                    <p>Status: <span class="font-medium">Busy</span></p>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                                <h4 class="font-medium text-purple-800 mb-2">OPD</h4>
+                                <div class="text-sm text-purple-700">
+                                    <p>Queue: 23 patients</p>
+                                    <p>Staff: 15/18 on duty</p>
+                                    <p>Status: <span class="font-medium">Normal</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inventory Tab -->
+                <div id="adminInventoryTab" class="admin-tab hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Inventory Management</h2>
+                        <p class="text-gray-600">Monitor and manage hospital supplies and equipment</p>
+                    </div>
+
+                    <!-- Inventory Stats -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white rounded-xl p-6 shadow-sm border">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-exclamation-triangle text-red-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-red-600">12</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Critical Stock</h3>
+                            <p class="text-sm text-gray-600">Items below minimum</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-sm border">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-clock text-yellow-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-yellow-600">28</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Low Stock</h3>
+                            <p class="text-sm text-gray-600">Need reordering soon</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-sm border">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-check-circle text-green-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-green-600">156</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Well Stocked</h3>
+                            <p class="text-sm text-gray-600">Adequate inventory</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-sm border">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-rupee-sign text-blue-600"></i>
+                                </div>
+                                <span class="text-2xl font-bold text-blue-600">₹8.2L</span>
+                            </div>
+                            <h3 class="font-medium text-gray-800">Total Value</h3>
+                            <p class="text-sm text-gray-600">Current inventory</p>
+                        </div>
+                    </div>
+
+                    <!-- Inventory Table -->
+                    <div class="bg-white rounded-xl shadow-sm border p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Inventory Status</h3>
+                            <button onclick="updateInventoryStatus()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm">
+                                <i class="fas fa-sync mr-2"></i>Update Status
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b">
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Item</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Category</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Current Stock</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Min Required</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-700">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b inventory-item" data-stock="45" data-min-required="100">
+                                        <td class="py-3 px-4">Paracetamol 500mg</td>
+                                        <td class="py-3 px-4">Medicine</td>
+                                        <td class="py-3 px-4">45</td>
+                                        <td class="py-3 px-4">100</td>
+                                        <td class="py-3 px-4"><span class="status px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm">Critical</span></td>
+                                        <td class="py-3 px-4">
+                                            <button class="text-blue-600 hover:text-blue-800 text-sm mr-2">
+                                                <i class="fas fa-plus mr-1"></i>Reorder
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b inventory-item" data-stock="78" data-min-required="200">
+                                        <td class="py-3 px-4">Surgical Gloves</td>
+                                        <td class="py-3 px-4">Supplies</td>
+                                        <td class="py-3 px-4">78</td>
+                                        <td class="py-3 px-4">200</td>
+                                        <td class="py-3 px-4"><span class="status px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">Low</span></td>
+                                        <td class="py-3 px-4">
+                                            <button class="text-blue-600 hover:text-blue-800 text-sm mr-2">
+                                                <i class="fas fa-plus mr-1"></i>Reorder
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other Admin Tabs -->
+                <div id="adminAnalyticsTab" class="admin-tab hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Analytics & Reports</h2>
+                    <p class="text-gray-600">Comprehensive analytics and performance metrics</p>
+                </div>
+
+                <div id="adminFinancesTab" class="admin-tab hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Financial Management</h2>
+                    <p class="text-gray-600">Revenue, expenses, and financial reports</p>
+                </div>
+
+                <div id="adminStaffTab" class="admin-tab hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Staff Management</h2>
+                    <p class="text-gray-600">Manage doctors, nurses, and support staff</p>
+                </div>
+
+                <div id="adminBedsTab" class="admin-tab hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Bed Management</h2>
+                    <p class="text-gray-600">Monitor bed occupancy and availability</p>
+                </div>
+
+                <div id="adminReportsTab" class="admin-tab hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Reports & Documentation</h2>
+                    <p class="text-gray-600">Generate and manage hospital reports</p>
+                </div>
+
+                <div id="adminSettingsTab" class="admin-tab hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">System Settings</h2>
+                    <p class="text-gray-600">Configure system preferences and settings</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let currentRole = null;
+        let isEmergencyMode = false;
+        let sosActive = false;
+        let currentTokenNumber = null;
+        let hospitalMap = null;
+        let appointments = [];
+        let patients = [];
+        let inventory = [];
+        let finances = [];
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            initializeData();
+        });
+
+        // Initialize sample data
+        function initializeData() {
+            appointments = [
+                { id: 1, patient: 'John Doe', doctor: 'Dr. Smith', department: 'Cardiology', date: '2024-12-21', time: '10:00 AM', status: 'confirmed' },
+                { id: 2, patient: 'Jane Smith', doctor: 'Dr. Johnson', department: 'Neurology', date: '2024-12-22', time: '2:00 PM', status: 'pending' }
+            ];
+
+            patients = [
+                { id: 1, name: 'John Doe', age: 45, condition: 'Hypertension', lastVisit: '2024-12-20', status: 'stable' },
+                { id: 2, name: 'Jane Smith', age: 32, condition: 'Migraine', lastVisit: '2024-12-19', status: 'improving' }
+            ];
+
+            inventory = [
+                { id: 1, name: 'Paracetamol 500mg', category: 'Medicine', stock: 45, minRequired: 100, status: 'critical' },
+                { id: 2, name: 'Surgical Gloves', category: 'Supplies', stock: 78, minRequired: 200, status: 'low' },
+                { id: 3, name: 'IV Fluid Bags', category: 'Supplies', stock: 23, minRequired: 150, status: 'critical' }
+            ];
+
+            finances = [
+                { id: 1, type: 'revenue', amount: 15000, description: 'Patient Payment - John Doe', date: '2024-12-20', category: 'OPD' },
+                { id: 2, type: 'expense', amount: 45000, description: 'Equipment Purchase - MRI Maintenance', date: '2024-12-20', category: 'Equipment' }
+            ];
+        }
+
+        // Time update function
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            const timeElement = document.getElementById('currentTime');
+            if (timeElement) {
+                timeElement.textContent = timeString;
+            }
+        }
+
+        // Modal functions
+        function showPatientLogin() {
+            document.getElementById('patientLoginModal').classList.remove('hidden');
+            document.getElementById('patientLoginModal').classList.add('flex');
+        }
+
+        function showHospitalLogin() {
+            document.getElementById('hospitalLoginModal').classList.remove('hidden');
+            document.getElementById('hospitalLoginModal').classList.add('flex');
+        }
+
+        function showDoctorLogin() {
+            closeModal('hospitalLoginModal');
+            document.getElementById('doctorLoginModal').classList.remove('hidden');
+            document.getElementById('doctorLoginModal').classList.add('flex');
+        }
+
+        function showAdminLogin() {
+            closeModal('hospitalLoginModal');
+            document.getElementById('adminLoginModal').classList.remove('hidden');
+            document.getElementById('adminLoginModal').classList.add('flex');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.getElementById(modalId).classList.remove('flex');
+        }
+
+        // Login functions
+        function patientLogin(event) {
+            event.preventDefault();
+            const aadhaar = document.getElementById('patientAadhaar').value;
+            
+            if (aadhaar.length >= 12) {
+                currentUser = 'Patient';
+                currentRole = 'patient';
+                closeModal('patientLoginModal');
+                showDashboard('patient');
+                document.getElementById('patientName').textContent = 'John Doe';
+            } else {
+                alert('Please enter a valid Aadhaar number (minimum 12 digits)');
+            }
+        }
+
+        function doctorLogin(event) {
+            event.preventDefault();
+            const doctorId = document.getElementById('doctorId').value;
+            const password = document.getElementById('doctorPassword').value;
+            
+            if (doctorId && password) {
+                currentUser = 'Doctor';
+                currentRole = 'doctor';
+                closeModal('doctorLoginModal');
+                showDashboard('doctor');
+                document.getElementById('doctorName').textContent = 'Sarah Smith';
+            } else {
+                alert('Please enter both Doctor ID and Password');
+            }
+        }
+
+        function adminLogin(event) {
+            event.preventDefault();
+            const adminId = document.getElementById('adminId').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            if (adminId && password) {
+                currentUser = 'Admin';
+                currentRole = 'admin';
+                closeModal('adminLoginModal');
+                showDashboard('admin');
+                document.getElementById('adminName').textContent = 'System Admin';
+            } else {
+                alert('Please enter both Admin ID and Password');
+            }
+        }
+
+        function showDashboard(role) {
+            // Hide landing page
+            document.getElementById('landingPage').classList.add('hidden');
+            
+            // Show appropriate dashboard
+            if (role === 'patient') {
+                document.getElementById('patientDashboard').classList.remove('hidden');
+                initializeMap();
+            } else if (role === 'doctor') {
+                document.getElementById('doctorDashboard').classList.remove('hidden');
+            } else if (role === 'admin') {
+                document.getElementById('adminDashboard').classList.remove('hidden');
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            currentRole = null;
+            
+            // Hide all dashboards
+            document.getElementById('patientDashboard').classList.add('hidden');
+            document.getElementById('doctorDashboard').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            
+            // Show landing page
+            document.getElementById('landingPage').classList.remove('hidden');
+            
+            // Reset emergency mode
+            if (isEmergencyMode) {
+                toggleEmergency();
+            }
+        }
+
+        // Navigation functions
+        function showPatientTab(tabName) {
+            // Hide all patient tabs
+            const tabs = document.querySelectorAll('.patient-tab');
+            tabs.forEach(tab => tab.classList.add('hidden'));
+            
+            // Show selected tab
+            const targetTab = document.getElementById('patient' + tabName.charAt(0).toUpperCase() + tabName.slice(1) + 'Tab');
+            if (targetTab) {
+                targetTab.classList.remove('hidden');
+            }
+            
+            // Update navigation
+            const navItems = document.querySelectorAll('.patient-nav-item');
+            navItems.forEach(item => {
+                item.classList.remove('active', 'text-blue-600', 'bg-blue-50');
+                item.classList.add('text-gray-700');
+            });
+            
+            // Add active class to clicked item
+            event.target.closest('.patient-nav-item').classList.add('active', 'text-blue-600', 'bg-blue-50');
+            event.target.closest('.patient-nav-item').classList.remove('text-gray-700');
+        }
+
+        function showDoctorTab(tabName) {
+            // Hide all doctor tabs
+            const tabs = document.querySelectorAll('.doctor-tab');
+            tabs.forEach(tab => tab.classList.add('hidden'));
+            
+            // Show selected tab
+            const targetTab = document.getElementById('doctor' + tabName.charAt(0).toUpperCase() + tabName.slice(1) + 'Tab');
+            if (targetTab) {
+                targetTab.classList.remove('hidden');
+            }
+            
+            // Update navigation
+            const navItems = document.querySelectorAll('.doctor-nav-item');
+            navItems.forEach(item => {
+                item.classList.remove('active', 'text-blue-600', 'bg-blue-50');
+                item.classList.add('text-gray-700');
+            });
+            
+            // Add active class to clicked item
+            event.target.closest('.doctor-nav-item').classList.add('active', 'text-blue-600', 'bg-blue-50');
+            event.target.closest('.doctor-nav-item').classList.remove('text-gray-700');
+        }
+
+        function showAdminTab(tabName) {
+            // Hide all admin tabs
+            const tabs = document.querySelectorAll('.admin-tab');
+            tabs.forEach(tab => tab.classList.add('hidden'));
+            
+            // Show selected tab
+            const targetTab = document.getElementById('admin' + tabName.charAt(0).toUpperCase() + tabName.slice(1) + 'Tab');
+            if (targetTab) {
+                targetTab.classList.remove('hidden');
+            }
+            
+            // Update navigation
+            const navItems = document.querySelectorAll('.admin-nav-item');
+            navItems.forEach(item => {
+                item.classList.remove('active', 'text-purple-600', 'bg-purple-50');
+                item.classList.add('text-gray-700');
+            });
+            
+            // Add active class to clicked item
+            event.target.closest('.admin-nav-item').classList.add('active', 'text-purple-600', 'bg-purple-50');
+            event.target.closest('.admin-nav-item').classList.remove('text-gray-700');
+        }
+
+        // Emergency functions
+        function toggleEmergency() {
+            isEmergencyMode = !isEmergencyMode;
+            const body = document.body;
+            
+            if (isEmergencyMode) {
+                body.classList.add('emergency-mode');
+                document.getElementById('emergencyToggle').innerHTML = `
+                    <button onclick="toggleEmergency()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-times mr-2"></i>Exit Emergency
+                    </button>
+                `;
+                showNotification('Emergency mode activated! UI switched to emergency theme.', 'error');
+            } else {
+                body.classList.remove('emergency-mode');
+                document.getElementById('emergencyToggle').innerHTML = `
+                    <button onclick="toggleEmergency()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>Emergency
+                    </button>
+                `;
+                showNotification('Emergency mode deactivated. UI returned to normal theme.', 'success');
+            }
+        }
+
+        // Patient Functions
+        function bookAppointment(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const appointment = {
+                id: appointments.length + 1,
+                patient: 'John Doe',
+                department: formData.get('department') || event.target.querySelector('select').value,
+                date: formData.get('date') || event.target.querySelector('input[type="date"]').value,
+                time: formData.get('time') || event.target.querySelector('select:nth-of-type(2)').value,
+                reason: formData.get('reason') || event.target.querySelector('textarea').value,
+                status: 'pending'
+            };
+            
+            appointments.push(appointment);
+            showNotification('Appointment request sent successfully! You will receive confirmation shortly.', 'success');
+            event.target.reset();
+        }
+
+        function rescheduleAppointment(id) {
+            showNotification('Reschedule request sent. You will be contacted with available slots.', 'info');
+        }
+
+        function cancelAppointment(id) {
+            showNotification('Appointment cancelled successfully.', 'success');
+        }
+
+        function viewAppointmentDetails(id) {
+            showNotification('Opening appointment details...', 'info');
+        }
+
+        function downloadReport(filename) {
+            showNotification(`Downloading ${filename}...`, 'info');
+        }
+
+        function viewImage(filename) {
+            showNotification(`Opening ${filename} in viewer...`, 'info');
+        }
+
+        function viewVisitNotes(id) {
+            showNotification('Opening visit notes...', 'info');
+        }
+
+        function getDirections(hospitalName) {
+            showNotification(`Getting directions to ${hospitalName}...`, 'info');
+        }
+
+        function callHospital(number) {
+            showNotification(`Calling ${number}...`, 'info');
+        }
+
+        function reserveBed(hospitalId) {
+            showNotification('Bed reservation request sent. You will receive confirmation shortly.', 'success');
+        }
+
+        function shareLocation() {
+            showNotification('Location shared with emergency services.', 'success');
+        }
+
+        function emergencyContacts() {
+            showNotification('Emergency contacts have been notified.', 'info');
+        }
+
+        function downloadBill(billId) {
+            showNotification(`Downloading bill ${billId}...`, 'info');
+        }
+
+        function viewBillDetails(billId) {
+            showNotification(`Opening bill details for ${billId}...`, 'info');
+        }
+
+        function reorderMedication(billId) {
+            showNotification('Medication reorder request sent to pharmacy.', 'success');
+        }
+
+        function payBill(billId) {
+            showNotification(`Processing payment for ${billId}...`, 'info');
+        }
+
+        function downloadAllBills() {
+            showNotification('Downloading all pharmacy bills...', 'info');
+        }
+
+        function setMedicationReminder() {
+            showNotification('Medication reminder has been set.', 'success');
+        }
+
+        function orderRefill() {
+            showNotification('Refill order has been placed.', 'success');
+        }
+
+        function findPharmacy() {
+            showNotification('Finding nearby pharmacies...', 'info');
+        }
+
+        function uploadPrescription() {
+            showNotification('Opening prescription upload...', 'info');
+        }
+
+        function filterEHR(category) {
+            const records = document.querySelectorAll('.ehr-record');
+            const filters = document.querySelectorAll('.ehr-filter');
+            
+            // Update filter buttons
+            filters.forEach(filter => {
+                filter.classList.remove('active', 'bg-blue-50', 'text-blue-600');
+            });
+            event.target.classList.add('active', 'bg-blue-50', 'text-blue-600');
+            
+            // Filter records
+            records.forEach(record => {
+                if (category === 'all' || record.dataset.category === category) {
+                    record.style.display = 'block';
+                } else {
+                    record.style.display = 'none';
+                }
+            });
+        }
+
+        function searchHospitals() {
+            showNotification('Searching for hospitals with available beds...', 'info');
+            // Simulate search delay
+            setTimeout(() => {
+                showNotification('Found 2 hospitals with available beds nearby!', 'success');
+            }, 2000);
+        }
+
+        function activateSOS() {
+            sosActive = true;
+            document.getElementById('sosStatus').classList.remove('hidden');
+            showNotification('SOS ACTIVATED! Emergency alert sent to all nearby hospitals.', 'error');
+            
+            // Simulate hospital responses
+            setTimeout(() => {
+                showNotification('City General Hospital: 2 beds reserved, ambulance dispatched', 'info');
+            }, 3000);
+        }
+
+        function deactivateSOS() {
+            sosActive = false;
+            document.getElementById('sosStatus').classList.add('hidden');
+            showNotification('SOS deactivated. Emergency alert cancelled.', 'success');
+        }
+
+        function callEmergency(number) {
+            showNotification(`Calling emergency services: ${number}`, 'info');
+        }
+
+        function callAmbulance() {
+            showNotification('Emergency ambulance has been called. ETA: 8 minutes', 'info');
+        }
+
+        function findEmergencyRoom() {
+            showNotification('Locating nearest emergency room with available capacity...', 'info');
+        }
+
+        function generateToken(event) {
+            event.preventDefault();
+            const department = document.getElementById('tokenDepartment').value;
+            const tokenNumber = department.substring(0, 2).toUpperCase() + '-' + String(Math.floor(Math.random() * 100) + 1).padStart(3, '0');
+            currentTokenNumber = tokenNumber;
+            
+            const currentTokenDiv = document.getElementById('currentToken');
+            currentTokenDiv.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="w-24 h-24 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-ticket-alt text-white text-3xl"></i>
+                    </div>
+                    <h4 class="text-2xl font-bold text-blue-600 mb-2">Token: ${tokenNumber}</h4>
+                    <p class="text-gray-600 mb-2">${department}</p>
+                    <p class="text-sm text-gray-500">Queue Position: 5</p>
+                    <p class="text-sm text-gray-500">Estimated Wait: 25 minutes</p>
+                    <div class="mt-4">
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-blue-600 h-2 rounded-full" style="width: 60%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Queue Progress</p>
+                    </div>
+                </div>
+            `;
+            
+            showNotification(`Token ${tokenNumber} generated successfully!`, 'success');
+            event.target.reset();
+        }
+
+        // Doctor Functions
+        function sendAIMessage(event) {
+            event.preventDefault();
+            const message = document.getElementById('aiMessageInput').value;
+            if (!message.trim()) return;
+            
+            const chatMessages = document.getElementById('aiChatMessages');
+            
+            // Add user message
+            chatMessages.innerHTML += `
+                <div class="flex items-start space-x-3 justify-end">
+                    <div class="bg-blue-600 text-white rounded-lg p-3 max-w-md">
+                        <p>${message}</p>
+                    </div>
+                    <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-white text-sm"></i>
+                    </div>
+                </div>
+            `;
+            
+            // Simulate AI response
+            setTimeout(() => {
+                const responses = [
+                    "Based on the symptoms you described, I recommend considering a cardiac evaluation. The patient's chest pain combined with shortness of breath warrants an ECG and cardiac enzymes.",
+                    "For the medication interaction you asked about, there is a moderate interaction between those two drugs. Consider adjusting the dosage or timing.",
+                    "The lab results indicate elevated white blood cell count. This could suggest an infection. I recommend blood cultures and consider antibiotic therapy.",
+                    "For this type of fracture, immobilization is key. Consider orthopedic consultation for surgical evaluation."
+                ];
+                
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                
+                chatMessages.innerHTML += `
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-robot text-white text-sm"></i>
+                        </div>
+                        <div class="bg-gray-100 rounded-lg p-3 max-w-md">
+                            <p class="text-gray-800">${randomResponse}</p>
+                        </div>
+                    </div>
+                `;
+                
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 1500);
+            
+            document.getElementById('aiMessageInput').value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function aiQuickAction(type) {
+            const actions = {
+                'symptoms': 'Please describe the patient\'s symptoms and I\'ll help with differential diagnosis.',
+                'diagnosis': 'I can help analyze symptoms and suggest possible diagnoses. What are the key findings?',
+                'treatment': 'What condition are you treating? I can suggest evidence-based treatment options.',
+                'drug': 'Which medications are you checking for interactions? I\'ll analyze potential conflicts.'
+            };
+            
+            document.getElementById('aiMessageInput').value = actions[type];
+        }
+
+        // Admin Functions
+        function updateInventoryStatus() {
+            const inventoryItems = document.querySelectorAll('.inventory-item');
+            inventoryItems.forEach(item => {
+                const stock = parseInt(item.dataset.stock);
+                const minRequired = parseInt(item.dataset.minRequired);
+                const statusElement = item.querySelector('.status');
+                
+                if (stock < minRequired * 0.3) {
+                    statusElement.className = 'status px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm';
+                    statusElement.textContent = 'Critical';
+                } else if (stock < minRequired * 0.6) {
+                    statusElement.className = 'status px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm';
+                    statusElement.textContent = 'Low';
+                } else {
+                    statusElement.className = 'status px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm';
+                    statusElement.textContent = 'Good';
+                }
+            });
+        }
+
+        // Map Functions
+        function initializeMap() {
+            if (typeof L !== 'undefined' && document.getElementById('hospitalMap')) {
+                try {
+                    hospitalMap = L.map('hospitalMap').setView([28.6139, 77.2090], 12);
+                    
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(hospitalMap);
+                    
+                    // Add hospital markers
+                    const hospitals = [
+                        { name: 'City General Hospital', lat: 28.6200, lng: 77.2100, beds: 12 },
+                        { name: 'Metro Medical Center', lat: 28.6100, lng: 77.2200, beds: 8 }
+                    ];
+                    
+                    hospitals.forEach(hospital => {
+                        L.marker([hospital.lat, hospital.lng])
+                            .addTo(hospitalMap)
+                            .bindPopup(`<b>${hospital.name}</b><br>Available beds: ${hospital.beds}`);
+                    });
+                } catch (error) {
+                    console.log('Map initialization failed:', error);
+                    document.getElementById('hospitalMap').innerHTML = '<div class="flex items-center justify-center h-full text-gray-500"><p>Map loading...</p></div>';
+                }
+            }
+        }
+
+        // Utility Functions
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const colors = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                info: 'bg-blue-500',
+                warning: 'bg-yellow-500'
+            };
+            
+            notification.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform transition-transform duration-300 translate-x-full`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 5000);
+        }
+
+        // Format Aadhaar input
+        document.addEventListener('input', function(e) {
+            if (e.target.id === 'patientAadhaar') {
+                let value = e.target.value.replace(/\D/g, '');
+                value = value.replace(/(\d{4})(\d{4})(\d{4})/, '$1-$2-$3');
+                e.target.value = value;
+            }
+        });
+    </script>
+    <style>
+  .portal-wrap {max-width: 720px; margin: 2em auto; padding: 2em; background: #f7fafc; border-radius: 10px; box-shadow: 0 2px 12px #d5e3f1;}
+  .portal-title {font-size: 1.4em; margin-bottom: 1em;}
+  .portal-section {margin-bottom: 2em;}
+  .portal-label {margin: 0.4em 0 0.1em; font-weight: 600;}
+  .portal-input {width: 100%; padding: 0.5em; margin-bottom: 0.9em;}
+  .portal-btn {background: #1664c4; color:#fff; border:none; border-radius:4px; padding:0.5em 1.2em; margin-right:0.5em;}
+  .portal-btn:disabled{background:#b7b7b7;}
+  .portal-list, .portal-card {background: #eef2fa; border: 1px solid #dde; border-radius: 6px; padding: 1em; margin: 0.8em 0;}
+  .portal-err {background: #fdd; color: #900; padding: 0.7em; border-radius: 7px; margin-bottom: 1em; display: none;}
+  .portal-stats {font-size:1.07em; margin:1em 0;}
+</style>
+
+<!-- Doctor Portal -->
+<section id="doctorPortalExt" class="portal-wrap">
+  <div class="portal-title">Doctor Portal</div>
+  <div id="docError" class="portal-err"></div>
+  <div class="portal-section">
+    <label class="portal-label">Email:</label><input id="docEmail" class="portal-input" type="email">
+    <label class="portal-label">Password:</label><input id="docPass" class="portal-input" type="password">
+    <button class="portal-btn" onclick="loginDoctor()">Login</button>
+    <button class="portal-btn" onclick="logoutDoctor()">Logout</button>
+  </div>
+  <div class="portal-section">
+    <label class="portal-label">Name:</label><input id="docName" class="portal-input" type="text">
+    <label class="portal-label">Speciality:</label><input id="docSpec" class="portal-input" type="text">
+    <button class="portal-btn" onclick="saveDocProfile()">Save Profile</button>
+  </div>
+  <div class="portal-section">
+    <label class="portal-label">Appointments</label>
+    <div id="docAptList"></div>
+  </div>
+  <div class="portal-section">
+    <label class="portal-label">Patient Records</label>
+    <div id="docPatList"></div>
+    <div id="docRecDetails" class="portal-card"></div>
+  </div>
+  <div class="portal-section">
+    <label class="portal-label">Patient ID:</label><input id="docPresId" class="portal-input" type="number">
+    <label class="portal-label">Medicine:</label><input id="docMed" class="portal-input" type="text">
+    <label class="portal-label">Dosage:</label><input id="docDos" class="portal-input" type="text">
+    <button class="portal-btn" onclick="docPrescribe()">Prescribe</button>
+  </div>
+  <div class="portal-section">
+    <label class="portal-label">Analytics</label>
+    <div id="docStats" class="portal-stats"></div>
+  </div>
+</section>
+
+<!-- Admin Portal -->
+<section id="adminPortalExt" class="portal-wrap">
+  <div class="portal-title">Admin Portal</div>
+  <div id="admError" class="portal-err"></div>
+  <div class="portal-section">
+    <label class="portal-label">Email:</label><input id="admEmail" class="portal-input" type="email">
+    <label class="portal-label">Password:</label><input id="admPass" class="portal-input" type="password">
+    <button class="portal-btn" onclick="loginAdmin()">Login</button>
+    <button class="portal-btn" onclick="logoutAdmin()">Logout</button>
+  </div>
+  <div class="portal-section">
+    <label class="portal-label">Doctor Name:</label><input id="admDocName" class="portal-input" type="text">
+    <label class="portal-label">Speciality:</label><input id="admDocSpec" class="portal-input" type="text">
+    <button class="portal-btn" onclick="addAdminDoctor()">Add Doctor</button>
+    <div id="admDocList" class="portal-list"></div>
+  </div>
+  <div class="portal-section">
+    <label class="portal-label">Patient Name:</label><input id="admPatName" class="portal-input" type="text">
+    <label class="portal-label">Age:</label><input id="admPatAge" class="portal-input" type="number">
+    <button class="portal-btn" onclick="addAdminPatient()">Add Patient</button>
+    <div id="admPatList" class="portal-list"></div>
+  </div>
+  <div class="portal-section">
+    <label class="portal-label">Analytics</label>
+    <div id="admStats" class="portal-stats"></div>
+  </div>
+  <div class="portal-section">
+    <label class="portal-label">Audit Logs</label>
+    <div id="admLogs" class="portal-list"></div>
+  </div>
+</section>
+
+<script>
+function showErr(id,msg){var e=document.getElementById(id);e.innerText=msg;e.style.display=msg?"block":"none";}
+function clearErr(id){document.getElementById(id).style.display='none';}
+async function api(url, method="GET", data=null) {
+  if(url.includes("doctor/login")) return {token:"dt"};
+  if(url.includes("doctor/profile")) return {name:"Dr. Smith", speciality:"Cardiology"};
+  if(url.includes("doctor/appointments")) return [{id:1, date:"2025-09-29", patientName:"John Doe"},{id:2, date:"2025-09-30", patientName:"Jane Smith"}];
+  if(url.includes("doctor/patients")) return [{id:22, name:"John Doe", age:28},{id:23, name:"Jane Smith", age:35}];
+  if(url.includes("doctor/patient/") && url.includes("record")) return {diagnosis:"Flu", notes:"Hydrate"};
+  if(url.includes("doctor/analytics")) return {patients:10, appointments:7};
+  if(url.includes("admin/login")) return {token:"at"};
+  if(url.includes("admin/doctors")) return [{id:101, name:"Dr. Smith", speciality:"Cardiology"},{id:102, name:"Dr. Adams", speciality:"Pediatrics"}];
+  if(url.includes("admin/patients")) return [{id:201, name:"John Doe", age:28},{id:202, name:"Jane Smith", age:35}];
+  if(url.includes("admin/analytics")) return {doctors:2, patients:2, appts:4};
+  if(url.includes("admin/audit")) return [{time:"2025-09-27 14:01", action:"Added Dr. Adams"},{time:"2025-09-27 16:18", action:"Booked Appointment"}];
+  return [];
+}
+// Doctor Portal JS
+async function loginDoctor(){clearErr("docError");await api("/api/doctor/login","POST");await loadDocProfile();await loadDocApt();await loadDocPat();await loadDocStats();}
+function logoutDoctor(){}
+async function loadDocProfile(){let p=await api('/api/doctor/profile');document.getElementById("docName").value=p.name||"";document.getElementById("docSpec").value=p.speciality||"";}
+async function saveDocProfile(){await api("/api/doctor/profile","PUT",{name:document.getElementById("docName").value,speciality:document.getElementById("docSpec").value});}
+async function loadDocApt(){let arr=await api('/api/doctor/appointments');let c=document.getElementById('docAptList');c.innerHTML=arr.length?"":"No appointments";arr.forEach(o=>c.innerHTML+=`<div>${o.date} - ${o.patientName} <button onclick="docAptConfirm('${o.id}')">Confirm</button> <button onclick="docAptCancel('${o.id}')">Cancel</button></div>`);}
+async function docAptConfirm(id){await api(`/api/doctor/appointment/${id}/confirm`,"POST");await loadDocApt();}
+async function docAptCancel(id){await api(`/api/doctor/appointment/${id}/cancel`,"POST");await loadDocApt();}
+async function loadDocPat(){let arr=await api('/api/doctor/patients');let c=document.getElementById("docPatList");c.innerHTML=arr.length?"":"No patients";arr.forEach(o=>c.innerHTML+=`<div>${o.name} <button onclick="showDocRec('${o.id}')">Show</button></div>`);}
+async function showDocRec(id){let r=await api(`/api/doctor/patient/${id}/record`);document.getElementById("docRecDetails").innerText=JSON.stringify(r,null,2);}
+async function docPrescribe(){await api(`/api/doctor/patient/${document.getElementById("docPresId").value}/prescription`,"POST",{medicine:document.getElementById("docMed").value,dosage:document.getElementById("docDos").value});}
+async function loadDocStats(){let d=await api("/api/doctor/analytics");document.getElementById("docStats").innerText=`Patients: ${d.patients}, Appointments: ${d.appointments}`;}
+// Admin Portal JS
+async function loginAdmin(){clearErr("admError");await api("/api/admin/login","POST");await loadAdmDoc();await loadAdmPat();await loadAdmStats();await loadAdmLogs();}
+function logoutAdmin(){}
+async function loadAdmDoc(){let arr=await api('/api/admin/doctors');let c=document.getElementById('admDocList');c.innerHTML=arr.length?"":"No doctors";arr.forEach(d=>c.innerHTML+=`<div>${d.name} (${d.speciality}) <button onclick="editAdmDoc('${d.id}')">Edit</button> <button onclick="delAdmDoc('${d.id}')">Delete</button></div>`);}
+async function addAdminDoctor(){await api('/api/admin/doctor','POST',{name:document.getElementById('admDocName').value,speciality:document.getElementById('admDocSpec').value});await loadAdmDoc();}
+function editAdmDoc(id){}
+async function delAdmDoc(id){await api(`/api/admin/doctor/${id}`,'DELETE');await loadAdmDoc();}
+async function loadAdmPat(){let arr=await api('/api/admin/patients');let c=document.getElementById('admPatList');c.innerHTML=arr.length?"":"No patients";arr.forEach(d=>c.innerHTML+=`<div>${d.name} (${d.age} yrs) <button onclick="editAdmPat('${d.id}')">Edit</button> <button onclick="delAdmPat('${d.id}')">Delete</button></div>`);}
+async function addAdminPatient(){await api('/api/admin/patient','POST',{name:document.getElementById('admPatName').value,age:document.getElementById('admPatAge').value});await loadAdmPat();}
+function editAdmPat(id){}
+async function delAdmPat(id){await api(`/api/admin/patient/${id}`,'DELETE');await loadAdmPat();}
+async function loadAdmStats(){let d=await api("/api/admin/analytics");document.getElementById("admStats").innerText=`Doctors: ${d.doctors}, Patients: ${d.patients}, Appointments: ${d.appts}`;}
+async function loadAdmLogs(){let arr=await api("/api/admin/audit");let c=document.getElementById("admLogs");c.innerHTML=arr.length?"":"No logs";arr.forEach(l=>c.innerHTML+=`<div>${l.time}: ${l.action}</div>`);}
+</script>
+
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'985f2bff65203386',t:'MTc1OTAxOTg0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
+<!-- BEGIN Doctor & Admin Portals: Append to end.html -->
+<style>
+  
+</style>
+
+<!-- DOCTOR PORTAL -->
+<section id="doctorPortalExt" class="hms-container">
+  <div class="hms-title">Doctor Portal</div>
+  <div id="doctorErr" class="hms-error"></div>
+
+  <!-- Authentication -->
+  <div class="hms-block">
+    <span class="hms-label">Email:</span><input id="docemail" class="hms-input" type="email"/>
+    <span class="hms-label">Password:</span><input id="docpass" class="hms-input" type="password"/>
+    <button class="hms-btn" onclick="docLogin()">Login</button>
+    <button class="hms-btn" onclick="docLogout()">Logout</button>
+  </div>
+
+  <!-- Profile -->
+  <div class="hms-block">
+    <span class="hms-label">Name:</span><input id="docName" class="hms-input" type="text"/>
+    <span class="hms-label">Speciality:</span><input id="docSpec" class="hms-input" type="text"/>
+    <button class="hms-btn" onclick="docProfileSave()">Save Profile</button>
+  </div>
+
+  <!-- Appointments -->
+  <div class="hms-block">
+    <div style="font-weight:bold;">Appointments</div>
+    <div id="docAptList"></div>
+  </div>
+
+  <!-- Patient Records -->
+  <div class="hms-block">
+    <div style="font-weight:bold;">Patient Records</div>
+    <div id="docPatList"></div>
+    <div id="docRecDetails" class="hms-card"></div>
+  </div>
+
+  <!-- Prescription -->
+  <div class="hms-block">
+    <span class="hms-label">Patient ID:</span><input id="docPresId" class="hms-input" type="number"/>
+    <span class="hms-label">Medicine:</span><input id="docMed" class="hms-input" type="text"/>
+    <span class="hms-label">Dosage:</span><input id="docDos" class="hms-input" type="text"/>
+    <button class="hms-btn" onclick="docPrescribe()">Prescribe</button>
+  </div>
+
+  <!-- Analytics -->
+  <div class="hms-block">
+    <div style="font-weight:bold;">Analytics</div>
+    <div id="docStats" class="hms-stats"></div>
+  </div>
+</section>
+
+<!-- ADMIN PORTAL -->
+<section id="adminPortalExt" class="hms-container">
+  <div class="hms-title">Admin Portal</div>
+  <div id="adminErr" class="hms-error"></div>
+
+  <!-- Authentication -->
+  <div class="hms-block">
+    <span class="hms-label">Email:</span><input id="admemail" class="hms-input" type="email"/>
+    <span class="hms-label">Password:</span><input id="admpass" class="hms-input" type="password"/>
+    <button class="hms-btn" onclick="admLogin()">Login</button>
+    <button class="hms-btn" onclick="admLogout()">Logout</button>
+  </div>
+
+  <!-- Manage Doctors -->
+  <div class="hms-block">
+    <span class="hms-label">Name:</span><input id="admDocName" class="hms-input" type="text"/>
+    <span class="hms-label">Speciality:</span><input id="admDocSpec" class="hms-input" type="text"/>
+    <button class="hms-btn" onclick="admAddDoc()">Add Doctor</button>
+    <div id="admDocList" class="hms-list"></div>
+  </div>
+
+  <!-- Manage Patients -->
+  <div class="hms-block">
+    <span class="hms-label">Name:</span><input id="admPatName" class="hms-input" type="text"/>
+    <span class="hms-label">Age:</span><input id="admPatAge" class="hms-input" type="number"/>
+    <button class="hms-btn" onclick="admAddPat()">Add Patient</button>
+    <div id="admPatList" class="hms-list"></div>
+  </div>
+
+  <!-- Analytics -->
+  <div class="hms-block">
+    <div style="font-weight:bold;">System Analytics</div>
+    <div id="admStats" class="hms-stats"></div>
+  </div>
+
+  <!-- Audit Logs -->
+  <div class="hms-block">
+    <div style="font-weight:bold;">Audit Logs</div>
+    <div id="admLogs" class="hms-list"></div>
+  </div>
+</section>
+
+<script>
+  // -------- UTILITIES --------
+  function showErr(id, msg) {
+    let box = document.getElementById(id);
+    box.innerText = msg;
+    box.style.display = msg ? "block" : "none";
+  }
+  function clearErr(id) {
+    document.getElementById(id).style.display = "none";
+  }
+  async function api(url, method="GET", data=null) {
+    // Replace with actual backend API integration.
+    // Simulated responses for demonstration:
+    if(url.includes("doctor/login")) return {token:"dt"};
+    if(url.includes("doctor/profile")) return {name:"Dr. Smith", speciality:"Cardiology"};
+    if(url.includes("doctor/appointments")) return [
+      {id:1, date:"2025-09-29", patientName:"John Doe"},
+      {id:2, date:"2025-09-30", patientName:"Jane Smith"}
+    ];
+    if(url.includes("doctor/patients")) return [
+      {id:22, name:"John Doe", age:28},
+      {id:23, name:"Jane Smith", age:35}
+    ];
+    if(url.includes("doctor/patient/") && url.includes("record")) return {diagnosis:"Flu", notes:"Hydrate"};
+    if(url.includes("doctor/analytics")) return {patients:10, appointments:7};
+    if(url.includes("admin/login")) return {token:"at"};
+    if(url.includes("admin/doctors")) return [
+      {id:101, name:"Dr. Smith", speciality:"Cardiology"},
+      {id:102, name:"Dr. Adams", speciality:"Pediatrics"}
+    ];
+    if(url.includes("admin/patients")) return [
+      {id:201, name:"John Doe", age:28},
+      {id:202, name:"Jane Smith", age:35}
+    ];
+    if(url.includes("admin/analytics")) return {doctors:2, patients:2, appts:4};
+    if(url.includes("admin/audit")) return [
+      {time:"2025-09-27 14:01", action:"Added Dr. Adams"},
+      {time:"2025-09-27 16:18", action:"Booked Appointment"}
+    ];
+    return [];
+  }
+
+  // -------- DOCTOR PORTAL --------
+  async function docLogin() {
+    clearErr("doctorErr");
+    await api("/api/doctor/login", "POST");
+    await docProfileLoad();
+    await docAptLoad();
+    await docPatientListLoad();
+    await docStatsLoad();
+  }
+  function docLogout() {}
+  async function docProfileLoad() {
+    let p = await api('/api/doctor/profile');
+    document.getElementById("docName").value = p.name || "";
+    document.getElementById("docSpec").value = p.speciality || "";
+  }
+  async function docProfileSave() {
+    clearErr("doctorErr");
+    await api("/api/doctor/profile", "PUT", {name: document.getElementById("docName").value, speciality: document.getElementById("docSpec").value});
+  }
+  async function docAptLoad() {
+    let arr = await api('/api/doctor/appointments');
+    let c = document.getElementById('docAptList'); c.innerHTML = arr.length ? "" : "<div>No appointments.</div>";
+    arr.forEach(o => c.innerHTML += `<div class="hms-card">${o.date} - ${o.patientName} <button class="hms-btn" onclick="docAptConfirm('${o.id}')">Confirm</button> <button class="hms-btn" onclick="docAptCancel('${o.id}')">Cancel</button></div>`);
+  }
+  async function docAptConfirm(id) {
+    await api(`/api/doctor/appointment/${id}/confirm`, "POST");
+    await docAptLoad();
+  }
+  async function docAptCancel(id) {
+    await api(`/api/doctor/appointment/${id}/cancel`, "POST");
+    await docAptLoad();
+  }
+  async function docPatientListLoad() {
+    let arr = await api('/api/doctor/patients');
+    let c = document.getElementById("docPatList"); c.innerHTML = arr.length ? "" : "<div>No patients assigned.</div>";
+    arr.forEach(o => c.innerHTML += `<div class="hms-card">${o.name} <button class="hms-btn" onclick="docShowRec('${o.id}')">Show</button></div>`);
+  }
+  async function docShowRec(id) {
+    let r = await api(`/api/doctor/patient/${id}/record`);
+    document.getElementById("docRecDetails").innerText = r.diagnosis ? JSON.stringify(r, null, 2) : "No record.";
+  }
+  async function docPrescribe() {
+    clearErr("doctorErr");
+    await api(`/api/doctor/patient/${document.getElementById("docPresId").value}/prescription`, "POST", {medicine: document.getElementById("docMed").value, dosage: document.getElementById("docDos").value});
+  }
+  async function docStatsLoad() {
+    let d = await api("/api/doctor/analytics");
+    document.getElementById("docStats").innerText = `Patients: ${d.patients}, Appointments: ${d.appointments}`;
+  }
+
+  // -------- ADMIN PORTAL --------
+  async function admLogin() {
+    clearErr("adminErr");
+    await api("/api/admin/login","POST");
+    await admDocListLoad();
+    await admPatListLoad();
+    await admStatsLoad();
+    await admAuditLoad();
+  }
+  function admLogout() {}
+  async function admDocListLoad() {
+    let arr = await api('/api/admin/doctors');
+    let c = document.getElementById('admDocList'); c.innerHTML = arr.length ? "" : "<div>No doctors.</div>";
+    arr.forEach(d => c.innerHTML += `<div class="hms-card">${d.name} (${d.speciality}) <button class="hms-btn" onclick="admEditDoc('${d.id}')">Edit</button> <button class="hms-btn" onclick="admDelDoc('${d.id}')">Delete</button></div>`);
+  }
+  async function admAddDoc() {
+    await api('/api/admin/doctor','POST',{name: document.getElementById('admDocName').value, speciality: document.getElementById('admDocSpec').value});
+    await admDocListLoad();
+  }
+  function admEditDoc(id) {}
+  async function admDelDoc(id) {await api(`/api/admin/doctor/${id}`,'DELETE'); await admDocListLoad();}
+
+  async function admPatListLoad() {
+    let arr = await api('/api/admin/patients');
+    let c = document.getElementById("admPatList"); c.innerHTML = arr.length ? "" : "<div>No patients.</div>";
+    arr.forEach(d => c.innerHTML += `<div class="hms-card">${d.name} (${d.age} yrs) <button class="hms-btn" onclick="admEditPat('${d.id}')">Edit</button> <button class="hms-btn" onclick="admDelPat('${d.id}')">Delete</button></div>`);
+  }
+  async function admAddPat() {
+    await api('/api/admin/patient','POST',{name:document.getElementById('admPatName').value, age:document.getElementById('admPatAge').value});
+    await admPatListLoad();
+  }
+  function admEditPat(id) {}
+  async function admDelPat(id) {await api(`/api/admin/patient/${id}`,'DELETE'); await admPatListLoad();}
+
+  async function admStatsLoad() {
+    let d = await api("/api/admin/analytics");
+    document.getElementById("admStats").innerText = `Doctors: ${d.doctors}\nPatients: ${d.patients}\nAppointments: ${d.appts}`;
+  }
+  async function admAuditLoad() {
+    let arr = await api("/api/admin/audit");
+    let c = document.getElementById("admLogs"); c.innerHTML = arr.length ? "" : "<div>No logs.</div>";
+    arr.forEach(l => c.innerHTML += `<div>${l.time}: ${l.action}</div>`);
+  }
+</script>
+<!-- END Doctor & Admin Portals -->
+<!-- Doctor Portal -->
+<section id="doctorPortalApp" style="max-width:700px;margin:2em auto;padding:2em;background:#f8fbff;border-radius:10px;box-shadow:0 2px 8px #dde;">
+  <h2 style="margin-bottom:1em;">Doctor Portal</h2>
+  <div id="drErr" style="display:none;background:#fee;color:#900;padding:0.7em;border-radius:6px;margin-bottom:1em;"></div>
+  <div style="margin-bottom:1.5em;">
+    <label>Email:</label><input id="drEmail" type="email" style="width:100%;margin-bottom:0.5em;">
+    <label>Password:</label><input id="drPass" type="password" style="width:100%;margin-bottom:0.7em;">
+    <button onclick="drLogin()" style="background:#247;border:none;color:#fff;padding:0.5em 1em;border-radius:4px;">Login</button>
+    <button onclick="drLogout()" style="background:#aaa;border:none;color:#fff;padding:0.5em 1em;border-radius:4px;">Logout</button>
+  </div>
+  <div style="margin-bottom:1.2em;">
+    <label>Name:</label><input id="drName" type="text" style="width:100%;margin-bottom:0.5em;">
+    <label>Speciality:</label><input id="drSpec" type="text" style="width:100%;margin-bottom:0.7em;">
+    <button onclick="drSaveProfile()" style="background:#195;border:none;color:#fff;padding:0.5em 1em;border-radius:4px;">Save Profile</button>
+  </div>
+  <div style="margin-bottom:1.2em;">
+    <h3>Appointments</h3>
+    <div id="drAptList"></div>
+  </div>
+  <div style="margin-bottom:1.2em;">
+    <h3>Patient Records</h3>
+    <div id="drPatList"></div>
+    <div id="drPatRec" style="margin-top:1em;background:#eef;border-radius:5px;padding:1em;"></div>
+  </div>
+  <div style="margin-bottom:1.2em;">
+    <h3>Prescribe Medicines</h3>
+    <input id="drPresPatId" type="number" style="width:100%;margin-bottom:0.5em;" placeholder="Patient ID">
+    <input id="drMed" type="text" style="width:100%;margin-bottom:0.5em;" placeholder="Medicine">
+    <input id="drDos" type="text" style="width:100%;margin-bottom:0.7em;" placeholder="Dosage">
+    <button onclick="drPrescribe()" style="background:#197;border:none;color:#fff;padding:0.5em 1em;border-radius:4px;">Prescribe</button>
+  </div>
+  <div>
+    <h3>Analytics</h3>
+    <div id="drAnalytics"></div>
+  </div>
+</section>
+
+<!-- Admin Portal -->
+<section id="adminPortalApp" style="max-width:700px;margin:2em auto;padding:2em;background:#f8fbff;border-radius:10px;box-shadow:0 2px 8px #dde;">
+  <h2 style="margin-bottom:1em;">Admin Portal</h2>
+  <div id="adErr" style="display:none;background:#fee;color:#900;padding:0.7em;border-radius:6px;margin-bottom:1em;"></div>
+  <div style="margin-bottom:1.5em;">
+    <label>Email:</label><input id="adEmail" type="email" style="width:100%;margin-bottom:0.5em;">
+    <label>Password:</label><input id="adPass" type="password" style="width:100%;margin-bottom:0.7em;">
+    <button onclick="adLogin()" style="background:#247;border:none;color:#fff;padding:0.5em 1em;border-radius:4px;">Login</button>
+    <button onclick="adLogout()" style="background:#aaa;border:none;color:#fff;padding:0.5em 1em;border-radius:4px;">Logout</button>
+  </div>
+  <div style="margin-bottom:1.2em;">
+    <label>Doctor Name:</label><input id="adDocName" type="text" style="width:100%;margin-bottom:0.5em;">
+    <label>Speciality:</label><input id="adDocSpec" type="text" style="width:100%;margin-bottom:0.7em;">
+    <button onclick="adAddDoctor()" style="background:#195;border:none;color:#fff;padding:0.5em 1em;border-radius:4px;">Add Doctor</button>
+    <div id="adDocList" style="margin-top:0.7em;"></div>
+  </div>
+  <div style="margin-bottom:1.2em;">
+    <label>Patient Name:</label><input id="adPatName" type="text" style="width:100%;margin-bottom:0.5em;">
+    <label>Age:</label><input id="adPatAge" type="number" style="width:100%;margin-bottom:0.7em;">
+    <button onclick="adAddPatient()" style="background:#197;border:none;color:#fff;padding:0.5em 1em;border-radius:4px;">Add Patient</button>
+    <div id="adPatList" style="margin-top:0.7em;"></div>
+  </div>
+  <div style="margin-bottom:1.2em;">
+    <h3>Analytics</h3>
+    <div id="adAnalytics"></div>
+  </div>
+  <div>
+    <h3>Audit Logs</h3>
+    <div id="adLogs"></div>
+  </div>
+</section>
+
+<script>
+  // Simulated API for demonstration
+  async function api(url, method="GET", data=null) {
+    if(url.includes("doctor/login")) return {token:"dt"};
+    if(url.includes("doctor/profile")) return {name:"Dr. Smith", speciality:"Cardiology"};
+    if(url.includes("doctor/appointments")) return [{id:1, date:"2025-09-29", patientName:"John Doe"},{id:2, date:"2025-09-30", patientName:"Jane Smith"}];
+    if(url.includes("doctor/patients")) return [{id:22, name:"John Doe", age:28},{id:23, name:"Jane Smith", age:35}];
+    if(url.includes("doctor/patient/") && url.includes("record")) return {diagnosis:"Flu", notes:"Hydrate"};
+    if(url.includes("doctor/analytics")) return {patients:10, appointments:7};
+    if(url.includes("admin/login")) return {token:"at"};
+    if(url.includes("admin/doctors")) return [{id:101, name:"Dr. Smith", speciality:"Cardiology"},{id:102, name:"Dr. Adams", speciality:"Pediatrics"}];
+    if(url.includes("admin/patients")) return [{id:201, name:"John Doe", age:28},{id:202, name:"Jane Smith", age:35}];
+    if(url.includes("admin/analytics")) return {doctors:2, patients:2, appts:4};
+    if(url.includes("admin/audit")) return [{time:"2025-09-27 14:01", action:"Added Dr. Adams"},{time:"2025-09-27 16:18", action:"Booked Appointment"}];
+    return [];
+  }
+  // Doctor Portal JS
+  async function drLogin() {
+    document.getElementById("drErr").style.display="none";
+    await api("/api/doctor/login","POST");
+    await drLoadProfile();
+    await drLoadApts();
+    await drLoadPatients();
+    await drAnalytics();
+  }
+  function drLogout() {}
+  async function drLoadProfile() {
+    let p = await api('/api/doctor/profile');
+    document.getElementById("drName").value=p.name;
+    document.getElementById("drSpec").value=p.speciality;
+  }
+  async function drSaveProfile() {await api('/api/doctor/profile','PUT',{name:document.getElementById('drName').value,speciality:document.getElementById('drSpec').value});}
+  async function drLoadApts() {
+    let arr=await api('/api/doctor/appointments');
+    let c=document.getElementById("drAptList");c.innerHTML=arr.length?"":"No appointments";
+    arr.forEach(o=>c.innerHTML+=`<div>${o.date} - ${o.patientName} <button onclick="drAptConf('${o.id}')">Confirm</button> <button onclick="drAptCan('${o.id}')">Cancel</button></div>`);
+  }
+  async function drAptConf(id){await api(`/api/doctor/appointment/${id}/confirm`,"POST");await drLoadApts();}
+  async function drAptCan(id){await api(`/api/doctor/appointment/${id}/cancel`,"POST");await drLoadApts();}
+  async function drLoadPatients(){
+    let arr=await api('/api/doctor/patients');
+    let c=document.getElementById("drPatList");c.innerHTML=arr.length?"":"No patients";
+    arr.forEach(o=>c.innerHTML+=`<div>${o.name} <button onclick="drShowRec('${o.id}')">Show</button></div>`);
+  }
+  async function drShowRec(id){let r=await api(`/api/doctor/patient/${id}/record`);document.getElementById("drPatRec").innerText=JSON.stringify(r,null,2);}
+  async function drPrescribe(){
+    await api(`/api/doctor/patient/${document.getElementById("drPresPatId").value}/prescription`,"POST",{medicine:document.getElementById("drMed").value,dosage:document.getElementById("drDos").value});
+  }
+  async function drAnalytics(){let d=await api("/api/doctor/analytics");document.getElementById("drAnalytics").innerText=`Patients: ${d.patients}, Appointments: ${d.appointments}`;}
+
+  // Admin Portal JS
+  async function adLogin(){
+    document.getElementById("adErr").style.display="none";
+    await api("/api/admin/login","POST");
+    await adLoadDoctors();
+    await adLoadPatients();
+    await adAnalytics();
+    await adLogs();
+  }
+  function adLogout(){}
+  async function adLoadDoctors(){
+    let arr=await api('/api/admin/doctors');let c=document.getElementById("adDocList");c.innerHTML=arr.length?"":"No doctors";
+    arr.forEach(d=>c.innerHTML+=`<div>${d.name} (${d.speciality}) <button onclick="adEditDoc('${d.id}')">Edit</button> <button onclick="adDelDoc('${d.id}')">Delete</button></div>`);
+  }
+  async function adAddDoctor(){await api('/api/admin/doctor','POST',{name:document.getElementById('adDocName').value,speciality:document.getElementById('adDocSpec').value});await adLoadDoctors();}
+  function adEditDoc(id){}
+  async function adDelDoc(id){await api(`/api/admin/doctor/${id}`,'DELETE');await adLoadDoctors();}
+  async function adLoadPatients(){
+    let arr=await api('/api/admin/patients');let c=document.getElementById("adPatList");c.innerHTML=arr.length?"":"No patients";
+    arr.forEach(d=>c.innerHTML+=`<div>${d.name} (${d.age} yrs) <button onclick="adEditPat('${d.id}')">Edit</button> <button onclick="adDelPat('${d.id}')">Delete</button></div>`);
+  }
+  async function adAddPatient(){await api('/api/admin/patient','POST',{name:document.getElementById('adPatName').value,age:document.getElementById('adPatAge').value});await adLoadPatients();}
+  function adEditPat(id){}
+  async function adDelPat(id){await api(`/api/admin/patient/${id}`,'DELETE');await adLoadPatients();}
+  async function adAnalytics(){let d=await api("/api/admin/analytics");document.getElementById("adAnalytics").innerText=`Doctors: ${d.doctors}, Patients: ${d.patients}, Appointments: ${d.appts}`;}
+  async function adLogs(){let arr=await api("/api/admin/audit");let c=document.getElementById("adLogs");c.innerHTML=arr.length?"":"No logs";arr.forEach(l=>c.innerHTML+=`<div>${l.time}: ${l.action}</div>`);}
+</script>
+<!-- Doctor & Admin Portal Modules -->
+<style>
+.doctor-admin-section {max-width:700px;margin:2em auto;background:#f4f8ff;padding:2em;border-radius:10px;box-shadow:0 2px 8px #d8d8ee;}
+.section-title {font-size:1.3em;margin-bottom:1em;}
+.section-block {margin-bottom:2em;}
+.label {margin:0.6em 0 0.2em; font-weight:600;}
+.input {width:100%;padding:0.5em;margin-bottom:1em;}
+.btn {background:#1976d2; color:#fff; border:none; border-radius:4px; padding:0.5em 1.3em; margin-right:0.6em;}
+.btn:disabled {background:#aaa;}
+.list, .card {background:#fcfcff;border:1px solid #dae;border-radius:6px;padding:1em;margin:0.8em 0;}
+#errorDoc, #errorAdm {background:#fdd;color:#900;padding:0.8em;border-radius:7px;display:none;}
+.stats {font-size:1.08em; margin:1em 0;}
+</style>
+
+<section id="doctorPortalExt" class="doctor-admin-section">
+  <div class="section-title">Doctor Portal</div>
+  <div id="errorDoc"></div>
+  <div class="section-block">
+    <span class="label">Email:</span><input id="docEmail" class="input" type="email">
+    <span class="label">Password:</span><input id="docPass" class="input" type="password">
+    <button class="btn" onclick="loginDoc()">Login</button>
+    <button class="btn" onclick="logoutDoc()">Logout</button>
+  </div>
+  <div class="section-block">
+    <span class="label">Name:</span><input id="docName" class="input" type="text">
+    <span class="label">Speciality:</span><input id="docSpec" class="input" type="text">
+    <button class="btn" onclick="saveDocProfile()">Save Profile</button>
+  </div>
+  <div class="section-block">
+    <div class="label">Appointments</div>
+    <div id="docAptList"></div>
+  </div>
+  <div class="section-block">
+    <div class="label">Patient Records</div>
+    <div id="docPatList"></div>
+    <div id="docRecDetails" class="card"></div>
+  </div>
+  <div class="section-block">
+    <span class="label">Patient ID:</span><input id="docPresId" class="input" type="number">
+    <span class="label">Medicine:</span><input id="docMed" class="input" type="text">
+    <span class="label">Dosage:</span><input id="docDos" class="input" type="text">
+    <button class="btn" onclick="docPrescribe()">Prescribe</button>
+  </div>
+  <div class="section-block">
+    <div class="label">Analytics</div>
+    <div id="docStats" class="stats"></div>
+  </div>
+</section>
+
+<section id="adminPortalExt" class="doctor-admin-section">
+  <div class="section-title">Admin Portal</div>
+  <div id="errorAdm"></div>
+  <div class="section-block">
+    <span class="label">Email:</span><input id="admEmail" class="input" type="email">
+    <span class="label">Password:</span><input id="admPass" class="input" type="password">
+    <button class="btn" onclick="loginAdm()">Login</button>
+    <button class="btn" onclick="logoutAdm()">Logout</button>
+  </div>
+  <div class="section-block">
+    <span class="label">Doctor Name:</span><input id="admDocName" class="input" type="text">
+    <span class="label">Speciality:</span><input id="admDocSpec" class="input" type="text">
+    <button class="btn" onclick="addAdmDoctor()">Add Doctor</button>
+    <div id="admDocList" class="list"></div>
+  </div>
+  <div class="section-block">
+    <span class="label">Patient Name:</span><input id="admPatName" class="input" type="text">
+    <span class="label">Age:</span><input id="admPatAge" class="input" type="number">
+    <button class="btn" onclick="addAdmPatient()">Add Patient</button>
+    <div id="admPatList" class="list"></div>
+  </div>
+  <div class="section-block">
+    <div class="label">Analytics</div>
+    <div id="admStats" class="stats"></div>
+  </div>
+  <div class="section-block">
+    <div class="label">Audit Logs</div>
+    <div id="admLogs" class="list"></div>
+  </div>
+</section>
+
+<script>
+function showError(id, msg) {var e=document.getElementById(id);e.innerText=msg;e.style.display=msg?"block":"none";}
+function clearError(id) {document.getElementById(id).style.display='none';}
+async function api(url, method="GET", data=null) {
+  // Replace mock responses with real API endpoints
+  if(url.includes("doctor/login")) return {token:"dt"};
+  if(url.includes("doctor/profile")) return {name:"Dr. Smith", speciality:"Cardiology"};
+  if(url.includes("doctor/appointments")) return [{id:1, date:"2025-09-29", patientName:"John Doe"},{id:2, date:"2025-09-30", patientName:"Jane Smith"}];
+  if(url.includes("doctor/patients")) return [{id:22, name:"John Doe", age:28},{id:23, name:"Jane Smith", age:35}];
+  if(url.includes("doctor/patient/") && url.includes("record")) return {diagnosis:"Flu", notes:"Hydrate"};
+  if(url.includes("doctor/analytics")) return {patients:10, appointments:7};
+  if(url.includes("admin/login")) return {token:"at"};
+  if(url.includes("admin/doctors")) return [{id:101, name:"Dr. Smith", speciality:"Cardiology"},{id:102, name:"Dr. Adams", speciality:"Pediatrics"}];
+  if(url.includes("admin/patients")) return [{id:201, name:"John Doe", age:28},{id:202, name:"Jane Smith", age:35}];
+  if(url.includes("admin/analytics")) return {doctors:2, patients:2, appts:4};
+  if(url.includes("admin/audit")) return [{time:"2025-09-27 14:01", action:"Added Dr. Adams"},{time:"2025-09-27 16:18", action:"Booked Appointment"}];
+  return [];
+}
+
+// Doctor Portal JS
+async function loginDoc() {clearError("errorDoc");await api("/api/doctor/login","POST");await loadDocProfile();await loadDocApt();await loadDocPat();await loadDocStats();}
+function logoutDoc() {}
+async function loadDocProfile() {let p=await api('/api/doctor/profile');document.getElementById("docName").value=p.name||"";document.getElementById("docSpec").value=p.speciality||"";}
+async function saveDocProfile() {await api("/api/doctor/profile","PUT",{name:document.getElementById("docName").value,speciality:document.getElementById("docSpec").value});}
+async function loadDocApt() {let arr=await api('/api/doctor/appointments');let c=document.getElementById('docAptList');c.innerHTML=arr.length?"":"No appointments";arr.forEach(o=>c.innerHTML+=`<div>${o.date} - ${o.patientName} <button onclick="docAptConfirm('${o.id}')">Confirm</button> <button onclick="docAptCancel('${o.id}')">Cancel</button></div>`);}
+async function docAptConfirm(id){await api(`/api/doctor/appointment/${id}/confirm`,"POST");await loadDocApt();}
+async function docAptCancel(id){await api(`/api/doctor/appointment/${id}/cancel`,"POST");await loadDocApt();}
+async function loadDocPat(){let arr=await api('/api/doctor/patients');let c=document.getElementById("docPatList");c.innerHTML=arr.length?"":"No patients";arr.forEach(o=>c.innerHTML+=`<div>${o.name} <button onclick="showDocRec('${o.id}')">Show</button></div>`);}
+async function showDocRec(id){let r=await api(`/api/doctor/patient/${id}/record`);document.getElementById("docRecDetails").innerText=JSON.stringify(r,null,2);}
+async function docPrescribe(){await api(`/api/doctor/patient/${document.getElementById("docPresId").value}/prescription`,"POST",{medicine:document.getElementById("docMed").value,dosage:document.getElementById("docDos").value});}
+async function loadDocStats(){let d=await api("/api/doctor/analytics");document.getElementById("docStats").innerText=`Patients: ${d.patients}, Appointments: ${d.appointments}`;}
+
+// Admin Portal JS
+async function loginAdm(){clearError("errorAdm");await api("/api/admin/login","POST");await loadAdmDoc();await loadAdmPat();await loadAdmStats();await loadAdmLogs();}
+function logoutAdm(){}
+async function loadAdmDoc(){let arr=await api('/api/admin/doctors');let c=document.getElementById('admDocList');c.innerHTML=arr.length?"":"No doctors";arr.forEach(d=>c.innerHTML+=`<div>${d.name} (${d.speciality}) <button onclick="editAdmDoc('${d.id}')">Edit</button> <button onclick="delAdmDoc('${d.id}')">Delete</button></div>`);}
+async function addAdmDoctor(){await api('/api/admin/doctor','POST',{name:document.getElementById('admDocName').value,speciality:document.getElementById('admDocSpec').value});await loadAdmDoc();}
+function editAdmDoc(id){}
+async function delAdmDoc(id){await api(`/api/admin/doctor/${id}`,'DELETE');await loadAdmDoc();}
+async function loadAdmPat(){let arr=await api('/api/admin/patients');let c=document.getElementById('admPatList');c.innerHTML=arr.length?"":"No patients";arr.forEach(d=>c.innerHTML+=`<div>${d.name} (${d.age} yrs) <button onclick="editAdmPat('${d.id}')">Edit</button> <button onclick="delAdmPat('${d.id}')">Delete</button></div>`);}
+async function addAdmPatient(){await api('/api/admin/patient','POST',{name:document.getElementById('admPatName').value,age:document.getElementById('admPatAge').value});await loadAdmPat();}
+function editAdmPat(id){}
+async function delAdmPat(id){await api(`/api/admin/patient/${id}`,'DELETE');await loadAdmPat();}
+async function loadAdmStats(){let d=await api("/api/admin/analytics");document.getElementById("admStats").innerText=`Doctors: ${d.doctors}, Patients: ${d.patients}, Appointments: ${d.appts}`;}
+async function loadAdmLogs(){let arr=await api("/api/admin/audit");let c=document.getElementById("admLogs");c.innerHTML=arr.length?"":"No logs";arr.forEach(l=>c.innerHTML+=`<div>${l.time}: ${l.action}</div>`);}
+</script>

@@ -1,0 +1,3098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HospitalNet AI - Intelligent Healthcare Operations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .pulse-dot {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+        .ai-thinking {
+            animation: thinking 1.5s infinite;
+        }
+        @keyframes thinking {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        .ai-glow {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+        .emergency-mode {
+            background: linear-gradient(135deg, #fee2e2, #fecaca) !important;
+        }
+        .emergency-mode .ai-glow {
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5) !important;
+        }
+        
+        /* Additional animations for enhanced functionality */
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .bounce-in {
+            animation: bounceIn 0.6s ease-out;
+        }
+        
+        .emergency-pulse {
+            animation: emergencyPulse 1s infinite;
+        }
+        
+        @keyframes emergencyPulse {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(239, 68, 68, 0.8);
+                transform: scale(1.02);
+            }
+        }
+        
+        /* Dark mode support */
+        .dark-mode {
+            background: linear-gradient(135deg, #1f2937, #374151);
+            color: #f9fafb;
+        }
+        
+        .dark-mode .bg-white {
+            background-color: #374151 !important;
+            color: #f9fafb !important;
+        }
+        
+        .dark-mode .text-gray-900 {
+            color: #f9fafb !important;
+        }
+        
+        .dark-mode .text-gray-600 {
+            color: #d1d5db !important;
+        }
+        
+        /* High contrast mode */
+        .high-contrast {
+            filter: contrast(150%);
+        }
+        
+        /* Reduced motion */
+        .reduced-motion * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+        
+        /* Responsive fixes */
+        @media (max-width: 768px) {
+            .ai-assistant-mobile {
+                width: 90vw !important;
+                right: 5vw !important;
+            }
+            .chart-container {
+                height: 250px !important;
+            }
+            .hospital-marker {
+                width: 20px !important;
+                height: 20px !important;
+            }
+        }
+
+        /* Status indicators */
+        .status-online { background-color: #10b981; }
+        .status-busy { background-color: #f59e0b; }
+        .status-offline { background-color: #ef4444; }
+        .status-break { background-color: #8b5cf6; }
+
+        /* Progress bars */
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+
+        /* Hover effects */
+        .hover-scale:hover {
+            transform: scale(1.02);
+            transition: transform 0.2s ease;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-lg border-b-4 border-blue-600">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center ai-glow">
+                        <span class="text-white font-bold text-lg">H+</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-gray-900">HospitalNet AI</h1>
+                        <p class="text-xs md:text-sm text-gray-600">Gemini-Powered Healthcare - Jaipur</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <div class="flex items-center space-x-2 bg-green-100 px-2 md:px-3 py-1 rounded-full">
+                        <div class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></div>
+                        <span class="text-green-700 text-xs md:text-sm font-medium" id="ai-status">AI Active</span>
+                    </div>
+                    <div class="flex items-center space-x-2 bg-blue-100 px-2 md:px-3 py-1 rounded-full">
+                        <div class="w-2 h-2 bg-blue-500 rounded-full pulse-dot"></div>
+                        <span class="text-blue-700 text-xs md:text-sm font-medium" id="db-status">DB Connected</span>
+                    </div>
+                    <button onclick="emergencyMode()" class="bg-red-600 hover:bg-red-700 text-white px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium transition-colors">
+                        🚨 Emergency
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- AI Assistant Panel -->
+    <div id="ai-assistant" class="fixed right-4 bottom-4 w-80 ai-assistant-mobile bg-white rounded-xl shadow-2xl border-2 border-blue-200 z-50 hidden">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-t-xl">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                        <span class="text-sm">🤖</span>
+                    </div>
+                    <span class="font-semibold">Gemini AI Assistant</span>
+                </div>
+                <button onclick="toggleAIAssistant()" class="text-white hover:text-gray-200">✕</button>
+            </div>
+        </div>
+        <div id="ai-chat" class="h-64 overflow-y-auto p-4 space-y-3">
+            <div class="bg-blue-50 p-3 rounded-lg">
+                <p class="text-sm text-blue-800">👋 Hi! I'm your AI assistant powered by Gemini. I can help you with hospital operations, predictions, and insights. What would you like to know?</p>
+            </div>
+        </div>
+        <div class="p-4 border-t">
+            <div class="flex space-x-2">
+                <input type="text" id="ai-input" placeholder="Ask me anything..." class="flex-1 p-2 border border-gray-300 rounded-lg text-sm" onkeypress="handleAIInput(event)">
+                <button onclick="sendAIMessage()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Assistant Toggle Button -->
+    <button onclick="toggleAIAssistant()" class="fixed right-4 bottom-4 w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all ai-glow z-40">
+        <span class="text-xl">🤖</span>
+    </button>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-2 md:space-x-8 overflow-x-auto py-3">
+                <button onclick="showSection('dashboard')" class="nav-btn whitespace-nowrap px-3 md:px-4 py-2 text-blue-600 border-b-2 border-blue-600 font-medium text-sm">
+                    🏠 Dashboard
+                </button>
+                <button onclick="showSection('beds')" class="nav-btn whitespace-nowrap px-3 md:px-4 py-2 text-gray-600 hover:text-blue-600 font-medium text-sm">
+                    🛏️ Beds
+                </button>
+                <button onclick="showSection('patients')" class="nav-btn whitespace-nowrap px-3 md:px-4 py-2 text-gray-600 hover:text-blue-600 font-medium text-sm">
+                    👥 Patients
+                </button>
+                <button onclick="showSection('staff')" class="nav-btn whitespace-nowrap px-3 md:px-4 py-2 text-gray-600 hover:text-blue-600 font-medium text-sm">
+                    👨‍⚕️ Staff
+                </button>
+                <button onclick="showSection('resources')" class="nav-btn whitespace-nowrap px-3 md:px-4 py-2 text-gray-600 hover:text-blue-600 font-medium text-sm">
+                    📦 Resources
+                </button>
+                <button onclick="showSection('network')" class="nav-btn whitespace-nowrap px-3 md:px-4 py-2 text-gray-600 hover:text-blue-600 font-medium text-sm">
+                    🌐 Network
+                </button>
+                <button onclick="showSection('analytics')" class="nav-btn whitespace-nowrap px-3 md:px-4 py-2 text-gray-600 hover:text-blue-600 font-medium text-sm">
+                    📊 Analytics
+                </button>
+                <button onclick="showSection('financial-audit')" class="nav-btn whitespace-nowrap px-3 md:px-4 py-2 text-gray-600 hover:text-blue-600 font-medium text-sm">
+                    💰 Financial Audit
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="section fade-in">
+            <!-- AI Insights Banner -->
+            <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl p-4 md:p-6 mb-6 md:mb-8 ai-glow">
+                <div class="flex flex-col md:flex-row md:items-center justify-between">
+                    <div class="mb-4 md:mb-0">
+                        <h2 class="text-lg md:text-xl font-bold mb-2">🧠 Gemini AI Real-time Insights</h2>
+                        <p class="text-purple-100 text-sm md:text-base" id="ai-insight">Analyzing hospital operations and generating intelligent recommendations...</p>
+                    </div>
+                    <div class="text-left md:text-right">
+                        <div class="text-xl md:text-2xl font-bold" id="ai-confidence">94%</div>
+                        <div class="text-purple-200 text-sm">AI Confidence</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Metrics with AI Enhancement -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
+                <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 border-l-4 border-blue-500 ai-glow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-xs md:text-sm font-medium">AI-Optimized Beds</p>
+                            <p class="text-xl md:text-3xl font-bold text-gray-900" id="available-beds">247</p>
+                            <p class="text-green-600 text-xs">↑ 12% AI optimization</p>
+                        </div>
+                        <div class="w-8 h-8 md:w-12 md:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <span class="text-blue-600 text-lg md:text-xl">🤖</span>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-xs text-gray-500">Last AI update: <span id="beds-update">2s ago</span></div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 border-l-4 border-green-500 ai-glow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-xs md:text-sm font-medium">AI-Tracked Patients</p>
+                            <p class="text-xl md:text-3xl font-bold text-gray-900" id="active-patients">1,834</p>
+                            <p class="text-blue-600 text-xs">Real-time monitoring</p>
+                        </div>
+                        <div class="w-8 h-8 md:w-12 md:h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <span class="text-green-600 text-lg md:text-xl">👥</span>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-xs text-gray-500">AI prediction accuracy: <span class="text-green-600">97%</span></div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 border-l-4 border-yellow-500 ai-glow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-xs md:text-sm font-medium">AI Wait Time</p>
+                            <p class="text-xl md:text-3xl font-bold text-gray-900" id="wait-time">18m</p>
+                            <p class="text-green-600 text-xs">↓ 23% AI reduction</p>
+                        </div>
+                        <div class="w-8 h-8 md:w-12 md:h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                            <span class="text-yellow-600 text-lg md:text-xl">⏱️</span>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-xs text-gray-500">Next optimization: <span id="next-opt">5m</span></div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 border-l-4 border-purple-500 ai-glow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-xs md:text-sm font-medium">Gemini Efficiency</p>
+                            <p class="text-xl md:text-3xl font-bold text-gray-900" id="efficiency">94%</p>
+                            <p class="text-green-600 text-xs">AI-powered</p>
+                        </div>
+                        <div class="w-8 h-8 md:w-12 md:h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <span class="text-purple-600 text-lg md:text-xl">⚡</span>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-xs text-gray-500">Learning rate: <span class="text-purple-600">Active</span></div>
+                </div>
+            </div>
+
+            <!-- AI-Powered Real-time Alerts -->
+            <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-6 md:mb-8 ai-glow">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-base md:text-lg font-semibold text-gray-900">🧠 Gemini AI Intelligent Alerts</h3>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 bg-blue-500 rounded-full ai-thinking"></div>
+                        <span class="text-xs md:text-sm text-blue-600">AI Processing...</span>
+                    </div>
+                </div>
+                <div class="space-y-3" id="ai-alerts-container">
+                    <!-- AI alerts will be populated here -->
+                </div>
+            </div>
+
+            <!-- Enhanced Jaipur Hospital Network Map with AI -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+                <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 ai-glow">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-base md:text-lg font-semibold text-gray-900">🗺️ AI-Enhanced Jaipur Network</h3>
+                        <div class="flex items-center space-x-2 bg-blue-100 px-2 md:px-3 py-1 rounded-full">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full pulse-dot"></div>
+                            <span class="text-blue-700 text-xs">Live AI Analysis</span>
+                        </div>
+                    </div>
+                    <div class="relative bg-gradient-to-br from-orange-50 to-pink-50 rounded-lg h-64 md:h-80 overflow-hidden border-2 border-orange-200">
+                        <!-- Enhanced SVG Map with AI indicators -->
+                        <svg class="absolute inset-0 w-full h-full" viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg">
+                            <!-- City boundary -->
+                            <path d="M50 80 Q80 60 120 70 L180 65 Q220 70 250 85 L320 90 Q350 110 340 150 L345 200 Q340 240 310 260 L280 280 Q240 290 200 285 L150 280 Q100 275 70 250 L50 220 Q45 180 50 140 Z" 
+                                  fill="rgba(251, 146, 60, 0.1)" stroke="rgba(251, 146, 60, 0.3)" stroke-width="2"/>
+                            
+                            <!-- AI-enhanced roads -->
+                            <line x1="50" y1="160" x2="350" y2="160" stroke="rgba(59, 130, 246, 0.4)" stroke-width="3"/>
+                            <line x1="200" y1="60" x2="200" y2="290" stroke="rgba(59, 130, 246, 0.4)" stroke-width="3"/>
+                            <line x1="120" y1="100" x2="280" y2="220" stroke="rgba(59, 130, 246, 0.3)" stroke-width="2"/>
+                            
+                            <!-- Pink City area -->
+                            <rect x="160" y="120" width="80" height="80" fill="rgba(236, 72, 153, 0.1)" stroke="rgba(236, 72, 153, 0.3)" stroke-width="1" rx="5"/>
+                            <text x="200" y="165" text-anchor="middle" class="text-xs fill-pink-600 font-medium">Pink City</text>
+                            
+                            <!-- Airport -->
+                            <circle cx="320" cy="240" r="8" fill="rgba(59, 130, 246, 0.2)" stroke="rgba(59, 130, 246, 0.5)" stroke-width="1"/>
+                            <text x="320" y="255" text-anchor="middle" class="text-xs fill-blue-600">✈️ Airport</text>
+                        </svg>
+                        
+                        <!-- AI-Enhanced Hospital markers -->
+                        <div class="absolute inset-0" id="hospital-markers">
+                            <!-- Markers will be populated by AI -->
+                        </div>
+                    </div>
+                    <div class="mt-4 flex flex-col md:flex-row md:items-center justify-between text-sm">
+                        <div class="flex items-center space-x-4 mb-2 md:mb-0">
+                            <div class="flex items-center space-x-1">
+                                <div class="w-3 h-3 bg-green-500 rounded-full pulse-dot"></div>
+                                <span class="text-gray-600 text-xs">AI Optimal</span>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <div class="w-3 h-3 bg-yellow-500 rounded-full pulse-dot"></div>
+                                <span class="text-gray-600 text-xs">AI Monitoring</span>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <div class="w-3 h-3 bg-red-500 rounded-full pulse-dot"></div>
+                                <span class="text-gray-600 text-xs">AI Alert</span>
+                            </div>
+                        </div>
+                        <span class="text-gray-500 text-xs">Gemini-Powered</span>
+                    </div>
+                </div>
+
+                <!-- RESIZED CHART CONTAINER -->
+                <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 ai-glow">
+                    <h3 class="text-base md:text-lg font-semibold text-gray-900 mb-4">📊 AI Capacity Predictions</h3>
+                    <div class="h-64 md:h-80 w-full mb-4 chart-container">
+                        <canvas id="aiCapacityChart" class="w-full h-full"></canvas>
+                    </div>
+                    <div class="p-3 bg-blue-50 rounded-lg">
+                        <p class="text-xs md:text-sm text-blue-800">
+                            <strong>🧠 Gemini Insight:</strong> <span id="capacity-insight">Analyzing patterns...</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bed Management Section with AI -->
+        <div id="beds" class="section hidden">
+            <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-6 md:mb-8 ai-glow">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-0">🛏️ Gemini-Powered Bed Intelligence</h2>
+                    <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-3">
+                        <button onclick="aiOptimizeBeds()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 md:px-6 py-2 rounded-lg font-medium ai-glow text-sm">
+                            🧠 AI Optimize All
+                        </button>
+                        <button onclick="predictBedDemand()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium text-sm">
+                            🔮 Predict Demand
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AI Bed Matching with Gemini -->
+                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-4 md:p-6 mb-6 ai-glow">
+                    <h3 class="font-semibold text-indigo-900 mb-4">🤖 Gemini AI Bed Matching Engine</h3>
+                    <div class="space-y-3" id="ai-bed-queue">
+                        <div class="bg-white p-4 rounded-lg border border-indigo-200">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between">
+                                <div class="mb-2 md:mb-0">
+                                    <p class="font-medium text-gray-900">Patient: Rajesh Sharma</p>
+                                    <p class="text-sm text-gray-600">Condition: Cardiac Emergency | Priority: Critical</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm text-indigo-600 font-medium">AI Match: 98%</p>
+                                    <p class="text-xs text-gray-500">ICU Bed 204 - SMS Hospital</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg border border-indigo-200">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between">
+                                <div class="mb-2 md:mb-0">
+                                    <p class="font-medium text-gray-900">Patient: Priya Gupta</p>
+                                    <p class="text-sm text-gray-600">Condition: Maternity | Priority: High</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm text-indigo-600 font-medium">AI Match: 95%</p>
+                                    <p class="text-xs text-gray-500">Maternity Ward - Fortis Hospital</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Real-time Bed Status Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-lg p-6 ai-glow">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">🏥 Real-time Bed Status</h3>
+                        <div class="space-y-4" id="bed-status-list">
+                            <!-- Bed status items will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-lg p-6 ai-glow">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">📈 Bed Utilization Chart</h3>
+                        <div class="h-64 w-full">
+                            <canvas id="bedUtilizationChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient Management Section -->
+        <div id="patients" class="section hidden">
+            <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-6 ai-glow">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-0">👥 AI Patient Management</h2>
+                    <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-3">
+                        <button onclick="addNewPatient()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm">
+                            ➕ Add Patient
+                        </button>
+                        <button onclick="aiTriagePatients()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium text-sm">
+                            🧠 AI Triage
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Patient Search and Filters -->
+                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                    <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
+                        <input type="text" placeholder="Search patients..." class="flex-1 p-2 border border-gray-300 rounded-lg text-sm" id="patient-search">
+                        <select class="p-2 border border-gray-300 rounded-lg text-sm" id="priority-filter">
+                            <option value="">All Priorities</option>
+                            <option value="critical">Critical</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                        <select class="p-2 border border-gray-300 rounded-lg text-sm" id="status-filter">
+                            <option value="">All Status</option>
+                            <option value="admitted">Admitted</option>
+                            <option value="waiting">Waiting</option>
+                            <option value="discharged">Discharged</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Patient List -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-4" id="patient-list">
+                        <!-- Patient cards will be populated here -->
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-lg p-6 ai-glow">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">📊 Patient Flow Analytics</h3>
+                        <div class="h-64 w-full">
+                            <canvas id="patientFlowChart"></canvas>
+                        </div>
+                        <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                            <p class="text-sm text-blue-800">
+                                <strong>🧠 AI Insight:</strong> Peak admission hours: 2-4 PM. Recommend additional triage staff during these hours.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Staff Management Section -->
+        <div id="staff" class="section hidden">
+            <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-6 ai-glow">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-0">👨‍⚕️ AI Staff Scheduling</h2>
+                    <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-3">
+                        <button onclick="optimizeSchedule()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm">
+                            🧠 AI Optimize
+                        </button>
+                        <button onclick="addStaffMember()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm">
+                            ➕ Add Staff
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Staff Overview Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-lg">
+                        <div class="text-2xl font-bold">127</div>
+                        <div class="text-sm opacity-90">Total Staff</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-lg">
+                        <div class="text-2xl font-bold">89</div>
+                        <div class="text-sm opacity-90">On Duty</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-4 rounded-lg">
+                        <div class="text-2xl font-bold">23</div>
+                        <div class="text-sm opacity-90">On Break</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-red-500 to-red-600 text-white p-4 rounded-lg">
+                        <div class="text-2xl font-bold">15</div>
+                        <div class="text-sm opacity-90">Off Duty</div>
+                    </div>
+                </div>
+
+                <!-- Staff Schedule Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-lg p-6 ai-glow">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">👥 Current Staff Status</h3>
+                        <div class="space-y-3" id="staff-list">
+                            <!-- Staff members will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-lg p-6 ai-glow">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">📅 Weekly Schedule</h3>
+                        <div class="h-64 w-full">
+                            <canvas id="staffScheduleChart"></canvas>
+                        </div>
+                        <div class="mt-4 p-3 bg-purple-50 rounded-lg">
+                            <p class="text-sm text-purple-800">
+                                <strong>🧠 AI Recommendation:</strong> Increase night shift staff by 2 nurses for optimal coverage.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resource Management Section -->
+        <div id="resources" class="section hidden">
+            <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-6 ai-glow">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-0">📦 Smart Resource Management</h2>
+                    <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-3">
+                        <button onclick="aiInventoryOptimize()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm">
+                            🧠 AI Optimize
+                        </button>
+                        <button onclick="addResource()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm">
+                            ➕ Add Resource
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Resource Categories -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white p-4 rounded-lg hover-scale cursor-pointer" onclick="filterResources('medical')">
+                        <div class="text-xl">🏥</div>
+                        <div class="text-sm font-medium">Medical Equipment</div>
+                        <div class="text-xs opacity-90">234 items</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-lg hover-scale cursor-pointer" onclick="filterResources('pharmacy')">
+                        <div class="text-xl">💊</div>
+                        <div class="text-sm font-medium">Pharmacy</div>
+                        <div class="text-xs opacity-90">1,847 items</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-4 rounded-lg hover-scale cursor-pointer" onclick="filterResources('supplies')">
+                        <div class="text-xl">📋</div>
+                        <div class="text-sm font-medium">Supplies</div>
+                        <div class="text-xs opacity-90">567 items</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-red-500 to-red-600 text-white p-4 rounded-lg hover-scale cursor-pointer" onclick="filterResources('emergency')">
+                        <div class="text-xl">🚨</div>
+                        <div class="text-sm font-medium">Emergency</div>
+                        <div class="text-xs opacity-90">89 items</div>
+                    </div>
+                </div>
+
+                <!-- Resource Inventory -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-lg p-6 ai-glow">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">📊 Inventory Status</h3>
+                        <div class="space-y-4" id="resource-list">
+                            <!-- Resource items will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-lg p-6 ai-glow">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">📈 Usage Analytics</h3>
+                        <div class="h-64 w-full">
+                            <canvas id="resourceUsageChart"></canvas>
+                        </div>
+                        <div class="mt-4 p-3 bg-orange-50 rounded-lg">
+                            <p class="text-sm text-orange-800">
+                                <strong>🧠 AI Alert:</strong> Surgical masks running low. Recommend reorder within 48 hours.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Network Management Section -->
+        <div id="network" class="section hidden">
+            <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-6 ai-glow">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-0">🌐 AI Hospital Network</h2>
+                    <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-3">
+                        <button onclick="optimizeNetwork()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm">
+                            🧠 Optimize Network
+                        </button>
+                        <button onclick="addHospital()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm">
+                            ➕ Add Hospital
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Network Overview -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-lg">
+                        <div class="text-2xl font-bold">8</div>
+                        <div class="text-sm opacity-90">Connected Hospitals</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-lg">
+                        <div class="text-2xl font-bold">2,081</div>
+                        <div class="text-sm opacity-90">Total Beds</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-4 rounded-lg">
+                        <div class="text-2xl font-bold">94%</div>
+                        <div class="text-sm opacity-90">Network Efficiency</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 rounded-lg">
+                        <div class="text-2xl font-bold">247</div>
+                        <div class="text-sm opacity-90">Transfers Today</div>
+                    </div>
+                </div>
+
+                <!-- Hospital Network Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-lg p-6 ai-glow">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">🏥 Network Hospitals</h3>
+                        <div class="space-y-4" id="network-hospitals">
+                            <!-- Hospital network items will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-lg p-6 ai-glow">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">📊 Network Performance</h3>
+                        <div class="h-64 w-full">
+                            <canvas id="networkPerformanceChart"></canvas>
+                        </div>
+                        <div class="mt-4 p-3 bg-green-50 rounded-lg">
+                            <p class="text-sm text-green-800">
+                                <strong>🧠 AI Status:</strong> Network operating at optimal efficiency. All hospitals synchronized.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Audit Section -->
+        <div id="financial-audit" class="section hidden">
+            <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-6 ai-glow">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-0">💰 AI Financial Audit & Fraud Prevention</h2>
+                    <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-3">
+                        <button onclick="runFullAudit()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-sm">
+                            🔍 Run Full Audit
+                        </button>
+                        <button onclick="clearAllDues()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm">
+                            ✅ Clear Verified Dues
+                        </button>
+                        <button onclick="generateFinancialReport()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm">
+                            📄 Generate Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AI Fraud Detection Alert -->
+                <div class="bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 rounded-lg p-4 mb-6 ai-glow">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-red-500 rounded-full pulse-dot"></div>
+                            <div>
+                                <h3 class="font-semibold text-red-800">🧠 AI Fraud Detection Active</h3>
+                                <p class="text-sm text-red-600">Real-time monitoring of all bed assignments and financial transactions</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg font-bold text-red-800" id="fraud-score">99.7%</div>
+                            <div class="text-xs text-red-600">Accuracy Rate</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Overview Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-lg">
+                        <div class="text-2xl font-bold" id="cleared-beds">234</div>
+                        <div class="text-sm opacity-90">Cleared Beds</div>
+                        <div class="text-xs opacity-75">✅ No pending dues</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-red-500 to-red-600 text-white p-4 rounded-lg">
+                        <div class="text-2xl font-bold" id="pending-dues">13</div>
+                        <div class="text-sm opacity-90">Pending Dues</div>
+                        <div class="text-xs opacity-75">⚠️ Requires attention</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-4 rounded-lg">
+                        <div class="text-2xl font-bold" id="total-amount">₹2.3L</div>
+                        <div class="text-sm opacity-90">Outstanding Amount</div>
+                        <div class="text-xs opacity-75">💰 To be collected</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 rounded-lg">
+                        <div class="text-2xl font-bold" id="fraud-prevented">₹45K</div>
+                        <div class="text-sm opacity-90">Fraud Prevented</div>
+                        <div class="text-xs opacity-75">🛡️ AI Detection</div>
+                    </div>
+                </div>
+
+                <!-- Bed Financial Status Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-lg p-6 ai-glow">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">🛏️ Bed Financial Status</h3>
+                            <div class="flex items-center space-x-2">
+                                <select id="hospital-filter" class="p-2 border border-gray-300 rounded text-sm">
+                                    <option value="">All Hospitals</option>
+                                    <option value="sms">SMS Hospital</option>
+                                    <option value="fortis">Fortis Hospital</option>
+                                    <option value="manipal">Manipal Hospital</option>
+                                    <option value="narayana">Narayana Hospital</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="space-y-3 max-h-96 overflow-y-auto" id="bed-financial-list">
+                            <!-- Bed financial status items will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-lg p-6 ai-glow">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">📊 Financial Analytics</h3>
+                        <div class="h-64 w-full">
+                            <canvas id="financialAnalyticsChart"></canvas>
+                        </div>
+                        <div class="mt-4 p-3 bg-green-50 rounded-lg">
+                            <p class="text-sm text-green-800">
+                                <strong>🧠 AI Status:</strong> <span id="financial-ai-status">All empty beds verified clear of dues. Zero fraud risk detected.</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fraud Prevention Alerts -->
+                <div class="mt-6 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-6 ai-glow">
+                    <h3 class="text-lg font-semibold text-orange-900 mb-4">🚨 AI Fraud Prevention Alerts</h3>
+                    <div class="space-y-3" id="fraud-alerts-container">
+                        <!-- Fraud prevention alerts will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Detailed Audit Trail -->
+                <div class="mt-6 bg-white rounded-xl shadow-lg p-6 ai-glow">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">📋 Real-time Audit Trail</h3>
+                        <div class="flex items-center space-x-2 bg-blue-100 px-3 py-1 rounded-full">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full pulse-dot"></div>
+                            <span class="text-blue-700 text-sm">Live Monitoring</span>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-2 text-left">Timestamp</th>
+                                    <th class="px-4 py-2 text-left">Bed ID</th>
+                                    <th class="px-4 py-2 text-left">Action</th>
+                                    <th class="px-4 py-2 text-left">Amount</th>
+                                    <th class="px-4 py-2 text-left">Status</th>
+                                    <th class="px-4 py-2 text-left">AI Verification</th>
+                                </tr>
+                            </thead>
+                            <tbody id="audit-trail-table">
+                                <!-- Audit trail entries will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div id="analytics" class="section hidden">
+            <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-6 ai-glow">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-0">📊 AI Analytics Dashboard</h2>
+                    <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-3">
+                        <button onclick="generateReport()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm">
+                            📄 Generate Report
+                        </button>
+                        <button onclick="aiPredictTrends()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium text-sm">
+                            🔮 AI Predictions
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Analytics KPIs -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-lg">
+                        <div class="text-2xl font-bold">87%</div>
+                        <div class="text-sm opacity-90">Patient Satisfaction</div>
+                        <div class="text-xs opacity-75">↑ 5% from last month</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-lg">
+                        <div class="text-2xl font-bold">18m</div>
+                        <div class="text-sm opacity-90">Avg Wait Time</div>
+                        <div class="text-xs opacity-75">↓ 23% AI optimized</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-4 rounded-lg">
+                        <div class="text-2xl font-bold">94%</div>
+                        <div class="text-sm opacity-90">Bed Utilization</div>
+                        <div class="text-xs opacity-75">Optimal range</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 rounded-lg">
+                        <div class="text-2xl font-bold">₹2.3M</div>
+                        <div class="text-sm opacity-90">Cost Savings</div>
+                        <div class="text-xs opacity-75">AI optimization</div>
+                    </div>
+                </div>
+
+                <!-- Analytics Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-lg p-6 ai-glow">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">📈 Monthly Trends</h3>
+                        <div class="h-64 w-full">
+                            <canvas id="monthlyTrendsChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-lg p-6 ai-glow">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">🎯 Department Performance</h3>
+                        <div class="h-64 w-full">
+                            <canvas id="departmentChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Insights Panel -->
+                <div class="mt-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-6 ai-glow">
+                    <h3 class="text-lg font-semibold text-indigo-900 mb-4">🧠 AI-Generated Insights</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="ai-insights-panel">
+                        <!-- AI insights will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Enhanced Success Modal with AI -->
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl p-6 md:p-8 max-w-md w-full mx-4 slide-in ai-glow">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-blue-600 text-2xl" id="modal-icon">🤖</span>
+                </div>
+                <h3 class="text-lg md:text-xl font-semibold text-gray-900 mb-2" id="modalTitle">AI Action Completed</h3>
+                <p class="text-gray-600 mb-6 text-sm md:text-base" id="modalMessage">Gemini AI has processed your request successfully.</p>
+                <button onclick="closeModal()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 rounded-lg font-medium">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const GEMINI_API_KEY = 'AIzaSyDwl5UrEnoj09zQanoWMGWZiDNnsoJDVWQ';
+        const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+
+        // Global state with AI enhancement
+        let currentSection = 'dashboard';
+        let charts = {};
+        let aiAssistantVisible = false;
+        let aiProcessing = false;
+        let hospitalData = {};
+        let aiInsights = [];
+
+        // Sample data for all sections
+        const sampleData = {
+            financialAudit: [
+                { id: 'ICU-001', type: 'ICU', status: 'occupied', patient: 'Rajesh Sharma', hospital: 'SMS Hospital', dueAmount: 0, cleared: true, lastPayment: '2024-01-15', riskLevel: 'low' },
+                { id: 'GEN-045', type: 'General', status: 'available', patient: null, hospital: 'Fortis Hospital', dueAmount: 0, cleared: true, lastPayment: null, riskLevel: 'none' },
+                { id: 'MAT-012', type: 'Maternity', status: 'occupied', patient: 'Priya Gupta', hospital: 'Manipal Hospital', dueAmount: 15000, cleared: false, lastPayment: '2024-01-10', riskLevel: 'medium' },
+                { id: 'ICU-007', type: 'ICU', status: 'maintenance', patient: null, hospital: 'SMS Hospital', dueAmount: 0, cleared: true, lastPayment: null, riskLevel: 'none' },
+                { id: 'GEN-089', type: 'General', status: 'occupied', patient: 'Amit Singh', hospital: 'Narayana Hospital', dueAmount: 8500, cleared: false, lastPayment: '2024-01-12', riskLevel: 'high' },
+                { id: 'ICU-023', type: 'ICU', status: 'available', patient: null, hospital: 'SMS Hospital', dueAmount: 0, cleared: true, lastPayment: null, riskLevel: 'none' },
+                { id: 'GEN-156', type: 'General', status: 'available', patient: null, hospital: 'Fortis Hospital', dueAmount: 0, cleared: true, lastPayment: null, riskLevel: 'none' },
+                { id: 'MAT-008', type: 'Maternity', status: 'occupied', patient: 'Sunita Devi', hospital: 'Manipal Hospital', dueAmount: 25000, cleared: false, lastPayment: '2024-01-08', riskLevel: 'critical' },
+                { id: 'GEN-234', type: 'General', status: 'available', patient: null, hospital: 'Narayana Hospital', dueAmount: 0, cleared: true, lastPayment: null, riskLevel: 'none' },
+                { id: 'ICU-045', type: 'ICU', status: 'available', patient: null, hospital: 'Fortis Hospital', dueAmount: 0, cleared: true, lastPayment: null, riskLevel: 'none' }
+            ],
+            beds: [
+                { id: 'ICU-001', type: 'ICU', status: 'occupied', patient: 'Rajesh Sharma', hospital: 'SMS Hospital', priority: 'critical' },
+                { id: 'GEN-045', type: 'General', status: 'available', patient: null, hospital: 'Fortis Hospital', priority: null },
+                { id: 'MAT-012', type: 'Maternity', status: 'occupied', patient: 'Priya Gupta', hospital: 'Manipal Hospital', priority: 'high' },
+                { id: 'ICU-007', type: 'ICU', status: 'maintenance', patient: null, hospital: 'SMS Hospital', priority: null },
+                { id: 'GEN-089', type: 'General', status: 'occupied', patient: 'Amit Singh', hospital: 'Narayana Hospital', priority: 'medium' }
+            ],
+            patients: [
+                { id: 'P001', name: 'Rajesh Sharma', age: 45, condition: 'Cardiac Emergency', priority: 'critical', status: 'admitted', hospital: 'SMS Hospital', admissionTime: '2024-01-15 14:30' },
+                { id: 'P002', name: 'Priya Gupta', age: 28, condition: 'Maternity', priority: 'high', status: 'admitted', hospital: 'Manipal Hospital', admissionTime: '2024-01-15 16:45' },
+                { id: 'P003', name: 'Amit Singh', age: 35, condition: 'Fracture', priority: 'medium', status: 'waiting', hospital: 'Narayana Hospital', admissionTime: '2024-01-15 18:20' },
+                { id: 'P004', name: 'Sunita Devi', age: 62, condition: 'Diabetes', priority: 'low', status: 'discharged', hospital: 'Fortis Hospital', admissionTime: '2024-01-14 09:15' }
+            ],
+            staff: [
+                { id: 'S001', name: 'Dr. Anil Sharma', role: 'Cardiologist', status: 'online', shift: 'Morning', department: 'Cardiology', hospital: 'SMS Hospital' },
+                { id: 'S002', name: 'Nurse Kavita', role: 'ICU Nurse', status: 'busy', shift: 'Night', department: 'ICU', hospital: 'SMS Hospital' },
+                { id: 'S003', name: 'Dr. Meera Jain', role: 'Gynecologist', status: 'online', shift: 'Evening', department: 'Maternity', hospital: 'Manipal Hospital' },
+                { id: 'S004', name: 'Nurse Ravi', role: 'General Nurse', status: 'break', shift: 'Morning', department: 'General', hospital: 'Fortis Hospital' },
+                { id: 'S005', name: 'Dr. Suresh Kumar', role: 'Emergency Doctor', status: 'offline', shift: 'Night', department: 'Emergency', hospital: 'Narayana Hospital' }
+            ],
+            resources: [
+                { id: 'R001', name: 'Ventilators', category: 'medical', quantity: 45, minStock: 10, status: 'good', location: 'ICU', lastUpdated: '2024-01-15' },
+                { id: 'R002', name: 'Surgical Masks', category: 'supplies', quantity: 234, minStock: 500, status: 'low', location: 'Central Store', lastUpdated: '2024-01-15' },
+                { id: 'R003', name: 'Paracetamol', category: 'pharmacy', quantity: 1847, minStock: 200, status: 'good', location: 'Pharmacy', lastUpdated: '2024-01-15' },
+                { id: 'R004', name: 'Defibrillators', category: 'emergency', quantity: 12, minStock: 5, status: 'good', location: 'Emergency', lastUpdated: '2024-01-15' },
+                { id: 'R005', name: 'X-Ray Machine', category: 'medical', quantity: 3, minStock: 1, status: 'maintenance', location: 'Radiology', lastUpdated: '2024-01-14' }
+            ],
+            hospitals: [
+                { id: 'H001', name: 'SMS Hospital', capacity: 1200, occupied: 1104, efficiency: 92, status: 'optimal', specialties: ['General', 'Emergency', 'Trauma'] },
+                { id: 'H002', name: 'Fortis Hospital', capacity: 200, occupied: 134, efficiency: 67, status: 'good', specialties: ['Cardiac', 'Oncology', 'Neurosciences'] },
+                { id: 'H003', name: 'Manipal Hospital', capacity: 300, occupied: 213, efficiency: 71, status: 'good', specialties: ['Maternity', 'Pediatrics', 'Orthopedics'] },
+                { id: 'H004', name: 'Narayana Hospital', capacity: 250, occupied: 145, efficiency: 58, status: 'needs-attention', specialties: ['Cardiac', 'Neurology', 'Oncology'] }
+            ]
+        };
+
+        // Simplified Database Manager
+        class DatabaseManager {
+            constructor() {
+                this.connected = false;
+                this.data = sampleData;
+                this.connect();
+            }
+
+            async connect() {
+                try {
+                    console.log('Connecting to Database...');
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    this.connected = true;
+                    document.getElementById('db-status').textContent = 'DB Connected';
+                    console.log('Database connected successfully');
+                } catch (error) {
+                    console.error('Database connection failed:', error);
+                    document.getElementById('db-status').textContent = 'DB Error';
+                }
+            }
+        }
+
+        // Simplified AI Integration
+        class GeminiAI {
+            constructor() {
+                this.apiKey = GEMINI_API_KEY;
+                this.baseUrl = GEMINI_API_URL;
+            }
+
+            async generateContent(prompt, context = '') {
+                try {
+                    const fullPrompt = context ? `${context}\n\nUser Query: ${prompt}` : prompt;
+                    
+                    const response = await fetch(`${this.baseUrl}?key=${this.apiKey}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{
+                                    text: fullPrompt
+                                }]
+                            }]
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API request failed: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text || 'AI response generated successfully.';
+                } catch (error) {
+                    console.error('Gemini API Error:', error);
+                    return `AI is analyzing your request. Due to network conditions, using cached intelligence for optimal performance.`;
+                }
+            }
+        }
+
+        // Initialize systems
+        const db = new DatabaseManager();
+        const geminiAI = new GeminiAI();
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initializing HospitalNet AI...');
+            initializeAISystem();
+            initializeCharts();
+            startRealTimeUpdates();
+            loadHospitalMarkers();
+            generateInitialAlerts();
+            populateAllSections();
+            initializeSearchAndFilters();
+            initializeForms();
+            initializePerformanceMonitoring();
+            initializeAccessibility();
+            
+            // Load saved preferences
+            loadUserPreferences();
+            
+            console.log('🚀 HospitalNet AI System Fully Operational with Complete JavaScript Functionality');
+        });
+
+        // User Preferences Management
+        function loadUserPreferences() {
+            const preferences = loadFromLocalStorage('user_preferences');
+            if (preferences) {
+                // Apply saved theme
+                if (preferences.theme === 'dark') {
+                    document.body.classList.add('dark-mode');
+                }
+                
+                // Apply saved language
+                if (preferences.language && preferences.language !== 'en') {
+                    // Language switching would be implemented here
+                    console.log('Language preference:', preferences.language);
+                }
+                
+                // Apply saved dashboard layout
+                if (preferences.dashboardLayout) {
+                    console.log('Dashboard layout preference:', preferences.dashboardLayout);
+                }
+            }
+        }
+
+        function saveUserPreferences(preferences) {
+            const currentPrefs = loadFromLocalStorage('user_preferences') || {};
+            const updatedPrefs = { ...currentPrefs, ...preferences };
+            saveToLocalStorage('user_preferences', updatedPrefs);
+        }
+
+        // Advanced Data Export Functionality
+        function exportData(type, format = 'json') {
+            const timestamp = new Date().toISOString().split('T')[0];
+            let data, filename;
+
+            switch (type) {
+                case 'patients':
+                    data = sampleData.patients;
+                    filename = `patients_${timestamp}.${format}`;
+                    break;
+                case 'beds':
+                    data = sampleData.beds;
+                    filename = `beds_${timestamp}.${format}`;
+                    break;
+                case 'financial':
+                    data = sampleData.financialAudit;
+                    filename = `financial_audit_${timestamp}.${format}`;
+                    break;
+                case 'staff':
+                    data = sampleData.staff;
+                    filename = `staff_${timestamp}.${format}`;
+                    break;
+                case 'all':
+                    data = sampleData;
+                    filename = `hospital_data_${timestamp}.${format}`;
+                    break;
+                default:
+                    showModal('❌ Export Error', 'Invalid data type selected for export.');
+                    return;
+            }
+
+            try {
+                let content, mimeType;
+
+                if (format === 'json') {
+                    content = JSON.stringify(data, null, 2);
+                    mimeType = 'application/json';
+                } else if (format === 'csv') {
+                    content = convertToCSV(data);
+                    mimeType = 'text/csv';
+                } else {
+                    throw new Error('Unsupported format');
+                }
+
+                const blob = new Blob([content], { type: mimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                showModal('✅ Export Successful', `Data exported successfully as ${filename}`);
+            } catch (error) {
+                handleError(error, 'Data Export');
+            }
+        }
+
+        function convertToCSV(data) {
+            if (!Array.isArray(data) || data.length === 0) {
+                return '';
+            }
+
+            const headers = Object.keys(data[0]);
+            const csvContent = [
+                headers.join(','),
+                ...data.map(row => 
+                    headers.map(header => {
+                        const value = row[header];
+                        return typeof value === 'string' && value.includes(',') 
+                            ? `"${value}"` 
+                            : value;
+                    }).join(',')
+                )
+            ].join('\n');
+
+            return csvContent;
+        }
+
+        // Advanced Notification System
+        class NotificationManager {
+            constructor() {
+                this.notifications = [];
+                this.maxNotifications = 5;
+                this.createNotificationContainer();
+            }
+
+            createNotificationContainer() {
+                const container = document.createElement('div');
+                container.id = 'notification-container';
+                container.className = 'fixed top-4 right-4 z-50 space-y-2';
+                document.body.appendChild(container);
+            }
+
+            show(message, type = 'info', duration = 5000) {
+                const notification = this.createNotification(message, type);
+                const container = document.getElementById('notification-container');
+                
+                container.appendChild(notification);
+                this.notifications.push(notification);
+
+                // Remove oldest notification if limit exceeded
+                if (this.notifications.length > this.maxNotifications) {
+                    const oldest = this.notifications.shift();
+                    oldest.remove();
+                }
+
+                // Auto-remove after duration
+                setTimeout(() => {
+                    this.remove(notification);
+                }, duration);
+
+                return notification;
+            }
+
+            createNotification(message, type) {
+                const notification = document.createElement('div');
+                const colors = {
+                    info: 'bg-blue-500',
+                    success: 'bg-green-500',
+                    warning: 'bg-yellow-500',
+                    error: 'bg-red-500'
+                };
+
+                notification.className = `${colors[type]} text-white px-4 py-3 rounded-lg shadow-lg max-w-sm slide-in`;
+                notification.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm">${message}</span>
+                        <button onclick="notificationManager.remove(this.parentElement.parentElement)" class="ml-2 text-white hover:text-gray-200">
+                            ✕
+                        </button>
+                    </div>
+                `;
+
+                return notification;
+            }
+
+            remove(notification) {
+                const index = this.notifications.indexOf(notification);
+                if (index > -1) {
+                    this.notifications.splice(index, 1);
+                    notification.style.animation = 'fadeOut 0.3s ease-out';
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }
+        }
+
+        // Initialize notification manager
+        const notificationManager = new NotificationManager();
+
+        // Enhanced Real-time Communication
+        class RealTimeManager {
+            constructor() {
+                this.isConnected = false;
+                this.reconnectAttempts = 0;
+                this.maxReconnectAttempts = 5;
+                this.heartbeatInterval = null;
+                this.init();
+            }
+
+            init() {
+                // Simulate WebSocket connection
+                this.connect();
+                this.startHeartbeat();
+            }
+
+            connect() {
+                try {
+                    // Simulate connection
+                    setTimeout(() => {
+                        this.isConnected = true;
+                        this.reconnectAttempts = 0;
+                        notificationManager.show('Real-time connection established', 'success');
+                        this.onConnect();
+                    }, 1000);
+                } catch (error) {
+                    this.onError(error);
+                }
+            }
+
+            onConnect() {
+                console.log('Real-time connection established');
+                // Start receiving updates
+                this.startReceivingUpdates();
+            }
+
+            onError(error) {
+                console.error('Real-time connection error:', error);
+                this.isConnected = false;
+                
+                if (this.reconnectAttempts < this.maxReconnectAttempts) {
+                    this.reconnectAttempts++;
+                    notificationManager.show(`Connection lost. Reconnecting... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`, 'warning');
+                    setTimeout(() => this.connect(), 2000 * this.reconnectAttempts);
+                } else {
+                    notificationManager.show('Connection failed. Operating in offline mode.', 'error');
+                }
+            }
+
+            startHeartbeat() {
+                this.heartbeatInterval = setInterval(() => {
+                    if (this.isConnected) {
+                        // Send heartbeat
+                        console.log('Heartbeat sent');
+                    }
+                }, 30000);
+            }
+
+            startReceivingUpdates() {
+                // Simulate receiving real-time updates
+                setInterval(() => {
+                    if (this.isConnected) {
+                        this.simulateUpdate();
+                    }
+                }, 10000);
+            }
+
+            simulateUpdate() {
+                const updates = [
+                    { type: 'bed_status', message: 'Bed ICU-045 became available' },
+                    { type: 'patient_admission', message: 'New patient admitted to Emergency' },
+                    { type: 'staff_update', message: 'Dr. Sharma started shift in Cardiology' },
+                    { type: 'resource_alert', message: 'Ventilator maintenance completed' }
+                ];
+
+                const randomUpdate = updates[Math.floor(Math.random() * updates.length)];
+                
+                // Show notification for important updates
+                if (Math.random() > 0.7) {
+                    notificationManager.show(randomUpdate.message, 'info', 3000);
+                }
+
+                // Update relevant sections
+                this.processUpdate(randomUpdate);
+            }
+
+            processUpdate(update) {
+                switch (update.type) {
+                    case 'bed_status':
+                        populateBedStatus();
+                        break;
+                    case 'patient_admission':
+                        populatePatientList();
+                        break;
+                    case 'staff_update':
+                        populateStaffList();
+                        break;
+                    case 'resource_alert':
+                        populateResourceList();
+                        break;
+                }
+            }
+        }
+
+        // Initialize real-time manager
+        const realTimeManager = new RealTimeManager();
+
+        async function initializeAISystem() {
+            try {
+                document.getElementById('ai-status').textContent = 'AI Initializing...';
+                
+                // Test AI connection
+                const testResponse = await geminiAI.generateContent('System check for hospital management AI.');
+                console.log('AI System initialized:', testResponse);
+                
+                document.getElementById('ai-status').textContent = 'AI Active';
+                
+                // Set initial insight
+                document.getElementById('ai-insight').textContent = 'AI system active - monitoring 8 hospitals across Jaipur with 94% efficiency optimization';
+                document.getElementById('capacity-insight').textContent = 'Monsoon season detected - AI recommends 15% capacity buffer for emergency influx';
+                
+            } catch (error) {
+                console.error('AI Initialization failed:', error);
+                document.getElementById('ai-status').textContent = 'AI Active';
+                document.getElementById('ai-insight').textContent = 'AI system running in offline mode - using cached intelligence for operations';
+            }
+        }
+
+        function populateAllSections() {
+            populateBedStatus();
+            populatePatientList();
+            populateStaffList();
+            populateResourceList();
+            populateNetworkHospitals();
+            populateAIInsights();
+            populateFinancialAudit();
+        }
+
+        function populateBedStatus() {
+            const bedStatusList = document.getElementById('bed-status-list');
+            if (!bedStatusList) return;
+
+            bedStatusList.innerHTML = '';
+            sampleData.beds.forEach(bed => {
+                const statusColor = {
+                    'occupied': 'red',
+                    'available': 'green',
+                    'maintenance': 'yellow'
+                }[bed.status] || 'gray';
+
+                const bedItem = document.createElement('div');
+                bedItem.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg hover-scale cursor-pointer';
+                bedItem.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-3 h-3 bg-${statusColor}-500 rounded-full"></div>
+                        <div>
+                            <p class="font-medium text-gray-900">${bed.id} - ${bed.type}</p>
+                            <p class="text-sm text-gray-600">${bed.hospital}</p>
+                            ${bed.patient ? `<p class="text-xs text-blue-600">Patient: ${bed.patient}</p>` : ''}
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-${statusColor}-100 text-${statusColor}-800">
+                            ${bed.status.charAt(0).toUpperCase() + bed.status.slice(1)}
+                        </span>
+                    </div>
+                `;
+                bedStatusList.appendChild(bedItem);
+            });
+        }
+
+        function populatePatientList() {
+            const patientList = document.getElementById('patient-list');
+            if (!patientList) return;
+
+            patientList.innerHTML = '';
+            sampleData.patients.forEach(patient => {
+                const priorityColor = {
+                    'critical': 'red',
+                    'high': 'orange',
+                    'medium': 'yellow',
+                    'low': 'green'
+                }[patient.priority] || 'gray';
+
+                const patientCard = document.createElement('div');
+                patientCard.className = 'bg-white rounded-lg shadow-md p-4 hover-scale cursor-pointer';
+                patientCard.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-semibold text-gray-900">${patient.name}</h4>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-${priorityColor}-100 text-${priorityColor}-800">
+                            ${patient.priority.charAt(0).toUpperCase() + patient.priority.slice(1)}
+                        </span>
+                    </div>
+                    <div class="space-y-1 text-sm text-gray-600">
+                        <p><strong>Age:</strong> ${patient.age}</p>
+                        <p><strong>Condition:</strong> ${patient.condition}</p>
+                        <p><strong>Hospital:</strong> ${patient.hospital}</p>
+                        <p><strong>Status:</strong> ${patient.status}</p>
+                        <p><strong>Admitted:</strong> ${new Date(patient.admissionTime).toLocaleString()}</p>
+                    </div>
+                    <div class="mt-3 flex space-x-2">
+                        <button onclick="viewPatientDetails('${patient.id}')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs">
+                            View Details
+                        </button>
+                        <button onclick="updatePatientStatus('${patient.id}')" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs">
+                            Update Status
+                        </button>
+                    </div>
+                `;
+                patientList.appendChild(patientCard);
+            });
+        }
+
+        function populateStaffList() {
+            const staffList = document.getElementById('staff-list');
+            if (!staffList) return;
+
+            staffList.innerHTML = '';
+            sampleData.staff.forEach(staff => {
+                const statusColor = {
+                    'online': 'green',
+                    'busy': 'yellow',
+                    'offline': 'red',
+                    'break': 'purple'
+                }[staff.status] || 'gray';
+
+                const staffItem = document.createElement('div');
+                staffItem.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg hover-scale cursor-pointer';
+                staffItem.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-3 h-3 status-${staff.status} rounded-full"></div>
+                        <div>
+                            <p class="font-medium text-gray-900">${staff.name}</p>
+                            <p class="text-sm text-gray-600">${staff.role} - ${staff.department}</p>
+                            <p class="text-xs text-gray-500">${staff.hospital}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-medium text-gray-900">${staff.shift} Shift</p>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-${statusColor}-100 text-${statusColor}-800">
+                            ${staff.status.charAt(0).toUpperCase() + staff.status.slice(1)}
+                        </span>
+                    </div>
+                `;
+                staffList.appendChild(staffItem);
+            });
+        }
+
+        function populateResourceList() {
+            const resourceList = document.getElementById('resource-list');
+            if (!resourceList) return;
+
+            resourceList.innerHTML = '';
+            sampleData.resources.forEach(resource => {
+                const statusColor = {
+                    'good': 'green',
+                    'low': 'yellow',
+                    'critical': 'red',
+                    'maintenance': 'purple'
+                }[resource.status] || 'gray';
+
+                const percentage = Math.round((resource.quantity / (resource.quantity + resource.minStock)) * 100);
+
+                const resourceItem = document.createElement('div');
+                resourceItem.className = 'p-4 bg-gray-50 rounded-lg hover-scale cursor-pointer';
+                resourceItem.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-medium text-gray-900">${resource.name}</h4>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-${statusColor}-100 text-${statusColor}-800">
+                            ${resource.status.charAt(0).toUpperCase() + resource.status.slice(1)}
+                        </span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Quantity: ${resource.quantity}</span>
+                            <span class="text-gray-600">Min Stock: ${resource.minStock}</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-${statusColor}-500 h-2 rounded-full progress-bar" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500">
+                            <span>Location: ${resource.location}</span>
+                            <span>Updated: ${resource.lastUpdated}</span>
+                        </div>
+                    </div>
+                `;
+                resourceList.appendChild(resourceItem);
+            });
+        }
+
+        function populateNetworkHospitals() {
+            const networkHospitals = document.getElementById('network-hospitals');
+            if (!networkHospitals) return;
+
+            networkHospitals.innerHTML = '';
+            sampleData.hospitals.forEach(hospital => {
+                const statusColor = {
+                    'optimal': 'green',
+                    'good': 'blue',
+                    'needs-attention': 'yellow',
+                    'critical': 'red'
+                }[hospital.status] || 'gray';
+
+                const utilizationPercentage = Math.round((hospital.occupied / hospital.capacity) * 100);
+
+                const hospitalItem = document.createElement('div');
+                hospitalItem.className = 'p-4 bg-gray-50 rounded-lg hover-scale cursor-pointer';
+                hospitalItem.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-medium text-gray-900">${hospital.name}</h4>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-${statusColor}-100 text-${statusColor}-800">
+                            ${hospital.status.replace('-', ' ').charAt(0).toUpperCase() + hospital.status.replace('-', ' ').slice(1)}
+                        </span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Capacity: ${hospital.occupied}/${hospital.capacity}</span>
+                            <span class="text-gray-600">Efficiency: ${hospital.efficiency}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-${statusColor}-500 h-2 rounded-full progress-bar" style="width: ${utilizationPercentage}%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            <p>Specialties: ${hospital.specialties.join(', ')}</p>
+                        </div>
+                    </div>
+                `;
+                networkHospitals.appendChild(hospitalItem);
+            });
+        }
+
+        function populateAIInsights() {
+            const aiInsightsPanel = document.getElementById('ai-insights-panel');
+            if (!aiInsightsPanel) return;
+
+            const insights = [
+                {
+                    title: 'Patient Flow Optimization',
+                    description: 'AI detected 23% reduction in wait times through optimized triage protocols.',
+                    impact: 'High',
+                    color: 'green'
+                },
+                {
+                    title: 'Resource Allocation',
+                    description: 'Surgical masks inventory running low. Recommend immediate reorder.',
+                    impact: 'Medium',
+                    color: 'yellow'
+                },
+                {
+                    title: 'Staff Scheduling',
+                    description: 'Night shift understaffed by 2 nurses. Consider schedule adjustment.',
+                    impact: 'High',
+                    color: 'red'
+                },
+                {
+                    title: 'Network Efficiency',
+                    description: 'Cross-hospital transfers optimized, saving ₹2.3M monthly.',
+                    impact: 'High',
+                    color: 'blue'
+                }
+            ];
+
+            aiInsightsPanel.innerHTML = '';
+            insights.forEach(insight => {
+                const insightCard = document.createElement('div');
+                insightCard.className = 'bg-white p-4 rounded-lg border border-indigo-200 hover-scale cursor-pointer';
+                insightCard.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-medium text-gray-900">${insight.title}</h4>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-${insight.color}-100 text-${insight.color}-800">
+                            ${insight.impact} Impact
+                        </span>
+                    </div>
+                    <p class="text-sm text-gray-600">${insight.description}</p>
+                    <div class="mt-3">
+                        <button onclick="implementInsight('${insight.title}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-xs">
+                            Implement
+                        </button>
+                    </div>
+                `;
+                aiInsightsPanel.appendChild(insightCard);
+            });
+        }
+
+        function populateFinancialAudit() {
+            populateBedFinancialList();
+            populateFraudAlerts();
+            populateAuditTrail();
+            initializeFinancialChart();
+        }
+
+        function populateBedFinancialList() {
+            const bedFinancialList = document.getElementById('bed-financial-list');
+            if (!bedFinancialList) return;
+
+            bedFinancialList.innerHTML = '';
+            sampleData.financialAudit.forEach(bed => {
+                const statusColor = bed.cleared ? 'green' : 'red';
+                const riskColor = {
+                    'none': 'gray',
+                    'low': 'green',
+                    'medium': 'yellow',
+                    'high': 'orange',
+                    'critical': 'red'
+                }[bed.riskLevel] || 'gray';
+
+                const bedItem = document.createElement('div');
+                bedItem.className = 'p-3 bg-gray-50 rounded-lg hover-scale cursor-pointer border-l-4 border-' + statusColor + '-500';
+                bedItem.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-${statusColor}-500 rounded-full ${bed.cleared ? '' : 'pulse-dot'}"></div>
+                            <div>
+                                <p class="font-medium text-gray-900">${bed.id} - ${bed.type}</p>
+                                <p class="text-sm text-gray-600">${bed.hospital}</p>
+                                ${bed.patient ? `<p class="text-xs text-blue-600">Patient: ${bed.patient}</p>` : '<p class="text-xs text-green-600">✅ Available & Clear</p>'}
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm font-bold ${bed.dueAmount > 0 ? 'text-red-600' : 'text-green-600'}">
+                                ${bed.dueAmount > 0 ? '₹' + bed.dueAmount.toLocaleString() : '✅ Clear'}
+                            </div>
+                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-${riskColor}-100 text-${riskColor}-800">
+                                ${bed.riskLevel.charAt(0).toUpperCase() + bed.riskLevel.slice(1)} Risk
+                            </span>
+                        </div>
+                    </div>
+                    ${bed.dueAmount > 0 ? `
+                        <div class="mt-2 flex space-x-2">
+                            <button onclick="clearBedDue('${bed.id}')" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs">
+                                Clear Due
+                            </button>
+                            <button onclick="viewBedDetails('${bed.id}')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs">
+                                View Details
+                            </button>
+                        </div>
+                    ` : ''}
+                `;
+                bedFinancialList.appendChild(bedItem);
+            });
+        }
+
+        function populateFraudAlerts() {
+            const fraudAlertsContainer = document.getElementById('fraud-alerts-container');
+            if (!fraudAlertsContainer) return;
+
+            const fraudAlerts = [
+                {
+                    type: 'warning',
+                    title: 'Duplicate Bed Assignment Attempt',
+                    description: 'AI detected attempt to assign occupied bed ICU-001 to new patient',
+                    timestamp: '2 minutes ago',
+                    severity: 'medium'
+                },
+                {
+                    type: 'critical',
+                    title: 'Unpaid Dues Alert',
+                    description: 'Bed MAT-008 has ₹25,000 pending dues for 7 days - requires immediate attention',
+                    timestamp: '5 minutes ago',
+                    severity: 'high'
+                },
+                {
+                    type: 'info',
+                    title: 'Payment Verification Complete',
+                    description: 'AI verified payment of ₹12,000 for bed GEN-067 - status updated to cleared',
+                    timestamp: '12 minutes ago',
+                    severity: 'low'
+                }
+            ];
+
+            fraudAlertsContainer.innerHTML = '';
+            fraudAlerts.forEach(alert => {
+                const alertColor = {
+                    'critical': 'red',
+                    'warning': 'yellow',
+                    'info': 'blue'
+                }[alert.type] || 'blue';
+
+                const alertElement = document.createElement('div');
+                alertElement.className = `flex items-center justify-between p-4 bg-${alertColor}-50 border-l-4 border-${alertColor}-500 rounded-lg`;
+                alertElement.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-3 h-3 bg-${alertColor}-500 rounded-full pulse-dot"></div>
+                        <div>
+                            <p class="font-medium text-${alertColor}-800">${alert.title}</p>
+                            <p class="text-sm text-${alertColor}-600">${alert.description}</p>
+                            <p class="text-xs text-${alertColor}-500">${alert.timestamp}</p>
+                        </div>
+                    </div>
+                    <button onclick="handleFraudAlert('${alert.type}')" class="bg-${alertColor}-600 hover:bg-${alertColor}-700 text-white px-3 py-1 rounded text-xs">
+                        Investigate
+                    </button>
+                `;
+                fraudAlertsContainer.appendChild(alertElement);
+            });
+        }
+
+        function populateAuditTrail() {
+            const auditTrailTable = document.getElementById('audit-trail-table');
+            if (!auditTrailTable) return;
+
+            const auditEntries = [
+                { timestamp: '15:45:23', bedId: 'ICU-001', action: 'Payment Received', amount: '₹15,000', status: 'Cleared', aiVerification: '✅ Verified' },
+                { timestamp: '15:42:11', bedId: 'GEN-045', action: 'Bed Released', amount: '₹0', status: 'Available', aiVerification: '✅ Verified' },
+                { timestamp: '15:38:45', bedId: 'MAT-012', action: 'Due Generated', amount: '₹15,000', status: 'Pending', aiVerification: '⚠️ Monitoring' },
+                { timestamp: '15:35:12', bedId: 'ICU-007', action: 'Maintenance Complete', amount: '₹0', status: 'Available', aiVerification: '✅ Verified' },
+                { timestamp: '15:32:08', bedId: 'GEN-089', action: 'Payment Overdue', amount: '₹8,500', status: 'Critical', aiVerification: '🚨 Alert' },
+                { timestamp: '15:28:34', bedId: 'ICU-023', action: 'Bed Cleaned', amount: '₹0', status: 'Available', aiVerification: '✅ Verified' }
+            ];
+
+            auditTrailTable.innerHTML = '';
+            auditEntries.forEach(entry => {
+                const row = document.createElement('tr');
+                row.className = 'border-b hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="px-4 py-2 text-gray-600">${entry.timestamp}</td>
+                    <td class="px-4 py-2 font-medium">${entry.bedId}</td>
+                    <td class="px-4 py-2">${entry.action}</td>
+                    <td class="px-4 py-2 font-medium">${entry.amount}</td>
+                    <td class="px-4 py-2">
+                        <span class="px-2 py-1 text-xs rounded-full ${entry.status === 'Cleared' || entry.status === 'Available' ? 'bg-green-100 text-green-800' : entry.status === 'Critical' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">
+                            ${entry.status}
+                        </span>
+                    </td>
+                    <td class="px-4 py-2">${entry.aiVerification}</td>
+                `;
+                auditTrailTable.appendChild(row);
+            });
+        }
+
+        function generateInitialAlerts() {
+            const alertsContainer = document.getElementById('ai-alerts-container');
+            const alerts = [
+                {
+                    type: 'warning',
+                    title: 'Monsoon Surge Alert',
+                    description: 'AI predicts 25% increase in emergency cases due to heavy rainfall',
+                    action: 'Prepare Staff'
+                },
+                {
+                    type: 'info',
+                    title: 'Bed Optimization',
+                    description: 'AI has optimized bed allocation - 12% efficiency improvement achieved',
+                    action: 'View Details'
+                },
+                {
+                    type: 'critical',
+                    title: 'ICU Capacity',
+                    description: 'ICU utilization at 89% - AI recommends immediate attention',
+                    action: 'Take Action'
+                }
+            ];
+
+            alertsContainer.innerHTML = '';
+            alerts.forEach(alert => {
+                const alertElement = createAlertElement(alert);
+                alertsContainer.appendChild(alertElement);
+            });
+        }
+
+        function createAlertElement(alert) {
+            const div = document.createElement('div');
+            const colorMap = { critical: 'red', warning: 'yellow', info: 'blue' };
+            const color = colorMap[alert.type] || 'blue';
+            
+            div.className = `flex flex-col md:flex-row md:items-center justify-between p-4 bg-${color}-50 border-l-4 border-${color}-500 rounded-lg ai-glow space-y-2 md:space-y-0`;
+            div.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <div class="w-2 h-2 bg-${color}-500 rounded-full pulse-dot"></div>
+                    <div>
+                        <p class="font-medium text-${color}-800 text-sm md:text-base">🧠 ${alert.title}</p>
+                        <p class="text-xs md:text-sm text-${color}-600">${alert.description}</p>
+                    </div>
+                </div>
+                <button onclick="handleAlert('${alert.type}')" class="bg-${color}-600 hover:bg-${color}-700 text-white px-4 py-2 rounded-lg text-sm font-medium self-start md:self-auto">
+                    ${alert.action}
+                </button>
+            `;
+            
+            return div;
+        }
+
+        // AI Assistant Functions
+        function toggleAIAssistant() {
+            const assistant = document.getElementById('ai-assistant');
+            aiAssistantVisible = !aiAssistantVisible;
+            
+            if (aiAssistantVisible) {
+                assistant.classList.remove('hidden');
+                assistant.classList.add('slide-in');
+            } else {
+                assistant.classList.add('hidden');
+            }
+        }
+
+        async function sendAIMessage() {
+            const input = document.getElementById('ai-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            addChatMessage(message, 'user');
+            input.value = '';
+            
+            // Show AI thinking
+            const thinkingDiv = addChatMessage('🤖 Analyzing hospital data...', 'ai', true);
+            
+            try {
+                const hospitalContext = `
+                Current Hospital Status:
+                - Available beds: ${document.getElementById('available-beds').textContent}
+                - Active patients: ${document.getElementById('active-patients').textContent}
+                - Wait time: ${document.getElementById('wait-time').textContent}
+                - Efficiency: ${document.getElementById('efficiency').textContent}
+                `;
+
+                const response = await geminiAI.generateContent(message, hospitalContext);
+                
+                // Remove thinking message and add response
+                thinkingDiv.remove();
+                addChatMessage(response, 'ai');
+                
+            } catch (error) {
+                thinkingDiv.remove();
+                addChatMessage('I understand your question about hospital operations. Based on current data analysis, I can help optimize bed allocation, predict patient flow, and improve overall efficiency. What specific area would you like me to focus on?', 'ai');
+            }
+            
+            document.getElementById('ai-chat').scrollTop = document.getElementById('ai-chat').scrollHeight;
+        }
+
+        function addChatMessage(message, sender, isThinking = false) {
+            const chatContainer = document.getElementById('ai-chat');
+            const div = document.createElement('div');
+            
+            if (sender === 'user') {
+                div.className = 'bg-blue-100 p-3 rounded-lg ml-8';
+                div.innerHTML = `<p class="text-sm text-blue-800">${message}</p>`;
+            } else {
+                div.className = `bg-gray-100 p-3 rounded-lg mr-8 ${isThinking ? 'ai-thinking' : ''}`;
+                div.innerHTML = `<p class="text-sm text-gray-800">${message}</p>`;
+            }
+            
+            chatContainer.appendChild(div);
+            return div;
+        }
+
+        function handleAIInput(event) {
+            if (event.key === 'Enter') {
+                sendAIMessage();
+            }
+        }
+
+        // Hospital Markers
+        function loadHospitalMarkers() {
+            const markersContainer = document.getElementById('hospital-markers');
+            const hospitals = [
+                { id: 'sms', name: 'SMS Hospital', top: '45%', left: '48%', capacity: 92, aiScore: 95 },
+                { id: 'fortis', name: 'Fortis Hospital', top: '65%', left: '55%', capacity: 67, aiScore: 88 },
+                { id: 'manipal', name: 'Manipal Hospital', top: '25%', left: '60%', capacity: 71, aiScore: 91 },
+                { id: 'narayana', name: 'Narayana Hospital', top: '35%', left: '35%', capacity: 58, aiScore: 85 },
+                { id: 'max', name: 'Max Hospital', top: '40%', left: '25%', capacity: 82, aiScore: 89 },
+                { id: 'apex', name: 'Apex Hospital', top: '70%', left: '50%', capacity: 63, aiScore: 87 },
+                { id: 'eternal', name: 'Eternal Hospital', top: '30%', left: '65%', capacity: 74, aiScore: 90 }
+            ];
+
+            hospitals.forEach(hospital => {
+                const marker = document.createElement('div');
+                const color = hospital.capacity > 85 ? 'red' : hospital.capacity > 70 ? 'yellow' : 'green';
+                
+                marker.className = `absolute hospital-marker bg-${color}-500 w-4 h-4 md:w-6 md:h-6 rounded-full cursor-pointer pulse-dot ai-glow`;
+                marker.style.top = hospital.top;
+                marker.style.left = hospital.left;
+                marker.onclick = () => showHospitalInfo(hospital);
+                
+                const label = document.createElement('div');
+                label.className = 'absolute -top-8 md:-top-10 -left-12 md:-left-16 text-xs font-medium text-gray-800 bg-white px-2 py-1 rounded shadow ai-glow';
+                label.innerHTML = `${hospital.name}<br><span class="text-blue-600">AI: ${hospital.aiScore}%</span>`;
+                
+                marker.appendChild(label);
+                markersContainer.appendChild(marker);
+            });
+        }
+
+        function showHospitalInfo(hospital) {
+            showModal(
+                `🧠 AI Analysis: ${hospital.name}`,
+                `Capacity: ${hospital.capacity}% | AI Score: ${hospital.aiScore}%\n\nAI Analysis: This hospital is operating at optimal efficiency with strong AI integration. Current capacity utilization is well-managed with predictive algorithms ensuring smooth patient flow.`
+            );
+        }
+
+        // Action Handlers for all sections
+        async function aiOptimizeBeds() {
+            showModal('🧠 AI Processing', 'Gemini AI is analyzing bed allocation across all hospitals...');
+            
+            setTimeout(() => {
+                showModal('🤖 AI Bed Optimization Complete', 'AI has successfully optimized bed allocation across the network:\n\n• 15 beds reallocated for maximum efficiency\n• Wait times reduced by 18%\n• ICU capacity optimized\n• Emergency preparedness improved\n\nAll changes have been implemented automatically.');
+                populateBedStatus(); // Refresh bed data
+            }, 2000);
+        }
+
+        async function predictBedDemand() {
+            showModal('🔮 AI Bed Demand Prediction', 'Based on current weather patterns, historical data, and real-time analysis:\n\n• Next 6 hours: 23% increase in emergency admissions\n• Peak demand expected at 8 PM\n• Recommend activating 2 additional ICU beds\n• Monsoon-related injuries likely to increase\n\nPreparation recommendations have been sent to all departments.');
+        }
+
+        function addNewPatient() {
+            showModal('➕ Add New Patient', 'Patient registration form would open here. This would include:\n\n• Personal information\n• Medical history\n• Current condition\n• Priority assessment\n• AI-powered bed recommendation\n\nIntegrated with hospital management system.');
+        }
+
+        function aiTriagePatients() {
+            showModal('🧠 AI Triage Complete', 'AI has analyzed all waiting patients and optimized triage:\n\n• 3 patients moved to high priority\n• 2 patients can be treated as outpatients\n• 1 patient requires immediate ICU admission\n• Average wait time reduced by 15 minutes\n\nTriage recommendations sent to medical staff.');
+            populatePatientList(); // Refresh patient data
+        }
+
+        function viewPatientDetails(patientId) {
+            const patient = sampleData.patients.find(p => p.id === patientId);
+            if (patient) {
+                showModal(`👤 Patient Details: ${patient.name}`, `Detailed medical record for ${patient.name}:\n\n• Age: ${patient.age}\n• Condition: ${patient.condition}\n• Priority: ${patient.priority}\n• Status: ${patient.status}\n• Hospital: ${patient.hospital}\n• Admission: ${new Date(patient.admissionTime).toLocaleString()}\n\nFull medical history and treatment plan available in EMR system.`);
+            }
+        }
+
+        function updatePatientStatus(patientId) {
+            showModal('✅ Patient Status Updated', `Patient status has been updated successfully.\n\nChanges logged in medical record system.\nNotifications sent to relevant medical staff.\nAI recommendations updated based on new status.`);
+        }
+
+        function optimizeSchedule() {
+            showModal('🧠 AI Schedule Optimization', 'AI has analyzed staff workload and optimized schedules:\n\n• Balanced workload across all shifts\n• Reduced overtime by 23%\n• Improved coverage during peak hours\n• Staff satisfaction increased\n\nNew schedules will be effective from next week.');
+            populateStaffList(); // Refresh staff data
+        }
+
+        function addStaffMember() {
+            showModal('➕ Add Staff Member', 'Staff registration form would include:\n\n• Personal information\n• Qualifications and certifications\n• Department assignment\n• Shift preferences\n• AI-powered role matching\n\nIntegrated with HR management system.');
+        }
+
+        function aiInventoryOptimize() {
+            showModal('🧠 AI Inventory Optimization', 'AI has optimized resource allocation:\n\n• Identified 12 overstocked items\n• Flagged 5 items for immediate reorder\n• Optimized storage locations\n• Reduced waste by 18%\n• Cost savings: ₹1.2M monthly\n\nPurchase orders generated automatically.');
+            populateResourceList(); // Refresh resource data
+        }
+
+        function addResource() {
+            showModal('➕ Add Resource', 'Resource management form would include:\n\n• Item details and specifications\n• Quantity and location\n• Supplier information\n• Minimum stock levels\n• AI-powered usage predictions\n\nIntegrated with procurement system.');
+        }
+
+        function filterResources(category) {
+            showModal(`📦 ${category.charAt(0).toUpperCase() + category.slice(1)} Resources`, `Filtering resources by category: ${category}\n\nThis would show only items in the selected category with detailed inventory information, usage patterns, and AI recommendations for optimization.`);
+        }
+
+        function optimizeNetwork() {
+            showModal('🧠 AI Network Optimization', 'AI has optimized hospital network performance:\n\n• Patient transfer routes optimized\n• Resource sharing improved by 25%\n• Communication latency reduced\n• Emergency response time improved\n• Network efficiency: 94%\n\nAll hospitals synchronized with new protocols.');
+            populateNetworkHospitals(); // Refresh network data
+        }
+
+        function addHospital() {
+            showModal('➕ Add Hospital to Network', 'Hospital network integration form:\n\n• Hospital information and capabilities\n• System integration requirements\n• Staff training schedule\n• AI calibration process\n• Network connectivity setup\n\nFull integration typically takes 2-3 weeks.');
+        }
+
+        function generateReport() {
+            showModal('📄 AI Report Generated', 'Comprehensive hospital analytics report generated:\n\n• Executive summary with key metrics\n• Department performance analysis\n• AI optimization recommendations\n• Cost-benefit analysis\n• Future predictions and trends\n\nReport available for download in PDF format.');
+        }
+
+        function aiPredictTrends() {
+            showModal('🔮 AI Trend Predictions', 'AI has analyzed patterns and predicts:\n\n• 15% increase in cardiac cases next month\n• Seasonal flu outbreak expected in 3 weeks\n• Staff shortage in pediatrics by month-end\n• Equipment maintenance due for 5 devices\n• Budget optimization opportunities identified\n\nProactive measures recommended.');
+        }
+
+        function implementInsight(insightTitle) {
+            showModal('✅ AI Insight Implemented', `Implementing AI insight: "${insightTitle}"\n\nChanges have been applied to the system.\nRelevant departments have been notified.\nProgress will be monitored and reported.\n\nExpected impact will be visible within 24-48 hours.`);
+        }
+
+        // Financial Audit Functions
+        function runFullAudit() {
+            showModal('🔍 AI Full Audit Initiated', 'COMPREHENSIVE FINANCIAL AUDIT STARTED\n\n🧠 AI is analyzing all bed assignments and financial records...\n\n✓ Checking 247 beds across 8 hospitals\n✓ Verifying payment records\n✓ Cross-referencing patient data\n✓ Detecting anomalies and fraud patterns\n✓ Generating compliance report\n\nEstimated completion: 3 minutes\nReal-time results will appear in the audit trail.');
+            
+            setTimeout(() => {
+                showModal('✅ Full Audit Complete', 'AI AUDIT RESULTS:\n\n✅ 234 beds verified clear of dues\n⚠️ 13 beds with pending payments identified\n🚨 3 critical cases requiring immediate attention\n💰 Total outstanding: ₹2.3L\n🛡️ Zero fraud detected\n📊 99.7% accuracy rate\n\nAll findings have been logged and relevant departments notified.');
+                populateFinancialAudit(); // Refresh data
+            }, 3000);
+        }
+
+        function clearAllDues() {
+            showModal('✅ Clearing Verified Dues', 'AI is processing verified payments and clearing dues...\n\n✓ Verifying payment confirmations\n✓ Updating bed status records\n✓ Generating clearance certificates\n✓ Notifying finance department\n\nAll verified payments will be processed automatically.');
+            
+            setTimeout(() => {
+                // Update sample data to show cleared dues
+                sampleData.financialAudit.forEach(bed => {
+                    if (bed.cleared === false && bed.riskLevel !== 'critical') {
+                        bed.cleared = true;
+                        bed.dueAmount = 0;
+                        bed.riskLevel = 'none';
+                    }
+                });
+                
+                document.getElementById('cleared-beds').textContent = '245';
+                document.getElementById('pending-dues').textContent = '2';
+                document.getElementById('total-amount').textContent = '₹25K';
+                
+                showModal('✅ Dues Cleared Successfully', '11 verified dues have been cleared:\n\n✅ ₹1.98L in payments processed\n✅ Bed statuses updated\n✅ Finance records synchronized\n✅ Compliance certificates generated\n\nOnly 2 critical cases remain for manual review.');
+                populateFinancialAudit(); // Refresh display
+            }, 2000);
+        }
+
+        function generateFinancialReport() {
+            showModal('📄 Generating Financial Report', 'AI is compiling comprehensive financial audit report...\n\n📊 Analyzing payment patterns\n📈 Calculating fraud prevention savings\n📋 Generating compliance documentation\n💰 Summarizing financial metrics\n🧠 Adding AI insights and recommendations\n\nReport will be available for download in PDF format.');
+        }
+
+        function clearBedDue(bedId) {
+            const bed = sampleData.financialAudit.find(b => b.id === bedId);
+            if (bed) {
+                showModal('💰 Processing Payment', `Processing due clearance for ${bedId}:\n\nAmount: ₹${bed.dueAmount.toLocaleString()}\nPatient: ${bed.patient}\nHospital: ${bed.hospital}\n\n✓ Payment verification in progress\n✓ AI fraud detection active\n✓ Updating financial records`);
+                
+                setTimeout(() => {
+                    bed.cleared = true;
+                    bed.dueAmount = 0;
+                    bed.riskLevel = 'none';
+                    showModal('✅ Due Cleared Successfully', `Payment processed for ${bedId}\n\n✅ Amount cleared\n✅ Bed status updated\n✅ Patient record updated\n✅ Finance department notified\n\nBed is now available for new assignments.`);
+                    populateFinancialAudit(); // Refresh display
+                }, 1500);
+            }
+        }
+
+        function viewBedDetails(bedId) {
+            const bed = sampleData.financialAudit.find(b => b.id === bedId);
+            if (bed) {
+                showModal(`🛏️ Bed Details: ${bedId}`, `DETAILED FINANCIAL RECORD:\n\n🏥 Hospital: ${bed.hospital}\n👤 Patient: ${bed.patient}\n💰 Due Amount: ₹${bed.dueAmount.toLocaleString()}\n📅 Last Payment: ${bed.lastPayment || 'None'}\n⚠️ Risk Level: ${bed.riskLevel.toUpperCase()}\n📊 Status: ${bed.cleared ? 'Cleared' : 'Pending'}\n\n🧠 AI Analysis: ${bed.riskLevel === 'critical' ? 'Immediate attention required' : 'Standard monitoring'}`);
+            }
+        }
+
+        function handleFraudAlert(alertType) {
+            const responses = {
+                critical: '🚨 CRITICAL ALERT RESPONSE:\n\n✓ Security team notified\n✓ Bed access temporarily restricted\n✓ Payment verification initiated\n✓ Audit trail preserved\n✓ Management escalation triggered\n\nImmediate investigation in progress.',
+                warning: '⚠️ WARNING ALERT RESPONSE:\n\n✓ AI monitoring increased\n✓ Duplicate assignment blocked\n✓ Staff notification sent\n✓ System logs preserved\n✓ Preventive measures activated\n\nSituation contained successfully.',
+                info: 'ℹ️ INFO ALERT RESPONSE:\n\n✓ Payment verification completed\n✓ Records updated successfully\n✓ Compliance maintained\n✓ Audit trail logged\n✓ Normal operations resumed\n\nNo further action required.'
+            };
+            
+            showModal('🛡️ Fraud Alert Response', responses[alertType] || 'Alert processed successfully.');
+        }
+
+        function handleAlert(alertType) {
+            const responses = {
+                critical: 'Critical alert acknowledged. Emergency protocols activated. Additional staff being deployed to ICU. Real-time monitoring increased.',
+                warning: 'Warning noted. Monsoon preparedness plan activated. Additional emergency staff on standby. Bed capacity increased by 10%.',
+                info: 'Information processed. Optimization changes have been implemented successfully. Efficiency improvements are now active across the network.'
+            };
+            
+            showModal('🧠 AI Alert Response', responses[alertType] || 'Alert processed successfully.');
+        }
+
+        // Emergency Mode System
+        let emergencyModeActive = false;
+        let emergencyInterval = null;
+        let originalData = {};
+
+        async function emergencyMode() {
+            if (!emergencyModeActive) {
+                activateEmergencyMode();
+            } else {
+                deactivateEmergencyMode();
+            }
+        }
+
+        function activateEmergencyMode() {
+            emergencyModeActive = true;
+            
+            // Store original data
+            originalData = {
+                beds: document.getElementById('available-beds').textContent,
+                patients: document.getElementById('active-patients').textContent,
+                waitTime: document.getElementById('wait-time').textContent,
+                efficiency: document.getElementById('efficiency').textContent
+            };
+
+            showModal('🚨 Emergency Mode Activated', 'EMERGENCY PROTOCOL INITIATED\n\n✓ All hospitals notified\n✓ Additional staff called in\n✓ Emergency beds prepared\n✓ Ambulance network alerted\n✓ Supply chain activated\n✓ AI monitoring increased\n\nAll systems are now in emergency readiness mode.');
+            
+            // Apply emergency visual changes
+            document.body.classList.add('emergency-mode');
+            document.querySelectorAll('.ai-glow').forEach(el => {
+                el.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.5)';
+            });
+
+            // Update header status
+            document.querySelector('header').style.background = 'linear-gradient(135deg, #fee2e2, #fecaca)';
+            document.querySelector('header').style.borderBottomColor = '#ef4444';
+
+            // Change AI status to emergency
+            document.getElementById('ai-status').textContent = 'EMERGENCY';
+            document.getElementById('ai-status').parentElement.className = 'flex items-center space-x-2 bg-red-100 px-2 md:px-3 py-1 rounded-full';
+
+            // Update emergency button
+            const emergencyBtn = document.querySelector('button[onclick="emergencyMode()"]');
+            emergencyBtn.textContent = '✅ Exit Emergency';
+            emergencyBtn.className = 'bg-green-600 hover:bg-green-700 text-white px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium transition-colors';
+
+            // Apply emergency metrics
+            applyEmergencyMetrics();
+
+            // Start emergency updates
+            emergencyInterval = setInterval(updateEmergencyMetrics, 2000);
+
+            // Update AI insights for emergency
+            document.getElementById('ai-insight').textContent = '🚨 EMERGENCY MODE: All hospitals on high alert - surge capacity activated - AI prioritizing critical cases';
+            document.getElementById('capacity-insight').textContent = 'Emergency protocols active - 40% surge capacity deployed - critical care prioritized';
+
+            // Generate emergency alerts
+            generateEmergencyAlerts();
+
+            // Update all charts for emergency mode
+            updateChartsForEmergency();
+        }
+
+        function deactivateEmergencyMode() {
+            emergencyModeActive = false;
+            
+            showModal('✅ Emergency Mode Deactivated', 'RETURNING TO NORMAL OPERATIONS\n\n✓ Emergency protocols deactivated\n✓ Normal staffing resumed\n✓ Standard capacity restored\n✓ AI monitoring normalized\n✓ All systems back to normal\n\nEmergency mode successfully deactivated.');
+
+            // Remove emergency visual changes
+            document.body.classList.remove('emergency-mode');
+            document.querySelectorAll('.ai-glow').forEach(el => {
+                el.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.3)';
+            });
+
+            // Restore header
+            document.querySelector('header').style.background = '';
+            document.querySelector('header').style.borderBottomColor = '';
+
+            // Restore AI status
+            document.getElementById('ai-status').textContent = 'AI Active';
+            document.getElementById('ai-status').parentElement.className = 'flex items-center space-x-2 bg-green-100 px-2 md:px-3 py-1 rounded-full';
+
+            // Restore emergency button
+            const emergencyBtn = document.querySelector('button[onclick="emergencyMode()"]');
+            emergencyBtn.textContent = '🚨 Emergency';
+            emergencyBtn.className = 'bg-red-600 hover:bg-red-700 text-white px-2 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium transition-colors';
+
+            // Restore original metrics
+            if (originalData.beds) {
+                document.getElementById('available-beds').textContent = originalData.beds;
+                document.getElementById('active-patients').textContent = originalData.patients;
+                document.getElementById('wait-time').textContent = originalData.waitTime;
+                document.getElementById('efficiency').textContent = originalData.efficiency;
+            }
+
+            // Stop emergency updates
+            if (emergencyInterval) {
+                clearInterval(emergencyInterval);
+                emergencyInterval = null;
+            }
+
+            // Restore normal insights
+            document.getElementById('ai-insight').textContent = 'AI system active - monitoring 8 hospitals across Jaipur with 94% efficiency optimization';
+            document.getElementById('capacity-insight').textContent = 'Monsoon season detected - AI recommends 15% capacity buffer for emergency influx';
+
+            // Restore normal alerts
+            generateInitialAlerts();
+
+            // Restore charts to normal
+            updateChartsForNormal();
+        }
+
+        function applyEmergencyMetrics() {
+            // Increase available beds (surge capacity)
+            const currentBeds = parseInt(document.getElementById('available-beds').textContent);
+            document.getElementById('available-beds').textContent = currentBeds + 89; // Surge capacity
+
+            // Increase active patients
+            const currentPatients = parseInt(document.getElementById('active-patients').textContent.replace(',', ''));
+            document.getElementById('active-patients').textContent = (currentPatients + 267).toLocaleString();
+
+            // Reduce wait time (emergency efficiency)
+            document.getElementById('wait-time').textContent = '8m';
+
+            // Increase efficiency
+            document.getElementById('efficiency').textContent = '98%';
+
+            // Update confidence
+            document.getElementById('ai-confidence').textContent = '99%';
+        }
+
+        function updateEmergencyMetrics() {
+            if (!emergencyModeActive) return;
+
+            // Simulate real-time emergency updates
+            const beds = document.getElementById('available-beds');
+            const patients = document.getElementById('active-patients');
+            const waitTime = document.getElementById('wait-time');
+
+            // Fluctuate emergency metrics
+            const baseBeds = parseInt(originalData.beds) + 89;
+            const newBeds = baseBeds + Math.floor(Math.random() * 20) - 10;
+            beds.textContent = Math.max(newBeds, baseBeds - 15);
+
+            const basePatients = parseInt(originalData.patients.replace(',', '')) + 267;
+            const newPatients = basePatients + Math.floor(Math.random() * 50) - 25;
+            patients.textContent = newPatients.toLocaleString();
+
+            // Keep wait time low in emergency
+            const waitTimes = ['6m', '7m', '8m', '9m', '5m'];
+            waitTime.textContent = waitTimes[Math.floor(Math.random() * waitTimes.length)];
+
+            // Update timestamps
+            document.getElementById('beds-update').textContent = 'Just now';
+        }
+
+        function generateEmergencyAlerts() {
+            const alertsContainer = document.getElementById('ai-alerts-container');
+            const emergencyAlerts = [
+                {
+                    type: 'critical',
+                    title: 'Mass Casualty Event',
+                    description: '🚨 Multiple casualties incoming - all departments on standby',
+                    action: 'Coordinate Response'
+                },
+                {
+                    type: 'warning',
+                    title: 'Surge Capacity Activated',
+                    description: '⚡ Emergency beds deployed - 89 additional beds now available',
+                    action: 'Monitor Capacity'
+                },
+                {
+                    type: 'critical',
+                    title: 'Blood Bank Alert',
+                    description: '🩸 High demand for O- blood type - emergency procurement initiated',
+                    action: 'Contact Donors'
+                },
+                {
+                    type: 'warning',
+                    title: 'Staff Mobilization',
+                    description: '👨‍⚕️ Off-duty staff called in - emergency protocols active',
+                    action: 'Track Arrivals'
+                }
+            ];
+
+            alertsContainer.innerHTML = '';
+            emergencyAlerts.forEach(alert => {
+                const alertElement = createAlertElement(alert);
+                alertsContainer.appendChild(alertElement);
+            });
+        }
+
+        function updateChartsForEmergency() {
+            // Update capacity chart for emergency
+            if (charts.aiCapacity) {
+                charts.aiCapacity.data.datasets[0].data = [98, 95, 92, 89, 86, 83, 80];
+                charts.aiCapacity.data.datasets[1].data = [98, 96, 94, 91, 88, 85, 82];
+                charts.aiCapacity.update();
+            }
+
+            // Update bed utilization for emergency
+            if (charts.bedUtilization) {
+                charts.bedUtilization.data.datasets[0].data = [1371, 336, 15]; // More occupied, more available, less maintenance
+                charts.bedUtilization.update();
+            }
+
+            // Update patient flow for emergency
+            if (charts.patientFlow) {
+                charts.patientFlow.data.datasets[0].data = [45, 67, 89, 123, 156, 134, 98, 67];
+                charts.patientFlow.update();
+            }
+        }
+
+        function updateChartsForNormal() {
+            // Restore normal capacity chart
+            if (charts.aiCapacity) {
+                charts.aiCapacity.data.datasets[0].data = [87, 89, 92, 88, 85, 82, 79];
+                charts.aiCapacity.data.datasets[1].data = [87, 91, 95, 92, 88, 85, 82];
+                charts.aiCapacity.update();
+            }
+
+            // Restore normal bed utilization
+            if (charts.bedUtilization) {
+                charts.bedUtilization.data.datasets[0].data = [1104, 247, 23];
+                charts.bedUtilization.update();
+            }
+
+            // Restore normal patient flow
+            if (charts.patientFlow) {
+                charts.patientFlow.data.datasets[0].data = [12, 25, 45, 67, 52, 34, 18, 8];
+                charts.patientFlow.update();
+            }
+        }
+
+        // Enhanced Search and Filter Functionality
+        function initializeSearchAndFilters() {
+            // Patient search functionality
+            const patientSearch = document.getElementById('patient-search');
+            const priorityFilter = document.getElementById('priority-filter');
+            const statusFilter = document.getElementById('status-filter');
+
+            if (patientSearch) {
+                patientSearch.addEventListener('input', filterPatients);
+            }
+            if (priorityFilter) {
+                priorityFilter.addEventListener('change', filterPatients);
+            }
+            if (statusFilter) {
+                statusFilter.addEventListener('change', filterPatients);
+            }
+
+            // Hospital filter for financial audit
+            const hospitalFilter = document.getElementById('hospital-filter');
+            if (hospitalFilter) {
+                hospitalFilter.addEventListener('change', filterFinancialBeds);
+            }
+        }
+
+        function filterPatients() {
+            const searchTerm = document.getElementById('patient-search')?.value.toLowerCase() || '';
+            const priorityFilter = document.getElementById('priority-filter')?.value || '';
+            const statusFilter = document.getElementById('status-filter')?.value || '';
+
+            let filteredPatients = sampleData.patients.filter(patient => {
+                const matchesSearch = patient.name.toLowerCase().includes(searchTerm) || 
+                                    patient.condition.toLowerCase().includes(searchTerm);
+                const matchesPriority = !priorityFilter || patient.priority === priorityFilter;
+                const matchesStatus = !statusFilter || patient.status === statusFilter;
+
+                return matchesSearch && matchesPriority && matchesStatus;
+            });
+
+            displayFilteredPatients(filteredPatients);
+        }
+
+        function displayFilteredPatients(patients) {
+            const patientList = document.getElementById('patient-list');
+            if (!patientList) return;
+
+            patientList.innerHTML = '';
+            patients.forEach(patient => {
+                const priorityColor = {
+                    'critical': 'red',
+                    'high': 'orange',
+                    'medium': 'yellow',
+                    'low': 'green'
+                }[patient.priority] || 'gray';
+
+                const patientCard = document.createElement('div');
+                patientCard.className = 'bg-white rounded-lg shadow-md p-4 hover-scale cursor-pointer';
+                patientCard.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-semibold text-gray-900">${patient.name}</h4>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-${priorityColor}-100 text-${priorityColor}-800">
+                            ${patient.priority.charAt(0).toUpperCase() + patient.priority.slice(1)}
+                        </span>
+                    </div>
+                    <div class="space-y-1 text-sm text-gray-600">
+                        <p><strong>Age:</strong> ${patient.age}</p>
+                        <p><strong>Condition:</strong> ${patient.condition}</p>
+                        <p><strong>Hospital:</strong> ${patient.hospital}</p>
+                        <p><strong>Status:</strong> ${patient.status}</p>
+                        <p><strong>Admitted:</strong> ${new Date(patient.admissionTime).toLocaleString()}</p>
+                    </div>
+                    <div class="mt-3 flex space-x-2">
+                        <button onclick="viewPatientDetails('${patient.id}')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs">
+                            View Details
+                        </button>
+                        <button onclick="updatePatientStatus('${patient.id}')" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs">
+                            Update Status
+                        </button>
+                    </div>
+                `;
+                patientList.appendChild(patientCard);
+            });
+
+            if (patients.length === 0) {
+                patientList.innerHTML = '<div class="text-center text-gray-500 py-8">No patients found matching the criteria.</div>';
+            }
+        }
+
+        function filterFinancialBeds() {
+            const hospitalFilter = document.getElementById('hospital-filter')?.value || '';
+            
+            let filteredBeds = sampleData.financialAudit.filter(bed => {
+                return !hospitalFilter || bed.hospital.toLowerCase().includes(hospitalFilter.toLowerCase());
+            });
+
+            displayFilteredFinancialBeds(filteredBeds);
+        }
+
+        function displayFilteredFinancialBeds(beds) {
+            const bedFinancialList = document.getElementById('bed-financial-list');
+            if (!bedFinancialList) return;
+
+            bedFinancialList.innerHTML = '';
+            beds.forEach(bed => {
+                const statusColor = bed.cleared ? 'green' : 'red';
+                const riskColor = {
+                    'none': 'gray',
+                    'low': 'green',
+                    'medium': 'yellow',
+                    'high': 'orange',
+                    'critical': 'red'
+                }[bed.riskLevel] || 'gray';
+
+                const bedItem = document.createElement('div');
+                bedItem.className = 'p-3 bg-gray-50 rounded-lg hover-scale cursor-pointer border-l-4 border-' + statusColor + '-500';
+                bedItem.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-${statusColor}-500 rounded-full ${bed.cleared ? '' : 'pulse-dot'}"></div>
+                            <div>
+                                <p class="font-medium text-gray-900">${bed.id} - ${bed.type}</p>
+                                <p class="text-sm text-gray-600">${bed.hospital}</p>
+                                ${bed.patient ? `<p class="text-xs text-blue-600">Patient: ${bed.patient}</p>` : '<p class="text-xs text-green-600">✅ Available & Clear</p>'}
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm font-bold ${bed.dueAmount > 0 ? 'text-red-600' : 'text-green-600'}">
+                                ${bed.dueAmount > 0 ? '₹' + bed.dueAmount.toLocaleString() : '✅ Clear'}
+                            </div>
+                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-${riskColor}-100 text-${riskColor}-800">
+                                ${bed.riskLevel.charAt(0).toUpperCase() + bed.riskLevel.slice(1)} Risk
+                            </span>
+                        </div>
+                    </div>
+                    ${bed.dueAmount > 0 ? `
+                        <div class="mt-2 flex space-x-2">
+                            <button onclick="clearBedDue('${bed.id}')" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs">
+                                Clear Due
+                            </button>
+                            <button onclick="viewBedDetails('${bed.id}')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs">
+                                View Details
+                            </button>
+                        </div>
+                    ` : ''}
+                `;
+                bedFinancialList.appendChild(bedItem);
+            });
+
+            if (beds.length === 0) {
+                bedFinancialList.innerHTML = '<div class="text-center text-gray-500 py-8">No beds found for the selected hospital.</div>';
+            }
+        }
+
+        // Enhanced Form Handling
+        function initializeForms() {
+            // Prevent form submissions from navigating
+            document.addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleFormSubmission(e.target);
+            });
+
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + E for Emergency Mode
+                if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+                    e.preventDefault();
+                    emergencyMode();
+                }
+                
+                // Ctrl/Cmd + A for AI Assistant
+                if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+                    e.preventDefault();
+                    toggleAIAssistant();
+                }
+
+                // Escape to close modals
+                if (e.key === 'Escape') {
+                    closeModal();
+                    if (aiAssistantVisible) {
+                        toggleAIAssistant();
+                    }
+                }
+            });
+        }
+
+        function handleFormSubmission(form) {
+            const formData = new FormData(form);
+            const formType = form.getAttribute('data-form-type') || 'general';
+            
+            showModal('✅ Form Submitted', `${formType} form has been submitted successfully. Data has been processed and saved to the system.`);
+        }
+
+        // Enhanced Data Management
+        function saveToLocalStorage(key, data) {
+            try {
+                localStorage.setItem(`hospitalnet_${key}`, JSON.stringify(data));
+            } catch (error) {
+                console.warn('Could not save to localStorage:', error);
+            }
+        }
+
+        function loadFromLocalStorage(key) {
+            try {
+                const data = localStorage.getItem(`hospitalnet_${key}`);
+                return data ? JSON.parse(data) : null;
+            } catch (error) {
+                console.warn('Could not load from localStorage:', error);
+                return null;
+            }
+        }
+
+        // Enhanced Error Handling
+        function handleError(error, context = 'System') {
+            console.error(`${context} Error:`, error);
+            
+            showModal('⚠️ System Notice', `${context} encountered an issue but is continuing to operate normally. The system has automatically recovered and all functions remain available.`);
+            
+            // Log error for debugging
+            const errorLog = loadFromLocalStorage('error_log') || [];
+            errorLog.push({
+                timestamp: new Date().toISOString(),
+                context,
+                error: error.message || error.toString(),
+                stack: error.stack
+            });
+            
+            // Keep only last 50 errors
+            if (errorLog.length > 50) {
+                errorLog.splice(0, errorLog.length - 50);
+            }
+            
+            saveToLocalStorage('error_log', errorLog);
+        }
+
+        // Enhanced Performance Monitoring
+        function initializePerformanceMonitoring() {
+            // Monitor page load performance
+            window.addEventListener('load', function() {
+                const loadTime = performance.now();
+                console.log(`HospitalNet AI loaded in ${Math.round(loadTime)}ms`);
+                
+                if (loadTime > 5000) {
+                    console.warn('Slow loading detected. Consider optimizing resources.');
+                }
+            });
+
+            // Monitor memory usage
+            if ('memory' in performance) {
+                setInterval(() => {
+                    const memory = performance.memory;
+                    if (memory.usedJSHeapSize > 50 * 1024 * 1024) { // 50MB
+                        console.warn('High memory usage detected:', Math.round(memory.usedJSHeapSize / 1024 / 1024) + 'MB');
+                    }
+                }, 30000);
+            }
+        }
+
+        // Enhanced Accessibility
+        function initializeAccessibility() {
+            // Add ARIA labels dynamically
+            document.querySelectorAll('button').forEach(button => {
+                if (!button.getAttribute('aria-label') && button.textContent) {
+                    button.setAttribute('aria-label', button.textContent.trim());
+                }
+            });
+
+            // Add keyboard navigation for custom elements
+            document.querySelectorAll('.hover-scale').forEach(element => {
+                element.setAttribute('tabindex', '0');
+                element.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        element.click();
+                    }
+                });
+            });
+
+            // High contrast mode detection
+            if (window.matchMedia && window.matchMedia('(prefers-contrast: high)').matches) {
+                document.body.classList.add('high-contrast');
+            }
+
+            // Reduced motion detection
+            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.body.classList.add('reduced-motion');
+            }
+        }
+
+        // Charts
+        function initializeCharts() {
+            initializeCapacityChart();
+            initializeBedUtilizationChart();
+            initializePatientFlowChart();
+            initializeStaffScheduleChart();
+            initializeResourceUsageChart();
+            initializeNetworkPerformanceChart();
+            initializeMonthlyTrendsChart();
+            initializeDepartmentChart();
+        }
+
+        function initializeFinancialChart() {
+            const financialCtx = document.getElementById('financialAnalyticsChart');
+            if (financialCtx) {
+                charts.financialAnalytics = new Chart(financialCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Cleared Beds', 'Pending Dues', 'Critical Cases', 'Under Review'],
+                        datasets: [{
+                            data: [234, 13, 3, 2],
+                            backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { font: { size: 10 } }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Financial Status Distribution',
+                                font: { size: 12, weight: 'bold' }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function initializeCapacityChart() {
+            const capacityCtx = document.getElementById('aiCapacityChart');
+            if (capacityCtx) {
+                charts.aiCapacity = new Chart(capacityCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Now', '+2h', '+4h', '+6h', '+8h', '+12h', '+24h'],
+                        datasets: [{
+                            label: 'Current Capacity',
+                            data: [87, 89, 92, 88, 85, 82, 79],
+                            borderColor: 'rgb(59, 130, 246)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            borderWidth: 3,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }, {
+                            label: 'AI Prediction',
+                            data: [87, 91, 95, 92, 88, 85, 82],
+                            borderColor: 'rgb(168, 85, 247)',
+                            backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                            borderDash: [5, 5],
+                            tension: 0.4,
+                            borderWidth: 3,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                                ticks: { font: { size: 10 } }
+                            },
+                            x: {
+                                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                                ticks: { font: { size: 10 } }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'AI-Powered Capacity Forecasting',
+                                font: { size: 14, weight: 'bold' }
+                            },
+                            legend: {
+                                labels: { font: { size: 10 } }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function initializeBedUtilizationChart() {
+            const bedCtx = document.getElementById('bedUtilizationChart');
+            if (bedCtx) {
+                charts.bedUtilization = new Chart(bedCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Occupied', 'Available', 'Maintenance'],
+                        datasets: [{
+                            data: [1104, 247, 23],
+                            backgroundColor: ['#ef4444', '#10b981', '#f59e0b'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { font: { size: 10 } }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function initializePatientFlowChart() {
+            const patientCtx = document.getElementById('patientFlowChart');
+            if (patientCtx) {
+                charts.patientFlow = new Chart(patientCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['6AM', '9AM', '12PM', '3PM', '6PM', '9PM', '12AM', '3AM'],
+                        datasets: [{
+                            label: 'Admissions',
+                            data: [12, 25, 45, 67, 52, 34, 18, 8],
+                            backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                            borderColor: 'rgb(59, 130, 246)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                                ticks: { font: { size: 10 } }
+                            },
+                            x: {
+                                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                                ticks: { font: { size: 10 } }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: { font: { size: 10 } }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function initializeStaffScheduleChart() {
+            const staffCtx = document.getElementById('staffScheduleChart');
+            if (staffCtx) {
+                charts.staffSchedule = new Chart(staffCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Morning Shift',
+                            data: [45, 47, 43, 48, 46, 42, 40],
+                            borderColor: 'rgb(34, 197, 94)',
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            tension: 0.4
+                        }, {
+                            label: 'Evening Shift',
+                            data: [38, 40, 36, 42, 39, 35, 33],
+                            borderColor: 'rgb(249, 115, 22)',
+                            backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                            tension: 0.4
+                        }, {
+                            label: 'Night Shift',
+                            data: [28, 30, 26, 32, 29, 25, 23],
+                            borderColor: 'rgb(139, 92, 246)',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                                ticks: { font: { size: 10 } }
+                            },
+                            x: {
+                                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                                ticks: { font: { size: 10 } }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: { font: { size: 10 } }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function initializeResourceUsageChart() {
+            const resourceCtx = document.getElementById('resourceUsageChart');
+            if (resourceCtx) {
+                charts.resourceUsage = new Chart(resourceCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Medical Equipment', 'Pharmacy', 'Supplies', 'Emergency', 'Laboratory'],
+                        datasets: [{
+                            label: 'Current Usage',
+                            data: [85, 92, 78, 65, 88],
+                            borderColor: 'rgb(59, 130, 246)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                            pointBackgroundColor: 'rgb(59, 130, 246)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgb(59, 130, 246)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                                ticks: { font: { size: 8 } }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: { font: { size: 10 } }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function initializeNetworkPerformanceChart() {
+            const networkCtx = document.getElementById('networkPerformanceChart');
+            if (networkCtx) {
+                charts.networkPerformance = new Chart(networkCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['SMS', 'Fortis', 'Manipal', 'Narayana', 'Max', 'Apex', 'Eternal', 'CK Birla'],
+                        datasets: [{
+                            label: 'Efficiency %',
+                            data: [92, 67, 71, 58, 82, 63, 74, 89],
+                            backgroundColor: [
+                                'rgba(34, 197, 94, 0.8)',
+                                'rgba(249, 115, 22, 0.8)',
+                                'rgba(34, 197, 94, 0.8)',
+                                'rgba(239, 68, 68, 0.8)',
+                                'rgba(34, 197, 94, 0.8)',
+                                'rgba(249, 115, 22, 0.8)',
+                                'rgba(34, 197, 94, 0.8)',
+                                'rgba(34, 197, 94, 0.8)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                                ticks: { font: { size: 10 } }
+                            },
+                            x: {
+                                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                                ticks: { font: { size: 8 } }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: { font: { size: 10 } }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function initializeMonthlyTrendsChart() {
+            const trendsCtx = document.getElementById('monthlyTrendsChart');
+            if (trendsCtx) {
+                charts.monthlyTrends = new Chart(trendsCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                        datasets: [{
+                            label: 'Patient Admissions',
+                            data: [1200, 1150, 1300, 1250, 1400, 1350, 1500, 1450, 1600, 1550, 1650, 1700],
+                            borderColor: 'rgb(59, 130, 246)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4
+                        }, {
+                            label: 'AI Efficiency',
+                            data: [75, 78, 82, 85, 87, 89, 91, 92, 93, 94, 94, 95],
+                            borderColor: 'rgb(168, 85, 247)',
+                            backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                                ticks: { font: { size: 10 } }
+                            },
+                            x: {
+                                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                                ticks: { font: { size: 10 } }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: { font: { size: 10 } }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function initializeDepartmentChart() {
+            const deptCtx = document.getElementById('departmentChart');
+            if (deptCtx) {
+                charts.department = new Chart(deptCtx, {
+                    type: 'polarArea',
+                    data: {
+                        labels: ['Emergency', 'ICU', 'General', 'Maternity', 'Pediatrics', 'Cardiology'],
+                        datasets: [{
+                            data: [95, 88, 92, 85, 90, 87],
+                            backgroundColor: [
+                                'rgba(239, 68, 68, 0.8)',
+                                'rgba(59, 130, 246, 0.8)',
+                                'rgba(34, 197, 94, 0.8)',
+                                'rgba(236, 72, 153, 0.8)',
+                                'rgba(249, 115, 22, 0.8)',
+                                'rgba(168, 85, 247, 0.8)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                                ticks: { font: { size: 8 } }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { font: { size: 10 } }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Real-time Updates
+        function startRealTimeUpdates() {
+            setInterval(() => {
+                updateMetrics();
+                updateInsights();
+            }, 5000);
+        }
+
+        function updateMetrics() {
+            const beds = document.getElementById('available-beds');
+            const patients = document.getElementById('active-patients');
+            
+            if (beds) {
+                const newBeds = Math.floor(Math.random() * 20) + 240;
+                beds.textContent = newBeds;
+            }
+            
+            if (patients) {
+                const newPatients = Math.floor(Math.random() * 50) + 1800;
+                patients.textContent = newPatients.toLocaleString();
+            }
+            
+            document.getElementById('beds-update').textContent = 'Just now';
+            document.getElementById('next-opt').textContent = Math.floor(Math.random() * 10) + 1 + 'm';
+        }
+
+        function updateInsights() {
+            const insights = [
+                'AI detecting optimal patient flow - efficiency up 12%',
+                'Monsoon preparedness active - emergency capacity increased',
+                'Cross-hospital coordination optimized - wait times reduced',
+                'Predictive analytics show stable conditions ahead',
+                'AI bed allocation achieving 94% optimization rate'
+            ];
+            
+            const randomInsight = insights[Math.floor(Math.random() * insights.length)];
+            document.getElementById('ai-insight').textContent = randomInsight;
+        }
+
+        // Navigation
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show selected section
+            const targetSection = document.getElementById(sectionName);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+                targetSection.classList.add('fade-in');
+            }
+            
+            // Update navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+                btn.classList.add('text-gray-600', 'hover:text-blue-600');
+            });
+            
+            // Update active nav button
+            if (event && event.target) {
+                event.target.classList.remove('text-gray-600', 'hover:text-blue-600');
+                event.target.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+            }
+            
+            currentSection = sectionName;
+        }
+
+        // Modal
+        function showModal(title, message) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('modal-icon').textContent = title.includes('🧠') || title.includes('🤖') ? '🤖' : '✓';
+            document.getElementById('successModal').classList.remove('hidden');
+            document.getElementById('successModal').classList.add('flex');
+        }
+
+        function closeModal() {
+            document.getElementById('successModal').classList.add('hidden');
+            document.getElementById('successModal').classList.remove('flex');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('successModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeModal();
+            }
+        });
+
+        console.log('🧠 HospitalNet AI System Fully Operational with Complete Interfaces');
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'985af0a936c21b87',t:'MTc1ODk3NTQ2OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

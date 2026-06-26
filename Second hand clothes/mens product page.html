@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ralph Lauren Polo Shirt | ReThread Second-Hand Fashion</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1D3557;       /* Dark blue */
+            --secondary: #457B9D;     /* Medium blue */
+            --accent: #E63946;       /* Red */
+            --light: #F1FAEE;        /* Light cream */
+            --highlight: #A8DADC;    /* Light teal */
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light);
+            color: var(--primary);
+            line-height: 1.6;
+        }
+        
+        /* Header Styles */
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--light);
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--highlight);
+        }
+        
+        .search-bar {
+            flex-grow: 1;
+            margin: 0 20px;
+            display: flex;
+            max-width: 600px;
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 4px 0 0 4px;
+            font-size: 16px;
+        }
+        
+        .search-bar button {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .search-bar button:hover {
+            background-color: var(--accent);
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .user-actions a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .user-actions i {
+            font-size: 20px;
+            margin-bottom: 3px;
+        }
+        
+        .user-actions a:hover {
+            color: var(--highlight);
+        }
+        
+        /* Main Content */
+        .main-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        /* Breadcrumbs */
+        .breadcrumbs {
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .breadcrumbs a {
+            color: var(--secondary);
+            text-decoration: none;
+        }
+        
+        .breadcrumbs a:hover {
+            text-decoration: underline;
+        }
+        
+        .breadcrumbs span {
+            margin: 0 5px;
+            color: #999;
+        }
+        
+        /* Product Layout */
+        .product-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+        
+        /* Product Gallery */
+        .product-gallery {
+            position: relative;
+        }
+        
+        .main-image {
+            width: 100%;
+            height: 500px;
+            object-fit: contain;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        
+        .thumbnail-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        
+        .thumbnail {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: white;
+            border: 2px solid transparent;
+        }
+        
+        .thumbnail:hover {
+            border-color: var(--secondary);
+        }
+        
+        .thumbnail.active {
+            border-color: var(--accent);
+        }
+        
+        .badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background-color: var(--accent);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        /* Product Details */
+        .product-details {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .product-brand {
+            color: var(--secondary);
+            font-size: 18px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .product-title {
+            font-size: 28px;
+            margin: 0 0 15px;
+            color: var(--primary);
+        }
+        
+        .product-rating {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .stars {
+            color: #FFC107;
+            margin-right: 10px;
+        }
+        
+        .review-count {
+            color: var(--secondary);
+            font-size: 14px;
+        }
+        
+        .product-price {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent);
+            margin: 20px 0;
+        }
+        
+        .original-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 18px;
+            margin-left: 10px;
+        }
+        
+        .discount {
+            background-color: var(--highlight);
+            color: var(--primary);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        
+        .product-condition {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: var(--light);
+            border-radius: 4px;
+        }
+        
+        .condition-badge {
+            background-color: var(--secondary);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-right: 15px;
+        }
+        
+        .condition-text {
+            font-size: 14px;
+        }
+        
+        .product-description {
+            margin: 25px 0;
+            line-height: 1.7;
+        }
+        
+        /* Size Selector */
+        .size-selector {
+            margin: 25px 0;
+        }
+        
+        .size-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .size-chart-link {
+            color: var(--secondary);
+            font-size: 14px;
+            text-decoration: none;
+        }
+        
+        .size-chart-link:hover {
+            text-decoration: underline;
+        }
+        
+        .size-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .size-option {
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .size-option:hover {
+            border-color: var(--secondary);
+        }
+        
+        .size-option.selected {
+            background-color: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+        
+        .size-option.unavailable {
+            color: #ccc;
+            border-color: #eee;
+            text-decoration: line-through;
+            cursor: not-allowed;
+        }
+        
+        /* Quantity Selector */
+        .quantity-selector {
+            margin: 25px 0;
+        }
+        
+        .quantity-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .quantity-control {
+            display: flex;
+            align-items: center;
+        }
+        
+        .quantity-btn {
+            width: 40px;
+            height: 40px;
+            background-color: var(--light);
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .quantity-input {
+            width: 60px;
+            height: 40px;
+            text-align: center;
+            border: 1px solid #ddd;
+            margin: 0 5px;
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .add-to-cart {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            flex-grow: 1;
+            transition: all 0.3s;
+        }
+        
+        .add-to-cart:hover {
+            background-color: #C1121F;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .wishlist-btn {
+            background-color: white;
+            border: 1px solid #ddd;
+            color: var(--primary);
+            padding: 0 20px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .wishlist-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        /* Product Tabs */
+        .product-tabs {
+            margin: 40px 0;
+        }
+        
+        .tab-header {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab-btn {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 16px;
+            cursor: pointer;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .tab-btn.active {
+            border-bottom-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .tab-content {
+            padding: 25px 0;
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Shipping & Returns */
+        .shipping-info {
+            background-color: var(--light);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+        
+        .shipping-info h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+        
+        .shipping-item {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .shipping-icon {
+            color: var(--secondary);
+            margin-right: 15px;
+            font-size: 20px;
+        }
+        
+        /* Related Products */
+        .related-products {
+            margin: 60px 0;
+        }
+        
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 30px;
+            color: var(--primary);
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--highlight);
+        }
+        
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        
+        .related-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        
+        .related-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .related-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .related-details {
+            padding: 15px;
+        }
+        
+        .related-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            color: var(--primary);
+            min-height: 42px;
+            font-size: 15px;
+        }
+        
+        .related-price {
+            color: var(--accent);
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .product-layout {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .main-image {
+                height: 400px;
+            }
+            
+            .related-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .search-bar {
+                margin: 10px 0;
+                max-width: none;
+            }
+            
+            .user-actions {
+                justify-content: space-around;
+                width: 100%;
+            }
+            
+            .main-image {
+                height: 350px;
+            }
+            
+            .thumbnail-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .related-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .main-image {
+                height: 300px;
+            }
+            
+            .thumbnail {
+                height: 70px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .add-to-cart, .wishlist-btn {
+                width: 100%;
+            }
+            
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tab-header {
+                overflow-x: auto;
+                white-space: nowrap;
+                padding-bottom: 5px;
+            }
+            
+            .tab-btn {
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="logo"><style> a {
+                text-decoration:  none;
+                color: white;}</style>
+            <a href="index.html">
+                <i class="fas fa-recycle"></i>
+                ReThread
+                </a>
+            </div>
+            
+            <div class="search-bar">
+                <input type="text" placeholder="Search for men's shirts, brands, or styles...">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+            
+            <div class="user-actions">
+                <a href="account.html">
+                    <i class="fas fa-user"></i>
+                    <span>Account</span>
+                </a>
+                <a href="#">
+                    <i class="fas fa-heart"></i>
+                    <span>Wishlist</span>
+                </a>
+                <a href="#">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Cart</span>
+                </a>
+            </div>
+        </div>
+    </header>
+    
+    <div class="main-container">
+        <div class="breadcrumbs">
+            <a href="#">Home</a>
+            <span>/</span>
+            <a href="#">Men</a>
+            <span>/</span>
+            <a href="#">Shirts</a>
+            <span>/</span>
+            <a href="#">Ralph Lauren Polo Shirt</a>
+        </div>
+        
+        <div class="product-layout">
+            <div class="product-gallery">
+                <div class="badge">25% OFF</div>
+                <img src="https://images.unsplash.com/photo-1551232864-3f0890e580d9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Ralph Lauren Polo Shirt" class="main-image">
+                <div class="thumbnail-container">
+                    <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" alt="Front view" class="thumbnail active">
+                    <img src="https://images.unsplash.com/photo-1551232864-3f0890e580d9?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" alt="Back view" class="thumbnail">
+                    <img src="https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" alt="Detail view" class="thumbnail">
+                    <img src="https://images.unsplash.com/photo-1600269452121-4f2416e55c28?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" alt="Brand tag" class="thumbnail">
+                </div>
+            </div>
+            
+            <div class="product-details">
+                <div class="product-brand">RALPH LAUREN</div>
+                <h1 class="product-title">Classic Fit Polo Shirt - Navy Blue</h1>
+                
+                <div class="product-rating">
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <a href="#" class="review-count">48 reviews</a>
+                </div>
+                
+                <div class="product-price">
+                    $39.99 <span class="original-price">$55.00</span> <span class="discount">Save 25%</span>
+                </div>
+                
+                <div class="product-condition">
+                    <div class="condition-badge">Like New</div>
+                    <div class="condition-text">This item shows minimal signs of wear and has been professionally inspected</div>
+                </div>
+                
+                <div class="product-description">
+                    <p>This classic Ralph Lauren polo shirt features the iconic pony logo, made from 100% premium cotton for exceptional comfort. The navy blue color is versatile and perfect for both casual and smart-casual occasions.</p>
+                    <p>• 100% premium cotton<br>
+                       • Classic fit<br>
+                       • Ribbed collar<br>
+                       • Three-button placket<br>
+                       • Straight hem<br>
+                       • Machine washable</p>
+                </div>
+                
+                <div class="size-selector">
+                    <div class="size-title">
+                        <span>Size</span>
+                        <a href="#" class="size-chart-link">Size Guide</a>
+                    </div>
+                    <div class="size-options">
+                        <div class="size-option">XS</div>
+                        <div class="size-option">S</div>
+                        <div class="size-option selected">M</div>
+                        <div class="size-option">L</div>
+                        <div class="size-option">XL</div>
+                        <div class="size-option unavailable">XXL</div>
+                    </div>
+                </div>
+                
+                <div class="quantity-selector">
+                    <div class="quantity-title">Quantity</div>
+                    <div class="quantity-control">
+                        <button class="quantity-btn">-</button>
+                        <input type="number" value="1" min="1" class="quantity-input">
+                        <button class="quantity-btn">+</button>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="add-to-cart">Add to Cart</button>
+                    <button class="wishlist-btn"><i class="far fa-heart"></i></button>
+                </div>
+                
+                <div class="shipping-info">
+                    <h3>Shipping & Returns</h3>
+                    <div class="shipping-item">
+                        <div class="shipping-icon"><i class="fas fa-truck"></i></div>
+                        <div>
+                            <strong>Free shipping</strong> on all orders. Typically delivers in 3-5 business days.
+                        </div>
+                    </div>
+                    <div class="shipping-item">
+                        <div class="shipping-icon"><i class="fas fa-undo"></i></div>
+                        <div>
+                            <strong>Easy returns</strong> within 14 days. We provide a prepaid return label.
+                        </div>
+                    </div>
+                    <div class="shipping-item">
+                        <div class="shipping-icon"><i class="fas fa-shield-alt"></i></div>
+                        <div>
+                            <strong>Authenticity guaranteed</strong>. All items are verified by our experts.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="product-tabs">
+            <div class="tab-header">
+                <button class="tab-btn active" data-tab="description">Description</button>
+                <button class="tab-btn" data-tab="details">Details</button>
+                <button class="tab-btn" data-tab="shipping">Shipping</button>
+                <button class="tab-btn" data-tab="reviews">Reviews</button>
+            </div>
+            
+            <div class="tab-content active" id="description">
+                <h3>Product Description</h3>
+                <p>The Ralph Lauren Classic Fit Polo Shirt is a timeless wardrobe staple that combines comfort and style. Made from 100% premium cotton, this polo features a classic fit that's neither too slim nor too loose, making it flattering for most body types.</p>
+                <p>The shirt features the iconic Ralph Lauren pony logo on the left chest, a ribbed collar that maintains its shape wash after wash, and a three-button placket for adjustable ventilation. The straight hem allows for easy tucking or wearing untucked.</p>
+                <p>This particular shirt has been gently worn but remains in excellent condition with no stains, holes, or significant wear. The color remains vibrant and the fabric is soft with minimal pilling.</p>
+            </div>
+            
+            <div class="tab-content" id="details">
+                <h3>Product Details</h3>
+                <ul>
+                    <li><strong>Brand:</strong> Ralph Lauren</li>
+                    <li><strong>Model:</strong> Classic Fit Polo</li>
+                    <li><strong>Material:</strong> 100% Cotton</li>
+                    <li><strong>Fit:</strong> Classic (regular fit)</li>
+                    <li><strong>Color:</strong> Navy Blue</li>
+                    <li><strong>Pattern:</strong> Solid</li>
+                    <li><strong>Neckline:</strong> Polo collar</li>
+                    <li><strong>Sleeve Length:</strong> Short sleeve</li>
+                    <li><strong>Care Instructions:</strong> Machine wash cold, tumble dry low</li>
+                    <li><strong>Original Price:</strong> $55.00</li>
+                    <li><strong>Condition:</strong> Like New (worn 2-3 times)</li>
+                </ul>
+            </div>
+            
+            <div class="tab-content" id="shipping">
+                <h3>Shipping Information</h3>
+                <p>We offer free standard shipping on all orders within the United States. Most orders are processed within 1 business day and typically arrive within 3-5 business days after shipping.</p>
+                <p>For international shipping, please contact us for rates and delivery times. Please note that customers are responsible for any customs fees or import duties that may apply.</p>
+                <p>All items are carefully inspected before shipping and packaged securely to prevent damage during transit.</p>
+                
+                <h3>Returns & Exchanges</h3>
+                <p>We accept returns within 14 days of delivery for store credit or exchange. The item must be in its original condition with all tags attached. We provide a prepaid return shipping label for your convenience.</p>
+                <p>To initiate a return, please visit the Returns Center in your account dashboard or contact our customer service team.</p>
+            </div>
+            
+            <div class="tab-content" id="reviews">
+                <h3>Customer Reviews</h3>
+                <div class="review-summary">
+                    <div class="overall-rating">
+                        <div class="rating-stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                            <span>4.5 out of 5 (48 reviews)</span>
+                        </div>
+                    </div>
+                    <div class="review-stats">
+                        <div class="stat">
+                            <span class="label">5 stars</span>
+                            <div class="bar"><div class="fill" style="width: 70%;"></div></div>
+                            <span class="count">34</span>
+                        </div>
+                        <div class="stat">
+                            <span class="label">4 stars</span>
+                            <div class="bar"><div class="fill" style="width: 20%;"></div></div>
+                            <span class="count">10</span>
+                        </div>
+                        <div class="stat">
+                            <span class="label">3 stars</span>
+                            <div class="bar"><div class="fill" style="width: 6%;"></div></div>
+                            <span class="count">3</span>
+                        </div>
+                        <div class="stat">
+                            <span class="label">2 stars</span>
+                            <div class="bar"><div class="fill" style="width: 2%;"></div></div>
+                            <span class="count">1</span>
+                        </div>
+                        <div class="stat">
+                            <span class="label">1 star</span>
+                            <div class="bar"><div class="fill" style="width: 0%;"></div></div>
+                            <span class="count">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="review-list">
+                    <div class="review">
+                        <div class="review-header">
+                            <div class="reviewer">James L.</div>
+                            <div class="review-date">March 15, 2023</div>
+                            <div class="review-rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <div class="review-title">Perfect condition, great deal</div>
+                        <div class="review-content">
+                            <p>This polo shirt arrived in perfect condition - you'd never know it was pre-owned! The fit is true to size (I'm 5'11", 170lbs and medium fits perfectly). The fabric is high quality and the color is exactly as shown. Will definitely buy from this seller again!</p>
+                        </div>
+                    </div>
+                    
+                    <div class="review">
+                        <div class="review-header">
+                            <div class="reviewer">Michael T.</div>
+                            <div class="review-date">February 28, 2023</div>
+                            <div class="review-rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                        </div>
+                        <div class="review-title">Excellent quality</div>
+                        <div class="review-content">
+                            <p>Very happy with this purchase. The shirt is practically new with no signs of wear. The only reason I didn't give 5 stars is that the color is slightly darker than I expected, but that's my fault for not checking the color description more carefully.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="cta-button" style="background-color: var(--secondary); margin-top: 20px;">Write a Review</button>
+            </div>
+        </div>
+        
+        <div class="related-products">
+            <h2 class="section-title">You May Also Like</h2>
+            <div class="related-grid">
+                <div class="related-card">
+                    <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Casual Shirt" class="related-image">
+                    <div class="related-details">
+                        <div class="related-title">Tommy Hilfiger Classic Fit Casual Shirt</div>
+                        <div class="related-price">$29.99</div>
+                    </div>
+                </div>
+                
+                <div class="related-card">
+                    <img src="https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Denim Jacket" class="related-image">
+                    <div class="related-details">
+                        <div class="related-title">Levi's Vintage Denim Jacket</div>
+                        <div class="related-price">$45.99</div>
+                    </div>
+                </div>
+                
+                <div class="related-card">
+                    <img src="https://images.unsplash.com/photo-1600269452121-4f2416e55c28?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Sneakers" class="related-image">
+                    <div class="related-details">
+                        <div class="related-title">Nike Air Max 270 Sneakers</div>
+                        <div class="related-price">$75.99</div>
+                    </div>
+                </div>
+                
+                <div class="related-card">
+                    <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Winter Coat" class="related-image">
+                    <div class="related-details">
+                        <div class="related-title">The North Face Winter Parka</div>
+                        <div class="related-price">$89.99</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Interactive elements for the product page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Image gallery functionality
+            const mainImage = document.querySelector('.main-image');
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            
+            thumbnails.forEach(thumbnail => {
+                thumbnail.addEventListener('click', function() {
+                    // Change main image
+                    mainImage.src = this.src.replace('300', '800');
+                    
+                    // Update active thumbnail
+                    thumbnails.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Size selector functionality
+            const sizeOptions = document.querySelectorAll('.size-option');
+            
+            sizeOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    if(!this.classList.contains('unavailable')) {
+                        sizeOptions.forEach(o => o.classList.remove('selected'));
+                        this.classList.add('selected');
+                    }
+                });
+            });
+            
+            // Quantity selector functionality
+            const quantityInput = document.querySelector('.quantity-input');
+            const minusBtn = document.querySelector('.quantity-btn:first-child');
+            const plusBtn = document.querySelector('.quantity-btn:last-child');
+            
+            minusBtn.addEventListener('click', function() {
+                let value = parseInt(quantityInput.value);
+                if(value > 1) {
+                    quantityInput.value = value - 1;
+                }
+            });
+            
+            plusBtn.addEventListener('click', function() {
+                let value = parseInt(quantityInput.value);
+                quantityInput.value = value + 1;
+            });
+            
+            // Tab functionality
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Update active tab button
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show corresponding content
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if(content.id === tabId) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+            
+            // Add to cart functionality
+            const addToCartBtn = document.querySelector('.add-to-cart');
+            addToCartBtn.addEventListener('click', function() {
+                const productTitle = document.querySelector('.product-title').textContent;
+                const selectedSize = document.querySelector('.size-option.selected').textContent;
+                const quantity = quantityInput.value;
+                
+                // Visual feedback
+                this.textContent = 'Added to Cart!';
+                this.style.backgroundColor = '#2a9d8f';
+                
+                setTimeout(() => {
+                    this.textContent = 'Add to Cart';
+                    this.style.backgroundColor = '';
+                }, 2000);
+                
+                // In a real app, you would add to cart here
+                console.log(`Added to cart: ${quantity}x ${productTitle} (Size: ${selectedSize})`);
+            });
+            
+            // Wishlist functionality
+            const wishlistBtn = document.querySelector('.wishlist-btn');
+            wishlistBtn.addEventListener('click', function() {
+                const icon = this.querySelector('i');
+                if (icon.classList.contains('far')) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    this.style.color = 'var(--accent)';
+                    this.style.borderColor = 'var(--accent)';
+                } else {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                    this.style.color = '';
+                    this.style.borderColor = '';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

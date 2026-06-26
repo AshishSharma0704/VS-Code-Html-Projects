@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill Template</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+            padding:0;
+        }
+        body {
+            width: 100%; 
+            height: 297mm; 
+            margin: 0 auto;
+            padding: 10mm; 
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        
+
+        /* Basic styling for the table and form */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* Adjust column widths */
+        th:nth-child(1), td:nth-child(1) { /* Name column */
+            width: 0%; /* Increase width */
+        }
+        th:nth-child(2), td:nth-child(2) { /* Date column */
+            width:12%; /* Decrease width */
+        }
+        th:nth-child(3), td:nth-child(3) { /* Name column */
+            width: 25%; /* Increase width */
+        }
+        th:nth-child(4), td:nth-child(4) { /* Particulars column */
+            width: 30%; /* Adjust width */
+        }
+        th:nth-child(5), td:nth-child(5) { /* Name column */
+            width: 20%; /* Increase width */
+        }
+        th:nth-child(6), td:nth-child(6) { /* Rate column */
+            width: 0%; /* Decrease width */
+        }
+        th:nth-child(7), td:nth-child(7) { /* Name column */
+            width: 45%; /* Increase width */
+        }
+        th:nth-child(8), td:nth-child(8) { /* Name column */
+            width: 0%; /* Increase width */
+        }
+
+        .add-row-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #0efff3;
+            color: 000;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius:15px;
+        }
+        .add-row-btn:hover {
+            background-color: #059da2cd;
+        }
+
+        input {
+            border: none;
+            width: 100%;
+            box-sizing: border-box;
+            background: transparent;
+        }
+        input:focus {
+            outline: none; 
+        }
+
+        .bill-details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .bill-details .left{
+            width:75%;
+        }
+        .bill-details .right {
+            width: 25%;
+        }
+        .bill-details input {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        .contact{
+            width:75%;
+            position: relative;
+            left:170px;
+        }
+
+        .bill-header {
+            text-align: center;
+            margin-bottom: 0px;
+            position: inherit;
+            margin-top:-120px;
+            
+        }
+        .bill-header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .bill-header p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .logo-img {
+            width: 200px; /* Adjust the size as needed */
+            display: block;
+            margin: 0 0 ; /* Center the logo */
+            margin-bottom: 0px;
+            position: relative;
+            top:95px;
+        }
+
+        /* Quadrant styling */
+        .quadrant-container {
+            margin-bottom: -55px;
+            margin-top: -5px;
+            position: relative;
+            left: 15px;;
+        }
+        .quadrant {
+            border: 1px solid black;
+            margin: 0px;
+            padding: 0px;
+        }
+        .quadrant-top-left {
+            width: 64px;
+            position: relative;
+            top: -14px;
+            border-top: none;
+            border-left: none;
+            direction: rtl;
+        }
+        .quadrant-top-right {
+            width: 64px;
+            position: relative;
+            left: 64px;
+            top: -34px;
+            border-top: none;
+            border-right: none;
+        }
+        .quadrant-bottom-left {
+            width: 64px;
+            position: relative;
+            top: -34px;
+            border-bottom: none;
+            border-left: none;
+            border-top:none;
+            direction: rtl;
+        }
+        .quadrant-bottom-right {
+            width: 64px;
+            position: relative;
+            top: -54px;
+            left: 64px;
+            border-bottom: none;
+            border-right: none;
+            border-top:none;
+        }
+
+        .bill-footer {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .bill-footer .total {
+            font-weight: bold;
+        }
+
+        .bill-details .left p,
+        .bill-details .right p {
+            display: flex;
+            align-items: center;
+            margin: 0px 0;
+        }
+        .bill-details .left input,
+        .bill-details .right input {
+            margin-left: 5px;
+        }
+
+        .print-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #0efff3;
+            color: 000;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 15px;
+        }
+        .print-btn:hover {
+            background-color: #059da2cd;
+        }
+        .delete-row-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #6dfff8;
+            color: 000;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .delete-row-btn:hover {
+            background-color: #059da2cd;
+        }
+        .bold{
+            font-weight: bold;
+        }
+       .signature{
+        position: relative;
+        left:230px;
+        bottom:110px;
+        margin-left:-75px;
+        z-index:-1;
+       }
+        
+        #signature{
+            width:15%;
+            position:relative;
+        }
+        .authorized-sign{
+            margin:-5px;
+        }
+        .for{
+            margin-bottom:0px;
+        }
+        
+        .summary-table {
+    width: 25%; /* Adjust width as needed */
+    border-collapse: collapse; /* Remove space between cells */
+    margin-top: 0px; /* Add some spacing above the table */
+    border: 1px solid #000; /* Add a border to the table */
+}
+
+.summary-table td {
+    padding: 10px; /* Add padding inside cells */
+    border: 1px solid #000; /* Add borders to cells */
+    text-align: center; /* Center-align text */
+}
+
+.summary-table td p {
+    margin: 0 0 5px 0; /* Add spacing below the paragraph */
+    font-weight: bold; /* Make labels bold */
+}
+
+.summary-table input {
+    width: 100px; /* Set a fixed width for inputs */
+    padding: 5px; /* Add padding inside inputs */
+    box-sizing: border-box; /* Include padding in width calculation */
+    text-align: center; /* Right-align input text */
+    border: 1px solid #ccc; /* Add a subtle border to inputs */
+    border-radius: 4px; /* Add rounded corners to inputs */
+}
+
+.summary-table input:focus {
+    outline: none; /* Remove default focus outline */
+    border-color: #0efff3; /* Highlight input border on focus */
+}
+        @media print {
+            .add-row-btn, .print-btn, .delete-row-btn {
+                display: none;
+            }
+
+            .bill-footer,
+            .summary-table,
+            .summary-table tr,
+            .summary-table td,
+            .summary-table th {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            .bill-footer {
+                display: block;
+                page-break-before: auto;
+                margin-top: 50px;
+            }
+
+            .summary-table {
+                width: 25%;
+                margin: 20 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bill-template">
+        <header class="bill-header">
+            <div class="logo">
+                <h1><img src="https://lh3.googleusercontent.com/d/1FLMEtnOXcI-pe5OMoA2RYAhcRIRJ5OhP=w1000" class="logo-img"alt="VARADAVINAYAKA Dental Lab">
+                </h1>
+            </div>
+            <div class="contact">
+                <h1>VARADAVINAYAKA DENTAL LAB</h1>
+                <p class="bold">107 Ganpati Nagar, Mansarovar(Raj.) - 302020</p>
+                <p>Email: varadavinayaka@yahoo.com</p>
+            </div>
+            
+            <div class="contact">
+                <p>Contact: +919887197719, 6375956819</p>
+            </div>
+        </header>
+        
+        <section class="bill-details">
+            <div class="left">
+                <p><input type="text" placeholder="Enter Bill Number"></p> 
+                <p>Dr. <input type="text" placeholder="Enter Doctor's Name"></p>
+            </div>
+            <div class="right">
+                <p> </p>
+                <p>Date: <input type="text"></p>
+            </div>
+        </section>
+        
+        <table class="bill-table" id="billTable">
+            <thead>
+                <tr>
+                    <th>S.</th>
+                    <th>Date</th>
+                    <th>Patient Name</th>
+                    <th>Particulars</th>
+                    <th>Work</th>
+                    <th>Unit</th>
+                    <th>Rate</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Initial row for filling data -->
+                <tr>
+                    <td>1</td>
+                    <td><input type="text"></td>
+                    <td><input type="text-area" placeholder="Enter Name"></td>
+                    <td>
+                        <input type="text">
+                        <div class="quadrant-container">
+                            <div class="quadrant quadrant-top-left"><input type="text"></div>
+                            <div class="quadrant quadrant-top-right"><input type="text"></div>
+                            <div class="quadrant quadrant-bottom-left"><input type="text"></div>
+                            <div class="quadrant quadrant-bottom-right"><input type="text"></div>
+                            <div class="cross-divider"></div>
+                        </div>
+                    </td>
+                    <td><input type="text" placeholder="Enter work"></td>
+                    <td><input type="text" placeholder="Enter Quantity"></td>
+                    <td><input type="text" placeholder="Enter Rate"></td>
+                    <td><input type="text" class="amount" placeholder="Enter Amount" oninput="calculateTotal()"></td>
+                </tr>
+            </tbody>
+        </table>
+
+    <button class="add-row-btn" onclick="addRow()">Add Row</button>
+        <button class="delete-row-btn" onclick="deleteRow()">Delete Last Row</button>
+
+        <button class="print-btn" onclick="printBill()">Print Bill</button>
+        
+        <footer class="bill-footer">
+            <table class="summary-table">
+                <tr>
+                    <td class="final-amount">
+                        <p>Total Amount:</p>
+                        <input id="finalAmount" type="text" placeholder="0.00"readonly>
+                    </td>
+                    <td class="due">
+                        <p>Due:</p>
+                        <input id="due" type="number" placeholder="0.00" oninput="calculateTotal()">
+                    </td>
+                    <td class="total">
+                        <p>To Pay:</p>
+                        <input id="totalAmount" type="text" placeholder="0.00"readonly>
+                    </td>
+                </tr>
+            </table>
+            <div class="signature">
+                <p class="for">For: VARADAVINAYAKA Dental Lab</p>
+                <img src="https://lh3.googleusercontent.com/d/1BUps73iQM3GzE-gqSNCFRrR6e5pt5_WQ=w1000"  id="signature" alt="signature">
+                <p class="authorized-sign">Authorized Sign</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // JavaScript function to add a new row to the table
+        function addRow() {
+            const table = document.getElementById("billTable").getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow(table.rows.length);
+
+            // Add cells to the new row
+            const cells = [
+                table.rows.length, // S.No
+                '<input type="text">', // Date
+                '<input type="text" >', // Name
+                `<input type="text">
+                <div class="quadrant-container">
+                    <div class="quadrant quadrant-top-left"><input type="text"></div>
+                    <div class="quadrant quadrant-top-right"><input type="text"></div>
+                    <div class="quadrant quadrant-bottom-left"><input type="text"></div>
+                    <div class="quadrant quadrant-bottom-right"><input type="text"></div>
+                    <div class="cross-divider"></div>
+                </div>`, // Particulars with quadrant
+               '<input type="text" >',
+                '<input type="text" >', // Quantity
+                '<input type="text" >', // Rate
+                '<input type="text" class="amount"  oninput="calculateTotal()">' // Amount
+            ];
+
+            // Insert data into cells
+            cells.forEach((cellData, index) => {
+                const cell = newRow.insertCell(index);
+                cell.innerHTML = cellData;
+            });
+        }
+
+        // JavaScript function to delete the last row from the table
+        function deleteRow() {
+            const table = document.getElementById("billTable").getElementsByTagName('tbody')[0];
+            if (table.rows.length > 1) { // Ensure there's at least one row remaining
+                table.deleteRow(table.rows.length - 1);
+                calculateTotal(); // Recalculate the total after deleting a row
+            }
+        }
+
+        // JavaScript function to calculate the total amount
+        function calculateTotal() {
+            const amounts = document.querySelectorAll('.amount'); // Get all amount inputs
+            let total = 0;
+
+            // Sum up all the amounts
+            amounts.forEach(input => {
+                const value = parseFloat(input.value) || 0; // Convert to number or default to 0
+                total += value;
+            });
+
+            // Update the final amount
+            document.getElementById('finalAmount').value = total.toFixed(2);
+
+            // Calculate the total including due
+            let due = parseFloat(document.getElementById('due').value) || 0;
+            document.getElementById('totalAmount').value = (total + due).toFixed(2);
+        }
+
+
+        // JavaScript function to print the bill
+        function printBill() {
+            window.print(); // Trigger the print dialog
+        }
+        
+        
+    </script>
+</body>
+</html>

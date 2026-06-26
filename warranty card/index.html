@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Printable Page</title>
+    <style>
+        /* Set the size of the page for printing */
+        @media print {
+            body {
+                width: 1013px;
+                height: 638px;
+                margin: 0;
+                padding: 0;
+            }
+        }
+
+        /* Set the background image for the page */
+        body {
+            background-image: url('https://drive.google.com/uc?export=view&id=1LVz3dNMIDHawepU-n0LA9eVVayfEDBRz'); /* Your Google Drive image link */
+            background-size: cover;
+            background-position: center;
+            width: 1013px;
+            height: 638px;
+            margin: 0;
+            display: flex;
+            flex-direction: column; /* Stack children vertically */
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Style the print button */
+        #print-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px; /* Add space between the image and the button */
+        }
+
+        #print-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Style the image */
+        img {
+            max-width: 100%;
+            max-height: 80%; /* Adjust height to leave space for the button */
+            display: block;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Insert the image -->
+    <img src="https://lh3.googleusercontent.com/d/1LVz3dNMIDHawepU-n0LA9eVVayfEDBRz=w1000" alt="Google Drive Image" width="1000">
+
+    <!-- Print button -->
+    <button id="print-button">Print this page</button>
+
+    <script>
+        // Add event listener to the print button
+        document.getElementById('print-button').addEventListener('click', function() {
+            window.print();
+        });
+    </script>
+</body>
+</html>

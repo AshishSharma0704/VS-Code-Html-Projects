@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealFlow - Advanced Hospital Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+        }
+        
+        .pulse { animation: pulse 2s infinite; }
+        .slide-in { animation: slideIn 0.5s ease-out; }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        .glow { animation: glow 2s infinite; }
+        
+        .patient-bg { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .doctor-bg { background: linear-gradient(135deg, #10b981, #059669); }
+        .nurse-bg { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .admin-bg { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .pharmacist-bg { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        
+        .emergency-mode {
+            background: linear-gradient(45deg, #dc2626, #b91c1c) !important;
+            color: white !important;
+        }
+        
+        .fingerprint-scanner {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #10b981, #059669);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .fingerprint-scanner::before {
+            content: '';
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-md border-b-4 border-blue-500">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-heartbeat text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-blue-600">HealFlow</h1>
+                    <p class="text-sm text-gray-600">Advanced Hospital Management System</p>
+                </div>
+            </div>
+            
+            <!-- User Profile (Hidden initially) -->
+            <div id="userProfile" class="hidden flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiMzYjgyZjYiLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI4IiB5PSI4Ij4KPHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYzAtMi42Ni01LjMzLTQtOC00eiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cjwvc3ZnPgo=" alt="User" class="w-10 h-10 rounded-full">
+                    <div>
+                        <p class="text-sm font-medium" id="userName">User Name</p>
+                        <p class="text-xs text-gray-500" id="userRole">Role</p>
+                    </div>
+                </div>
+                <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Emergency Banner (Hidden initially) -->
+    <div id="emergencyBanner" class="hidden bg-red-600 text-white text-center py-2 pulse">
+        <i class="fas fa-exclamation-triangle mr-2"></i>
+        <strong>EMERGENCY MODE ACTIVATED</strong> - All non-critical systems on standby
+    </div>
+
+    <!-- Main Content Container -->
+    <div id="mainContent">
+        <!-- Login Selection Screen (Front Page) -->
+        <div id="loginScreen" class="container mx-auto px-4 py-12">
+            <div class="text-center mb-12 fade-in">
+                <h1 class="text-5xl font-bold text-gray-800 mb-4">Welcome to HealFlow</h1>
+                <p class="text-xl text-gray-600 mb-8">Secure Healthcare Management Platform</p>
+                
+                <div class="flex justify-center space-x-6 mb-8">
+                    <div class="bg-green-100 text-green-800 px-4 py-2 rounded-full flex items-center">
+                        <i class="fas fa-shield-alt mr-2"></i>
+                        Bank-Level Security
+                    </div>
+                    <div class="bg-green-100 text-green-800 px-4 py-2 rounded-full flex items-center">
+                        <i class="fas fa-robot mr-2"></i>
+                        AI-Powered
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Patient Portal Card -->
+                <div class="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 slide-in">
+                    <div class="text-center mb-6">
+                        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 glow">
+                            <i class="fas fa-user-injured text-blue-500 text-3xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Patient Portal</h3>
+                        <p class="text-gray-600">Access your health records, book appointments, and manage your healthcare journey</p>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <button onclick="openPatientLogin()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg transition-colors flex items-center justify-center">
+                            <i class="fas fa-id-card mr-2"></i>
+                            Aadhaar / Mobile Login
+                        </button>
+                        <button onclick="openBiometricLogin('patient')" class="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg transition-colors flex items-center justify-center">
+                            <i class="fas fa-fingerprint mr-2"></i>
+                            Biometric Login
+                        </button>
+                        <a href="#" class="block text-center text-blue-500 hover:text-blue-600 transition-colors">
+                            <i class="fas fa-user-plus mr-1"></i>
+                            New Patient Registration
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Staff Portal Card -->
+                <div class="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 slide-in">
+                    <div class="text-center mb-6">
+                        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 glow">
+                            <i class="fas fa-user-md text-green-500 text-3xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Staff Portal</h3>
+                        <p class="text-gray-600">Healthcare professionals and administrative staff access point</p>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <button onclick="openStaffLogin()" class="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-lg transition-colors flex items-center justify-center">
+                            <i class="fas fa-stethoscope mr-2"></i>
+                            Doctor Login
+                        </button>
+                        <button onclick="openBiometricLogin('staff')" class="w-full bg-purple-500 hover:bg-purple-600 text-white py-3 px-6 rounded-lg transition-colors flex items-center justify-center">
+                            <i class="fas fa-fingerprint mr-2"></i>
+                            Biometric Login
+                        </button>
+                        <button onclick="openAdminLogin()" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-lg transition-colors flex items-center justify-center">
+                            <i class="fas fa-user-shield mr-2"></i>
+                            Admin Login
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Interface (Hidden initially) -->
+        <div id="mainInterface" class="hidden">
+            <!-- Navigation Tabs -->
+            <nav class="bg-white shadow-md">
+                <div class="container mx-auto px-4">
+                    <div class="flex space-x-8 overflow-x-auto">
+                        <button onclick="showTab('dashboard')" class="nav-tab active py-4 px-6 border-b-2 border-blue-500 text-blue-600 font-medium whitespace-nowrap">
+                            <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                        </button>
+                        <button onclick="showTab('appointments')" class="nav-tab py-4 px-6 border-b-2 border-transparent text-gray-600 hover:text-blue-600 font-medium whitespace-nowrap">
+                            <i class="fas fa-calendar-alt mr-2"></i>Appointments
+                        </button>
+                        <button onclick="showTab('records')" class="nav-tab py-4 px-6 border-b-2 border-transparent text-gray-600 hover:text-blue-600 font-medium whitespace-nowrap">
+                            <i class="fas fa-file-medical mr-2"></i>Health Records
+                        </button>
+                        <button onclick="showTab('pharmacy')" class="nav-tab py-4 px-6 border-b-2 border-transparent text-gray-600 hover:text-blue-600 font-medium whitespace-nowrap">
+                            <i class="fas fa-pills mr-2"></i>Pharmacy
+                        </button>
+                        <button onclick="showTab('emergency')" class="nav-tab py-4 px-6 border-b-2 border-transparent text-gray-600 hover:text-red-600 font-medium whitespace-nowrap">
+                            <i class="fas fa-ambulance mr-2"></i>Emergency
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Tab Content -->
+            <div class="container mx-auto px-4 py-8">
+                <!-- Dashboard Tab -->
+                <div id="dashboardTab" class="tab-content">
+                    <!-- Patient Dashboard (Default) -->
+                    <div id="patientDashboard">
+                        <!-- Quick Stats -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <div class="bg-white rounded-lg shadow-md p-6">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-600">Health Score</p>
+                                        <p class="text-2xl font-bold text-green-500">85%</p>
+                                    </div>
+                                    <i class="fas fa-heart text-green-500 text-2xl"></i>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg shadow-md p-6">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-600">Next Appointment</p>
+                                        <p class="text-lg font-bold text-blue-500">Tomorrow</p>
+                                    </div>
+                                    <i class="fas fa-calendar text-blue-500 text-2xl"></i>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg shadow-md p-6">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-600">Active Prescriptions</p>
+                                        <p class="text-2xl font-bold text-purple-500">3</p>
+                                    </div>
+                                    <i class="fas fa-prescription-bottle text-purple-500 text-2xl"></i>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg shadow-md p-6">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-600">Notifications</p>
+                                        <p class="text-2xl font-bold text-orange-500">2</p>
+                                    </div>
+                                    <i class="fas fa-bell text-orange-500 text-2xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activities -->
+                        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                            <h3 class="text-xl font-bold mb-4">Recent Activities</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
+                                    <i class="fas fa-check-circle text-green-500"></i>
+                                    <div>
+                                        <p class="font-medium">Blood test completed</p>
+                                        <p class="text-sm text-gray-600">2 hours ago</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
+                                    <i class="fas fa-pills text-blue-500"></i>
+                                    <div>
+                                        <p class="font-medium">Prescription refilled</p>
+                                        <p class="text-sm text-gray-600">1 day ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Health Assistant -->
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-xl font-bold">AI Health Assistant</h3>
+                                <button onclick="toggleAIChat()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                                    <i class="fas fa-robot mr-2"></i>Chat
+                                </button>
+                            </div>
+                            <div id="aiChatBox" class="hidden">
+                                <div class="bg-gray-50 rounded-lg p-4 mb-4 h-64 overflow-y-auto" id="chatMessages">
+                                    <div class="mb-2">
+                                        <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm">AI Assistant</span>
+                                        <p class="mt-1">Hello! How can I help you with your health today?</p>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <input type="text" id="chatInput" placeholder="Ask about your health..." class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <button onclick="sendMessage()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin Dashboard (Hidden by default) -->
+                    <div id="adminDashboard" class="hidden">
+                        <!-- Admin Navigation -->
+                        <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="showAdminSection('analytics')" class="admin-nav-btn bg-blue-500 text-white px-4 py-2 rounded-lg">
+                                    <i class="fas fa-chart-bar mr-2"></i>Analytics
+                                </button>
+                                <button onclick="showAdminSection('doctors')" class="admin-nav-btn bg-gray-300 text-gray-700 px-4 py-2 rounded-lg">
+                                    <i class="fas fa-user-md mr-2"></i>Doctors
+                                </button>
+                                <button onclick="showAdminSection('nurses')" class="admin-nav-btn bg-gray-300 text-gray-700 px-4 py-2 rounded-lg">
+                                    <i class="fas fa-user-nurse mr-2"></i>Nurses
+                                </button>
+                                <button onclick="showAdminSection('staff')" class="admin-nav-btn bg-gray-300 text-gray-700 px-4 py-2 rounded-lg">
+                                    <i class="fas fa-users mr-2"></i>Staff
+                                </button>
+                                <button onclick="showAdminSection('scheduling')" class="admin-nav-btn bg-gray-300 text-gray-700 px-4 py-2 rounded-lg">
+                                    <i class="fas fa-calendar-alt mr-2"></i>Scheduling
+                                </button>
+                                <button onclick="showAdminSection('resources')" class="admin-nav-btn bg-gray-300 text-gray-700 px-4 py-2 rounded-lg">
+                                    <i class="fas fa-boxes mr-2"></i>Resources
+                                </button>
+                                <button onclick="showAdminSection('patients')" class="admin-nav-btn bg-gray-300 text-gray-700 px-4 py-2 rounded-lg">
+                                    <i class="fas fa-user-injured mr-2"></i>Patients
+                                </button>
+                                <button onclick="showAdminSection('beds')" class="admin-nav-btn bg-gray-300 text-gray-700 px-4 py-2 rounded-lg">
+                                    <i class="fas fa-bed mr-2"></i>Bed Allocation
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Analytics Section -->
+                        <div id="analyticsSection" class="admin-section">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                                <div class="bg-white rounded-lg shadow-md p-6">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm text-gray-600">Total Patients</p>
+                                            <p class="text-2xl font-bold text-blue-500">1,247</p>
+                                        </div>
+                                        <i class="fas fa-user-injured text-blue-500 text-2xl"></i>
+                                    </div>
+                                </div>
+                                <div class="bg-white rounded-lg shadow-md p-6">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm text-gray-600">Active Staff</p>
+                                            <p class="text-2xl font-bold text-green-500">156</p>
+                                        </div>
+                                        <i class="fas fa-users text-green-500 text-2xl"></i>
+                                    </div>
+                                </div>
+                                <div class="bg-white rounded-lg shadow-md p-6">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm text-gray-600">Bed Occupancy</p>
+                                            <p class="text-2xl font-bold text-orange-500">78%</p>
+                                        </div>
+                                        <i class="fas fa-bed text-orange-500 text-2xl"></i>
+                                    </div>
+                                </div>
+                                <div class="bg-white rounded-lg shadow-md p-6">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm text-gray-600">Revenue</p>
+                                            <p class="text-2xl font-bold text-purple-500">₹2.4M</p>
+                                        </div>
+                                        <i class="fas fa-rupee-sign text-purple-500 text-2xl"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="bg-white rounded-lg shadow-md p-6">
+                                    <h3 class="text-xl font-bold mb-4">Patient Admissions (This Month)</h3>
+                                    <div class="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+                                        <div class="text-center">
+                                            <i class="fas fa-chart-line text-4xl text-blue-500 mb-2"></i>
+                                            <p class="text-gray-600">Chart visualization would go here</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-white rounded-lg shadow-md p-6">
+                                    <h3 class="text-xl font-bold mb-4">Department Performance</h3>
+                                    <div class="space-y-4">
+                                        <div class="flex justify-between items-center">
+                                            <span>Cardiology</span>
+                                            <div class="w-32 bg-gray-200 rounded-full h-2">
+                                                <div class="bg-green-500 h-2 rounded-full" style="width: 85%"></div>
+                                            </div>
+                                            <span class="text-sm text-gray-600">85%</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span>Neurology</span>
+                                            <div class="w-32 bg-gray-200 rounded-full h-2">
+                                                <div class="bg-blue-500 h-2 rounded-full" style="width: 92%"></div>
+                                            </div>
+                                            <span class="text-sm text-gray-600">92%</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span>Emergency</span>
+                                            <div class="w-32 bg-gray-200 rounded-full h-2">
+                                                <div class="bg-red-500 h-2 rounded-full" style="width: 78%"></div>
+                                            </div>
+                                            <span class="text-sm text-gray-600">78%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Doctors Management Section -->
+                        <div id="doctorsSection" class="admin-section hidden">
+                            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-xl font-bold">Doctor Management</h3>
+                                    <button onclick="addDoctor()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                                        <i class="fas fa-plus mr-2"></i>Add Doctor
+                                    </button>
+                                </div>
+                                
+                                <div class="overflow-x-auto">
+                                    <table class="w-full table-auto">
+                                        <thead>
+                                            <tr class="bg-gray-50">
+                                                <th class="px-4 py-2 text-left">Name</th>
+                                                <th class="px-4 py-2 text-left">Specialization</th>
+                                                <th class="px-4 py-2 text-left">Experience</th>
+                                                <th class="px-4 py-2 text-left">Status</th>
+                                                <th class="px-4 py-2 text-left">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="border-b">
+                                                <td class="px-4 py-2">Dr. John Smith</td>
+                                                <td class="px-4 py-2">Cardiology</td>
+                                                <td class="px-4 py-2">15 years</td>
+                                                <td class="px-4 py-2"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Active</span></td>
+                                                <td class="px-4 py-2">
+                                                    <button onclick="editDoctor('Dr. John Smith')" class="bg-blue-500 text-white px-2 py-1 rounded text-xs mr-1">Edit</button>
+                                                    <button onclick="viewDoctorDetails('Dr. John Smith')" class="bg-gray-500 text-white px-2 py-1 rounded text-xs">View</button>
+                                                </td>
+                                            </tr>
+                                            <tr class="border-b">
+                                                <td class="px-4 py-2">Dr. Sarah Johnson</td>
+                                                <td class="px-4 py-2">Neurology</td>
+                                                <td class="px-4 py-2">12 years</td>
+                                                <td class="px-4 py-2"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Active</span></td>
+                                                <td class="px-4 py-2">
+                                                    <button onclick="editDoctor('Dr. Sarah Johnson')" class="bg-blue-500 text-white px-2 py-1 rounded text-xs mr-1">Edit</button>
+                                                    <button onclick="viewDoctorDetails('Dr. Sarah Johnson')" class="bg-gray-500 text-white px-2 py-1 rounded text-xs">View</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nurses Management Section -->
+                        <div id="nursesSection" class="admin-section hidden">
+                            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-xl font-bold">Nurse Management</h3>
+                                    <button onclick="addNurse()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                                        <i class="fas fa-plus mr-2"></i>Add Nurse
+                                    </button>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div class="border border-gray-200 rounded-lg p-4">
+                                        <div class="flex items-center mb-3">
+                                            <i class="fas fa-user-nurse text-purple-500 text-2xl mr-3"></i>
+                                            <div>
+                                                <h4 class="font-medium">Mary Wilson</h4>
+                                                <p class="text-sm text-gray-600">ICU Department</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-sm text-gray-600 mb-2">
+                                            <p>Shift: Night (8 PM - 8 AM)</p>
+                                            <p>Experience: 8 years</p>
+                                        </div>
+                                        <div class="flex space-x-2">
+                                            <button onclick="editNurse('Mary Wilson')" class="flex-1 bg-blue-500 text-white py-1 px-2 rounded text-xs">Edit</button>
+                                            <button onclick="viewNurseSchedule('Mary Wilson')" class="flex-1 bg-purple-500 text-white py-1 px-2 rounded text-xs">Schedule</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="border border-gray-200 rounded-lg p-4">
+                                        <div class="flex items-center mb-3">
+                                            <i class="fas fa-user-nurse text-purple-500 text-2xl mr-3"></i>
+                                            <div>
+                                                <h4 class="font-medium">Lisa Brown</h4>
+                                                <p class="text-sm text-gray-600">Emergency</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-sm text-gray-600 mb-2">
+                                            <p>Shift: Day (8 AM - 8 PM)</p>
+                                            <p>Experience: 5 years</p>
+                                        </div>
+                                        <div class="flex space-x-2">
+                                            <button onclick="editNurse('Lisa Brown')" class="flex-1 bg-blue-500 text-white py-1 px-2 rounded text-xs">Edit</button>
+                                            <button onclick="viewNurseSchedule('Lisa Brown')" class="flex-1 bg-purple-500 text-white py-1 px-2 rounded text-xs">Schedule</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Staff Management Section -->
+                        <div id="staffSection" class="admin-section hidden">
+                            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-xl font-bold">Staff Management</h3>
+                                    <button onclick="addStaff()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                                        <i class="fas fa-plus mr-2"></i>Add Staff
+                                    </button>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <h4 class="font-medium mb-3">Administrative Staff</h4>
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                                <div>
+                                                    <p class="font-medium">Robert Davis</p>
+                                                    <p class="text-sm text-gray-600">Reception Manager</p>
+                                                </div>
+                                                <button onclick="viewStaffDetails('Robert Davis')" class="bg-blue-500 text-white px-3 py-1 rounded text-xs">View</button>
+                                            </div>
+                                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                                <div>
+                                                    <p class="font-medium">Jennifer Lee</p>
+                                                    <p class="text-sm text-gray-600">HR Coordinator</p>
+                                                </div>
+                                                <button onclick="viewStaffDetails('Jennifer Lee')" class="bg-blue-500 text-white px-3 py-1 rounded text-xs">View</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <h4 class="font-medium mb-3">Support Staff</h4>
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                                <div>
+                                                    <p class="font-medium">Michael Chen</p>
+                                                    <p class="text-sm text-gray-600">IT Support</p>
+                                                </div>
+                                                <button onclick="viewStaffDetails('Michael Chen')" class="bg-blue-500 text-white px-3 py-1 rounded text-xs">View</button>
+                                            </div>
+                                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                                <div>
+                                                    <p class="font-medium">Amanda Garcia</p>
+                                                    <p class="text-sm text-gray-600">Pharmacy Assistant</p>
+                                                </div>
+                                                <button onclick="viewStaffDetails('Amanda Garcia')" class="bg-blue-500 text-white px-3 py-1 rounded text-xs">View</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scheduling Section -->
+                        <div id="schedulingSection" class="admin-section hidden">
+                            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                                <h3 class="text-xl font-bold mb-4">Staff Scheduling</h3>
+                                
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div>
+                                        <h4 class="font-medium mb-3">Today's Schedule</h4>
+                                        <div class="space-y-3">
+                                            <div class="border-l-4 border-blue-500 pl-4 py-2">
+                                                <p class="font-medium">Dr. Smith - Cardiology</p>
+                                                <p class="text-sm text-gray-600">9:00 AM - 5:00 PM</p>
+                                            </div>
+                                            <div class="border-l-4 border-green-500 pl-4 py-2">
+                                                <p class="font-medium">Nurse Mary - ICU</p>
+                                                <p class="text-sm text-gray-600">8:00 PM - 8:00 AM</p>
+                                            </div>
+                                            <div class="border-l-4 border-purple-500 pl-4 py-2">
+                                                <p class="font-medium">Dr. Johnson - Emergency</p>
+                                                <p class="text-sm text-gray-600">6:00 PM - 6:00 AM</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <h4 class="font-medium mb-3">Schedule Management</h4>
+                                        <div class="space-y-3">
+                                            <button onclick="createSchedule()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg text-left">
+                                                <i class="fas fa-calendar-plus mr-2"></i>Create New Schedule
+                                            </button>
+                                            <button onclick="viewWeeklySchedule()" class="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg text-left">
+                                                <i class="fas fa-calendar-week mr-2"></i>View Weekly Schedule
+                                            </button>
+                                            <button onclick="manageShifts()" class="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded-lg text-left">
+                                                <i class="fas fa-clock mr-2"></i>Manage Shifts
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resources Management Section -->
+                        <div id="resourcesSection" class="admin-section hidden">
+                            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                                <h3 class="text-xl font-bold mb-4">Resource Management</h3>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    <div class="border border-gray-200 rounded-lg p-4">
+                                        <h4 class="font-medium mb-3 flex items-center">
+                                            <i class="fas fa-x-ray text-blue-500 mr-2"></i>
+                                            Medical Equipment
+                                        </h4>
+                                        <div class="space-y-2 text-sm">
+                                            <div class="flex justify-between">
+                                                <span>X-Ray Machines</span>
+                                                <span class="text-green-600">3 Available</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>MRI Scanner</span>
+                                                <span class="text-yellow-600">1 In Use</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Ventilators</span>
+                                                <span class="text-green-600">8 Available</span>
+                                            </div>
+                                        </div>
+                                        <button onclick="manageEquipment()" class="w-full mt-3 bg-blue-500 text-white py-1 px-3 rounded text-sm">Manage</button>
+                                    </div>
+                                    
+                                    <div class="border border-gray-200 rounded-lg p-4">
+                                        <h4 class="font-medium mb-3 flex items-center">
+                                            <i class="fas fa-pills text-green-500 mr-2"></i>
+                                            Pharmacy Inventory
+                                        </h4>
+                                        <div class="space-y-2 text-sm">
+                                            <div class="flex justify-between">
+                                                <span>Antibiotics</span>
+                                                <span class="text-green-600">In Stock</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Pain Relievers</span>
+                                                <span class="text-red-600">Low Stock</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Vaccines</span>
+                                                <span class="text-green-600">In Stock</span>
+                                            </div>
+                                        </div>
+                                        <button onclick="manageInventory()" class="w-full mt-3 bg-green-500 text-white py-1 px-3 rounded text-sm">Manage</button>
+                                    </div>
+                                    
+                                    <div class="border border-gray-200 rounded-lg p-4">
+                                        <h4 class="font-medium mb-3 flex items-center">
+                                            <i class="fas fa-building text-purple-500 mr-2"></i>
+                                            Facilities
+                                        </h4>
+                                        <div class="space-y-2 text-sm">
+                                            <div class="flex justify-between">
+                                                <span>Operating Rooms</span>
+                                                <span class="text-green-600">2 Available</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>ICU Rooms</span>
+                                                <span class="text-yellow-600">1 Available</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Emergency Rooms</span>
+                                                <span class="text-green-600">3 Available</span>
+                                            </div>
+                                        </div>
+                                        <button onclick="manageFacilities()" class="w-full mt-3 bg-purple-500 text-white py-1 px-3 rounded text-sm">Manage</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Patients Management Section -->
+                        <div id="patientsSection" class="admin-section hidden">
+                            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-xl font-bold">Patient Management</h3>
+                                    <div class="flex space-x-2">
+                                        <input type="text" placeholder="Search patients..." class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                                        <button onclick="searchPatients()" class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm">Search</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="overflow-x-auto">
+                                    <table class="w-full table-auto">
+                                        <thead>
+                                            <tr class="bg-gray-50">
+                                                <th class="px-4 py-2 text-left">Patient ID</th>
+                                                <th class="px-4 py-2 text-left">Name</th>
+                                                <th class="px-4 py-2 text-left">Age</th>
+                                                <th class="px-4 py-2 text-left">Department</th>
+                                                <th class="px-4 py-2 text-left">Status</th>
+                                                <th class="px-4 py-2 text-left">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="border-b">
+                                                <td class="px-4 py-2">P001</td>
+                                                <td class="px-4 py-2">John Doe</td>
+                                                <td class="px-4 py-2">45</td>
+                                                <td class="px-4 py-2">Cardiology</td>
+                                                <td class="px-4 py-2"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Admitted</span></td>
+                                                <td class="px-4 py-2">
+                                                    <button onclick="viewPatientRecords('P001')" class="bg-blue-500 text-white px-2 py-1 rounded text-xs mr-1">Records</button>
+                                                    <button onclick="viewPatientReports('P001')" class="bg-green-500 text-white px-2 py-1 rounded text-xs">Reports</button>
+                                                </td>
+                                            </tr>
+                                            <tr class="border-b">
+                                                <td class="px-4 py-2">P002</td>
+                                                <td class="px-4 py-2">Jane Smith</td>
+                                                <td class="px-4 py-2">32</td>
+                                                <td class="px-4 py-2">Neurology</td>
+                                                <td class="px-4 py-2"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">Outpatient</span></td>
+                                                <td class="px-4 py-2">
+                                                    <button onclick="viewPatientRecords('P002')" class="bg-blue-500 text-white px-2 py-1 rounded text-xs mr-1">Records</button>
+                                                    <button onclick="viewPatientReports('P002')" class="bg-green-500 text-white px-2 py-1 rounded text-xs">Reports</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bed Allocation Section -->
+                        <div id="bedsSection" class="admin-section hidden">
+                            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                                <h3 class="text-xl font-bold mb-4">Bed Allocation Management</h3>
+                                
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div>
+                                        <h4 class="font-medium mb-3">Bed Status Overview</h4>
+                                        <div class="space-y-4">
+                                            <div class="border border-gray-200 rounded-lg p-4">
+                                                <div class="flex justify-between items-center mb-2">
+                                                    <span class="font-medium">General Ward</span>
+                                                    <span class="text-sm text-gray-600">Floor 2</span>
+                                                </div>
+                                                <div class="flex justify-between text-sm">
+                                                    <span>Total: 50</span>
+                                                    <span class="text-green-600">Available: 12</span>
+                                                    <span class="text-red-600">Occupied: 38</span>
+                                                </div>
+                                                <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                                                    <div class="bg-red-500 h-2 rounded-full" style="width: 76%"></div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="border border-gray-200 rounded-lg p-4">
+                                                <div class="flex justify-between items-center mb-2">
+                                                    <span class="font-medium">ICU</span>
+                                                    <span class="text-sm text-gray-600">Floor 3</span>
+                                                </div>
+                                                <div class="flex justify-between text-sm">
+                                                    <span>Total: 20</span>
+                                                    <span class="text-green-600">Available: 3</span>
+                                                    <span class="text-red-600">Occupied: 17</span>
+                                                </div>
+                                                <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                                                    <div class="bg-red-500 h-2 rounded-full" style="width: 85%"></div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="border border-gray-200 rounded-lg p-4">
+                                                <div class="flex justify-between items-center mb-2">
+                                                    <span class="font-medium">Emergency</span>
+                                                    <span class="text-sm text-gray-600">Floor 1</span>
+                                                </div>
+                                                <div class="flex justify-between text-sm">
+                                                    <span>Total: 15</span>
+                                                    <span class="text-green-600">Available: 8</span>
+                                                    <span class="text-red-600">Occupied: 7</span>
+                                                </div>
+                                                <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                                                    <div class="bg-yellow-500 h-2 rounded-full" style="width: 47%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <h4 class="font-medium mb-3">Bed Management Actions</h4>
+                                        <div class="space-y-3">
+                                            <button onclick="allocateBed()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg text-left">
+                                                <i class="fas fa-bed mr-2"></i>Allocate Bed
+                                            </button>
+                                            <button onclick="dischargeBed()" class="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg text-left">
+                                                <i class="fas fa-sign-out-alt mr-2"></i>Discharge Patient
+                                            </button>
+                                            <button onclick="transferBed()" class="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded-lg text-left">
+                                                <i class="fas fa-exchange-alt mr-2"></i>Transfer Patient
+                                            </button>
+                                            <button onclick="maintenanceBed()" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-lg text-left">
+                                                <i class="fas fa-tools mr-2"></i>Maintenance Mode
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="mt-6">
+                                            <h5 class="font-medium mb-2">Recent Bed Activities</h5>
+                                            <div class="space-y-2 text-sm">
+                                                <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                                    <span>Bed G-205 allocated</span>
+                                                    <span class="text-gray-600">2 min ago</span>
+                                                </div>
+                                                <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                                    <span>Patient discharged from ICU-12</span>
+                                                    <span class="text-gray-600">15 min ago</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appointments Tab -->
+                <div id="appointmentsTab" class="tab-content hidden">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-xl font-bold mb-4">Book New Appointment</h3>
+                        <form class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                                <select class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option>Cardiology</option>
+                                    <option>Neurology</option>
+                                    <option>Orthopedics</option>
+                                    <option>Pediatrics</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Doctor</label>
+                                <select class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option>Dr. Smith</option>
+                                    <option>Dr. Johnson</option>
+                                    <option>Dr. Williams</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                                <input type="date" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Time</label>
+                                <select class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option>09:00 AM</option>
+                                    <option>10:00 AM</option>
+                                    <option>11:00 AM</option>
+                                    <option>02:00 PM</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2">
+                                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors">
+                                    <i class="fas fa-calendar-plus mr-2"></i>Book Appointment
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Health Records Tab -->
+                <div id="recordsTab" class="tab-content hidden">
+                    <!-- My Reports Section -->
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold">My Reports</h3>
+                            <button onclick="uploadReport()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                                <i class="fas fa-upload mr-2"></i>Upload Report
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <div class="flex items-center mb-3">
+                                    <i class="fas fa-vial text-red-500 text-2xl mr-3"></i>
+                                    <div>
+                                        <h4 class="font-medium">Blood Test Results</h4>
+                                        <p class="text-sm text-gray-600">March 15, 2024</p>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="viewReport('blood-test')" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded text-sm">
+                                        <i class="fas fa-eye mr-1"></i>View
+                                    </button>
+                                    <button onclick="downloadReport('blood-test')" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded text-sm">
+                                        <i class="fas fa-download mr-1"></i>Download
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <div class="flex items-center mb-3">
+                                    <i class="fas fa-x-ray text-blue-500 text-2xl mr-3"></i>
+                                    <div>
+                                        <h4 class="font-medium">X-Ray Report</h4>
+                                        <p class="text-sm text-gray-600">March 10, 2024</p>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="viewReport('xray')" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded text-sm">
+                                        <i class="fas fa-eye mr-1"></i>View
+                                    </button>
+                                    <button onclick="downloadReport('xray')" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded text-sm">
+                                        <i class="fas fa-download mr-1"></i>Download
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <div class="flex items-center mb-3">
+                                    <i class="fas fa-heartbeat text-purple-500 text-2xl mr-3"></i>
+                                    <div>
+                                        <h4 class="font-medium">ECG Report</h4>
+                                        <p class="text-sm text-gray-600">March 5, 2024</p>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="viewReport('ecg')" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded text-sm">
+                                        <i class="fas fa-eye mr-1"></i>View
+                                    </button>
+                                    <button onclick="downloadReport('ecg')" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded text-sm">
+                                        <i class="fas fa-download mr-1"></i>Download
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nearby Hospitals Section -->
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold">Nearby Hospitals</h3>
+                            <button onclick="refreshHospitals()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                                <i class="fas fa-sync-alt mr-2"></i>Refresh
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Hospital List -->
+                            <div class="space-y-4">
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div>
+                                            <h4 class="font-medium text-lg">City General Hospital</h4>
+                                            <p class="text-sm text-gray-600">2.3 km away</p>
+                                            <div class="flex items-center mt-1">
+                                                <div class="flex text-yellow-400">
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star-half-alt"></i>
+                                                </div>
+                                                <span class="text-sm text-gray-600 ml-2">4.5 (234 reviews)</span>
+                                            </div>
+                                        </div>
+                                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Open 24/7</span>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-2 gap-4 mb-3">
+                                        <div class="text-center p-2 bg-green-50 rounded">
+                                            <div class="text-lg font-bold text-green-600">15</div>
+                                            <div class="text-xs text-gray-600">General Beds</div>
+                                        </div>
+                                        <div class="text-center p-2 bg-blue-50 rounded">
+                                            <div class="text-lg font-bold text-blue-600">3</div>
+                                            <div class="text-xs text-gray-600">ICU Beds</div>
+                                        </div>
+                                        <div class="text-center p-2 bg-purple-50 rounded">
+                                            <div class="text-lg font-bold text-purple-600">8</div>
+                                            <div class="text-xs text-gray-600">Emergency</div>
+                                        </div>
+                                        <div class="text-center p-2 bg-orange-50 rounded">
+                                            <div class="text-lg font-bold text-orange-600">2</div>
+                                            <div class="text-xs text-gray-600">Operation</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex space-x-2">
+                                        <button onclick="getDirections('City General Hospital')" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-3 rounded text-sm">
+                                            <i class="fas fa-directions mr-1"></i>Directions
+                                        </button>
+                                        <button onclick="callHospital('+911234567890')" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-3 rounded text-sm">
+                                            <i class="fas fa-phone mr-1"></i>Call
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div>
+                                            <h4 class="font-medium text-lg">Metro Medical Center</h4>
+                                            <p class="text-sm text-gray-600">3.7 km away</p>
+                                            <div class="flex items-center mt-1">
+                                                <div class="flex text-yellow-400">
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="far fa-star"></i>
+                                                </div>
+                                                <span class="text-sm text-gray-600 ml-2">4.2 (156 reviews)</span>
+                                            </div>
+                                        </div>
+                                        <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">Busy</span>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-2 gap-4 mb-3">
+                                        <div class="text-center p-2 bg-red-50 rounded">
+                                            <div class="text-lg font-bold text-red-600">2</div>
+                                            <div class="text-xs text-gray-600">General Beds</div>
+                                        </div>
+                                        <div class="text-center p-2 bg-red-50 rounded">
+                                            <div class="text-lg font-bold text-red-600">0</div>
+                                            <div class="text-xs text-gray-600">ICU Beds</div>
+                                        </div>
+                                        <div class="text-center p-2 bg-green-50 rounded">
+                                            <div class="text-lg font-bold text-green-600">12</div>
+                                            <div class="text-xs text-gray-600">Emergency</div>
+                                        </div>
+                                        <div class="text-center p-2 bg-blue-50 rounded">
+                                            <div class="text-lg font-bold text-blue-600">4</div>
+                                            <div class="text-xs text-gray-600">Operation</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex space-x-2">
+                                        <button onclick="getDirections('Metro Medical Center')" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-3 rounded text-sm">
+                                            <i class="fas fa-directions mr-1"></i>Directions
+                                        </button>
+                                        <button onclick="callHospital('+911234567891')" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-3 rounded text-sm">
+                                            <i class="fas fa-phone mr-1"></i>Call
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div>
+                                            <h4 class="font-medium text-lg">Apollo Specialty Hospital</h4>
+                                            <p class="text-sm text-gray-600">5.1 km away</p>
+                                            <div class="flex items-center mt-1">
+                                                <div class="flex text-yellow-400">
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                </div>
+                                                <span class="text-sm text-gray-600 ml-2">4.8 (412 reviews)</span>
+                                            </div>
+                                        </div>
+                                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Available</span>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-2 gap-4 mb-3">
+                                        <div class="text-center p-2 bg-green-50 rounded">
+                                            <div class="text-lg font-bold text-green-600">25</div>
+                                            <div class="text-xs text-gray-600">General Beds</div>
+                                        </div>
+                                        <div class="text-center p-2 bg-green-50 rounded">
+                                            <div class="text-lg font-bold text-green-600">8</div>
+                                            <div class="text-xs text-gray-600">ICU Beds</div>
+                                        </div>
+                                        <div class="text-center p-2 bg-green-50 rounded">
+                                            <div class="text-lg font-bold text-green-600">15</div>
+                                            <div class="text-xs text-gray-600">Emergency</div>
+                                        </div>
+                                        <div class="text-center p-2 bg-green-50 rounded">
+                                            <div class="text-lg font-bold text-green-600">6</div>
+                                            <div class="text-xs text-gray-600">Operation</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex space-x-2">
+                                        <button onclick="getDirections('Apollo Specialty Hospital')" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-3 rounded text-sm">
+                                            <i class="fas fa-directions mr-1"></i>Directions
+                                        </button>
+                                        <button onclick="callHospital('+911234567892')" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-3 rounded text-sm">
+                                            <i class="fas fa-phone mr-1"></i>Call
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Interactive Map -->
+                            <div class="bg-gray-100 rounded-lg p-4">
+                                <h4 class="font-medium mb-3">Hospital Locations</h4>
+                                <div id="hospitalMap" class="w-full h-96 bg-gray-200 rounded-lg relative overflow-hidden">
+                                    <!-- SVG Map -->
+                                    <svg viewBox="0 0 400 300" class="w-full h-full">
+                                        <!-- Background -->
+                                        <rect width="400" height="300" fill="#e5e7eb"/>
+                                        
+                                        <!-- Roads -->
+                                        <path d="M0 150 L400 150" stroke="#9ca3af" stroke-width="4"/>
+                                        <path d="M200 0 L200 300" stroke="#9ca3af" stroke-width="4"/>
+                                        <path d="M100 75 L300 225" stroke="#9ca3af" stroke-width="2"/>
+                                        
+                                        <!-- Your Location (Center) -->
+                                        <circle cx="200" cy="150" r="8" fill="#3b82f6"/>
+                                        <circle cx="200" cy="150" r="12" fill="none" stroke="#3b82f6" stroke-width="2" opacity="0.5">
+                                            <animate attributeName="r" values="12;20;12" dur="2s" repeatCount="indefinite"/>
+                                        </circle>
+                                        <text x="200" y="170" text-anchor="middle" class="text-xs fill-blue-600 font-medium">You</text>
+                                        
+                                        <!-- Hospital 1 - City General -->
+                                        <circle cx="150" cy="100" r="6" fill="#10b981"/>
+                                        <text x="150" y="90" text-anchor="middle" class="text-xs fill-green-600 font-medium">City General</text>
+                                        <text x="150" y="120" text-anchor="middle" class="text-xs fill-gray-600">2.3km</text>
+                                        
+                                        <!-- Hospital 2 - Metro Medical -->
+                                        <circle cx="280" cy="200" r="6" fill="#f59e0b"/>
+                                        <text x="280" y="190" text-anchor="middle" class="text-xs fill-yellow-600 font-medium">Metro Medical</text>
+                                        <text x="280" y="220" text-anchor="middle" class="text-xs fill-gray-600">3.7km</text>
+                                        
+                                        <!-- Hospital 3 - Apollo -->
+                                        <circle cx="320" cy="80" r="6" fill="#10b981"/>
+                                        <text x="320" y="70" text-anchor="middle" class="text-xs fill-green-600 font-medium">Apollo</text>
+                                        <text x="320" y="100" text-anchor="middle" class="text-xs fill-gray-600">5.1km</text>
+                                        
+                                        <!-- Direction Lines -->
+                                        <path id="route1" d="M200 150 L150 100" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,5" opacity="0">
+                                            <animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite"/>
+                                        </path>
+                                        <path id="route2" d="M200 150 L280 200" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,5" opacity="0">
+                                            <animate attributeName="opacity" values="0;1;0" dur="3s" begin="1s" repeatCount="indefinite"/>
+                                        </path>
+                                        <path id="route3" d="M200 150 L320 80" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,5" opacity="0">
+                                            <animate attributeName="opacity" values="0;1;0" dur="3s" begin="2s" repeatCount="indefinite"/>
+                                        </path>
+                                    </svg>
+                                    
+                                    <!-- Map Controls -->
+                                    <div class="absolute top-2 right-2 flex flex-col space-y-1">
+                                        <button onclick="zoomIn()" class="bg-white hover:bg-gray-50 p-2 rounded shadow">
+                                            <i class="fas fa-plus text-gray-600"></i>
+                                        </button>
+                                        <button onclick="zoomOut()" class="bg-white hover:bg-gray-50 p-2 rounded shadow">
+                                            <i class="fas fa-minus text-gray-600"></i>
+                                        </button>
+                                        <button onclick="centerMap()" class="bg-white hover:bg-gray-50 p-2 rounded shadow">
+                                            <i class="fas fa-crosshairs text-gray-600"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Legend -->
+                                    <div class="absolute bottom-2 left-2 bg-white p-2 rounded shadow text-xs">
+                                        <div class="flex items-center mb-1">
+                                            <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                                            <span>Your Location</span>
+                                        </div>
+                                        <div class="flex items-center mb-1">
+                                            <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                                            <span>Available</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
+                                            <span>Busy</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Map Filter -->
+                                <div class="mt-4 flex flex-wrap gap-2">
+                                    <button onclick="filterHospitals('all')" class="bg-blue-500 text-white px-3 py-1 rounded text-sm">All</button>
+                                    <button onclick="filterHospitals('emergency')" class="bg-red-500 text-white px-3 py-1 rounded text-sm">Emergency</button>
+                                    <button onclick="filterHospitals('specialty')" class="bg-purple-500 text-white px-3 py-1 rounded text-sm">Specialty</button>
+                                    <button onclick="filterHospitals('available')" class="bg-green-500 text-white px-3 py-1 rounded text-sm">Available Beds</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pharmacy Tab -->
+                <div id="pharmacyTab" class="tab-content hidden">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-xl font-bold mb-4">Pharmacy</h3>
+                        <div class="mb-4">
+                            <input type="text" placeholder="Search medicines..." class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <h4 class="font-medium">Paracetamol 500mg</h4>
+                                <p class="text-sm text-gray-600">Pain relief</p>
+                                <div class="flex justify-between items-center mt-2">
+                                    <span class="text-lg font-bold text-green-500">₹25</span>
+                                    <button class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">
+                                        Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Tab -->
+                <div id="emergencyTab" class="tab-content hidden">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-xl font-bold mb-4 text-red-600">Emergency Services</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-medium mb-2">Emergency Contacts</h4>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                                        <span>Ambulance</span>
+                                        <a href="tel:108" class="bg-red-500 text-white px-3 py-1 rounded">108</a>
+                                    </div>
+                                    <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                                        <span>Emergency Room</span>
+                                        <a href="tel:+911234567890" class="bg-red-500 text-white px-3 py-1 rounded">Call</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium mb-2">Emergency Mode</h4>
+                                <div class="space-y-2">
+                                    <button onclick="activateEmergency()" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg">
+                                        <i class="fas fa-exclamation-triangle mr-2"></i>Activate Emergency Mode
+                                    </button>
+                                    <button onclick="deactivateEmergency()" class="w-full bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg">
+                                        <i class="fas fa-times mr-2"></i>Deactivate Emergency Mode
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Patient Login Modal -->
+    <div id="patientLoginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold">Patient Login</h3>
+                <button onclick="closeModal('patientLoginModal')" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <div class="flex space-x-2 mb-4">
+                    <button onclick="switchLoginMethod('aadhaar')" id="aadhaarBtn" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg">Aadhaar</button>
+                    <button onclick="switchLoginMethod('mobile')" id="mobileBtn" class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg">Mobile</button>
+                </div>
+                
+                <div id="aadhaarLogin">
+                    <input type="text" placeholder="Enter Aadhaar Number" class="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div id="mobileLogin" class="hidden">
+                    <input type="tel" placeholder="Enter Mobile Number" class="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <button onclick="sendOTP()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg mb-4">Send OTP</button>
+                
+                <div id="otpSection" class="hidden">
+                    <input type="text" placeholder="Enter OTP" class="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="verifyOTP('patient')" class="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg">Verify & Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff Login Modal -->
+    <div id="staffLoginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold">Staff Login</h3>
+                <button onclick="closeModal('staffLoginModal')" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form onsubmit="staffLogin(event)">
+                <div class="mb-4">
+                    <input type="text" placeholder="Staff ID" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-4 relative">
+                    <input type="password" id="staffPassword" placeholder="Password" class="w-full border border-gray-300 rounded-lg px-4 py-2 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <button type="button" onclick="togglePassword('staffPassword')" class="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold">Admin Login</h3>
+                <button onclick="closeModal('adminLoginModal')" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form onsubmit="adminLogin(event)">
+                <div class="mb-4">
+                    <input type="text" placeholder="Admin ID" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-4 relative">
+                    <input type="password" id="adminPassword" placeholder="Password" class="w-full border border-gray-300 rounded-lg px-4 py-2 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <button type="button" onclick="togglePassword('adminPassword')" class="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-lg">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Biometric Login Modal -->
+    <div id="biometricModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold">Biometric Authentication</h3>
+                <button onclick="closeModal('biometricModal')" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="fingerprint-scanner mb-6">
+                <i class="fas fa-fingerprint text-white text-4xl"></i>
+            </div>
+            
+            <p class="text-gray-600 mb-6">Place your finger on the scanner</p>
+            
+            <div class="flex space-x-4">
+                <button onclick="simulateBiometricSuccess()" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg">
+                    <i class="fas fa-check mr-2"></i>Success
+                </button>
+                <button onclick="closeModal('biometricModal')" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg">
+                    <i class="fas fa-times mr-2"></i>Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification System -->
+    <div id="notifications" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading...</p>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let emergencyMode = false;
+        let biometricType = null;
+
+        // Login Functions
+        function openPatientLogin() {
+            document.getElementById('patientLoginModal').classList.remove('hidden');
+        }
+
+        function openStaffLogin() {
+            document.getElementById('staffLoginModal').classList.remove('hidden');
+        }
+
+        function openAdminLogin() {
+            document.getElementById('adminLoginModal').classList.remove('hidden');
+        }
+
+        function openBiometricLogin(type) {
+            biometricType = type;
+            document.getElementById('biometricModal').classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        function switchLoginMethod(method) {
+            const aadhaarBtn = document.getElementById('aadhaarBtn');
+            const mobileBtn = document.getElementById('mobileBtn');
+            const aadhaarLogin = document.getElementById('aadhaarLogin');
+            const mobileLogin = document.getElementById('mobileLogin');
+
+            if (method === 'aadhaar') {
+                aadhaarBtn.className = 'flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg';
+                mobileBtn.className = 'flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg';
+                aadhaarLogin.classList.remove('hidden');
+                mobileLogin.classList.add('hidden');
+            } else {
+                mobileBtn.className = 'flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg';
+                aadhaarBtn.className = 'flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg';
+                mobileLogin.classList.remove('hidden');
+                aadhaarLogin.classList.add('hidden');
+            }
+        }
+
+        function sendOTP() {
+            showNotification('OTP sent successfully!', 'success');
+            document.getElementById('otpSection').classList.remove('hidden');
+        }
+
+        function verifyOTP(userType) {
+            showLoading();
+            setTimeout(() => {
+                hideLoading();
+                login(userType, 'Patient User');
+                closeModal('patientLoginModal');
+            }, 2000);
+        }
+
+        function staffLogin(event) {
+            event.preventDefault();
+            showLoading();
+            setTimeout(() => {
+                hideLoading();
+                login('doctor', 'Dr. Smith');
+                closeModal('staffLoginModal');
+            }, 2000);
+        }
+
+        function adminLogin(event) {
+            event.preventDefault();
+            showLoading();
+            setTimeout(() => {
+                hideLoading();
+                login('admin', 'Admin User');
+                closeModal('adminLoginModal');
+            }, 2000);
+        }
+
+        function simulateBiometricSuccess() {
+            showLoading();
+            setTimeout(() => {
+                hideLoading();
+                const userType = biometricType === 'patient' ? 'patient' : 'doctor';
+                const userName = biometricType === 'patient' ? 'Patient User' : 'Dr. Johnson';
+                login(userType, userName);
+                closeModal('biometricModal');
+            }, 3000);
+        }
+
+        function login(userType, userName) {
+            currentUser = { type: userType, name: userName };
+            
+            // Update UI
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainInterface').classList.remove('hidden');
+            document.getElementById('userProfile').classList.remove('hidden');
+            document.getElementById('userName').textContent = userName;
+            document.getElementById('userRole').textContent = userType.charAt(0).toUpperCase() + userType.slice(1);
+            
+            // Apply role-based theming
+            applyRoleTheming(userType);
+            
+            showNotification(`Welcome back, ${userName}!`, 'success');
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainInterface').classList.add('hidden');
+            document.getElementById('userProfile').classList.add('hidden');
+            deactivateEmergency();
+            showNotification('Logged out successfully', 'info');
+        }
+
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = input.nextElementSibling.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+
+        // Tab Navigation
+        function showTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.add('hidden'));
+            
+            // Remove active class from all nav tabs
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => {
+                tab.className = 'nav-tab py-4 px-6 border-b-2 border-transparent text-gray-600 hover:text-blue-600 font-medium whitespace-nowrap';
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').classList.remove('hidden');
+            
+            // Add active class to selected nav tab
+            event.target.className = 'nav-tab active py-4 px-6 border-b-2 border-blue-500 text-blue-600 font-medium whitespace-nowrap';
+        }
+
+        // Role-based theming and navigation
+        function applyRoleTheming(userType) {
+            const dashboard = document.getElementById('dashboardTab');
+            dashboard.className = 'tab-content';
+            
+            // Hide/show navigation tabs based on role
+            const navTabs = document.querySelectorAll('.nav-tab');
+            if (userType === 'admin') {
+                // For admin, hide all tabs except dashboard
+                navTabs.forEach((tab, index) => {
+                    if (index > 0) { // Keep only dashboard (index 0)
+                        tab.style.display = 'none';
+                    }
+                });
+                // Load admin dashboard content
+                loadAdminDashboard();
+            } else {
+                // For other roles, show all tabs
+                navTabs.forEach(tab => {
+                    tab.style.display = 'block';
+                });
+            }
+            
+            switch(userType) {
+                case 'patient':
+                    dashboard.classList.add('patient-bg');
+                    break;
+                case 'doctor':
+                    dashboard.classList.add('doctor-bg');
+                    break;
+                case 'nurse':
+                    dashboard.classList.add('nurse-bg');
+                    break;
+                case 'admin':
+                    dashboard.classList.add('admin-bg');
+                    break;
+                case 'pharmacist':
+                    dashboard.classList.add('pharmacist-bg');
+                    break;
+            }
+        }
+
+        function loadAdminDashboard() {
+            document.getElementById('patientDashboard').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.remove('hidden');
+        }
+
+        // Admin Section Navigation
+        function showAdminSection(sectionName) {
+            // Hide all admin sections
+            const sections = document.querySelectorAll('.admin-section');
+            sections.forEach(section => section.classList.add('hidden'));
+            
+            // Remove active class from all admin nav buttons
+            const navBtns = document.querySelectorAll('.admin-nav-btn');
+            navBtns.forEach(btn => {
+                btn.className = 'admin-nav-btn bg-gray-300 text-gray-700 px-4 py-2 rounded-lg';
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName + 'Section').classList.remove('hidden');
+            
+            // Add active class to selected nav button
+            event.target.className = 'admin-nav-btn bg-blue-500 text-white px-4 py-2 rounded-lg';
+        }
+
+        // Admin Management Functions
+        function addDoctor() {
+            showNotification('Add Doctor form would open here', 'info');
+        }
+
+        function editDoctor(doctorName) {
+            showNotification(`Editing ${doctorName} details`, 'info');
+        }
+
+        function viewDoctorDetails(doctorName) {
+            showNotification(`Viewing ${doctorName} profile`, 'info');
+        }
+
+        function addNurse() {
+            showNotification('Add Nurse form would open here', 'info');
+        }
+
+        function editNurse(nurseName) {
+            showNotification(`Editing ${nurseName} details`, 'info');
+        }
+
+        function viewNurseSchedule(nurseName) {
+            showNotification(`Viewing ${nurseName} schedule`, 'info');
+        }
+
+        function addStaff() {
+            showNotification('Add Staff form would open here', 'info');
+        }
+
+        function viewStaffDetails(staffName) {
+            showNotification(`Viewing ${staffName} details`, 'info');
+        }
+
+        function createSchedule() {
+            showNotification('Create Schedule form would open here', 'info');
+        }
+
+        function viewWeeklySchedule() {
+            showNotification('Opening weekly schedule view', 'info');
+        }
+
+        function manageShifts() {
+            showNotification('Opening shift management', 'info');
+        }
+
+        function manageEquipment() {
+            showNotification('Opening equipment management', 'info');
+        }
+
+        function manageInventory() {
+            showNotification('Opening inventory management', 'info');
+        }
+
+        function manageFacilities() {
+            showNotification('Opening facilities management', 'info');
+        }
+
+        function searchPatients() {
+            showNotification('Searching patients...', 'info');
+        }
+
+        function viewPatientRecords(patientId) {
+            showNotification(`Opening records for patient ${patientId}`, 'info');
+        }
+
+        function viewPatientReports(patientId) {
+            showNotification(`Opening reports for patient ${patientId}`, 'info');
+        }
+
+        function allocateBed() {
+            showNotification('Opening bed allocation form', 'info');
+        }
+
+        function dischargeBed() {
+            showNotification('Opening patient discharge form', 'info');
+        }
+
+        function transferBed() {
+            showNotification('Opening patient transfer form', 'info');
+        }
+
+        function maintenanceBed() {
+            showNotification('Setting bed to maintenance mode', 'info');
+        }
+
+        // Emergency Mode
+        function activateEmergency() {
+            emergencyMode = true;
+            document.getElementById('emergencyBanner').classList.remove('hidden');
+            document.body.classList.add('emergency-mode');
+            showNotification('Emergency mode activated!', 'error');
+        }
+
+        function deactivateEmergency() {
+            emergencyMode = false;
+            document.getElementById('emergencyBanner').classList.add('hidden');
+            document.body.classList.remove('emergency-mode');
+            showNotification('Emergency mode deactivated', 'info');
+        }
+
+        // AI Chat
+        function toggleAIChat() {
+            const chatBox = document.getElementById('aiChatBox');
+            chatBox.classList.toggle('hidden');
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                const chatMessages = document.getElementById('chatMessages');
+                
+                // Add user message
+                const userMsg = document.createElement('div');
+                userMsg.className = 'mb-2 text-right';
+                userMsg.innerHTML = `
+                    <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm">You</span>
+                    <p class="mt-1">${message}</p>
+                `;
+                chatMessages.appendChild(userMsg);
+                
+                // Simulate AI response
+                setTimeout(() => {
+                    const aiMsg = document.createElement('div');
+                    aiMsg.className = 'mb-2';
+                    aiMsg.innerHTML = `
+                        <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">AI Assistant</span>
+                        <p class="mt-1">Thank you for your question. Based on your health profile, I recommend consulting with your doctor for personalized advice.</p>
+                    `;
+                    chatMessages.appendChild(aiMsg);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 1000);
+                
+                input.value = '';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+
+        // Notification System
+        function showNotification(message, type = 'info') {
+            const notifications = document.getElementById('notifications');
+            const notification = document.createElement('div');
+            
+            let bgColor = 'bg-blue-500';
+            let icon = 'fas fa-info-circle';
+            
+            switch(type) {
+                case 'success':
+                    bgColor = 'bg-green-500';
+                    icon = 'fas fa-check-circle';
+                    break;
+                case 'error':
+                    bgColor = 'bg-red-500';
+                    icon = 'fas fa-exclamation-circle';
+                    break;
+                case 'warning':
+                    bgColor = 'bg-yellow-500';
+                    icon = 'fas fa-exclamation-triangle';
+                    break;
+            }
+            
+            notification.className = `${bgColor} text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 fade-in`;
+            notification.innerHTML = `
+                <i class="${icon}"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            notifications.appendChild(notification);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Loading Overlay
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        // Report Management Functions
+        function uploadReport() {
+            showNotification('Report upload feature coming soon!', 'info');
+        }
+
+        function viewReport(reportType) {
+            showNotification(`Opening ${reportType} report...`, 'info');
+            // Simulate opening report viewer
+            setTimeout(() => {
+                showNotification('Report opened successfully!', 'success');
+            }, 1000);
+        }
+
+        function downloadReport(reportType) {
+            showLoading();
+            setTimeout(() => {
+                hideLoading();
+                showNotification(`${reportType} report downloaded!`, 'success');
+            }, 2000);
+        }
+
+        // Hospital Functions
+        function refreshHospitals() {
+            showLoading();
+            setTimeout(() => {
+                hideLoading();
+                showNotification('Hospital data refreshed!', 'success');
+            }, 1500);
+        }
+
+        function getDirections(hospitalName) {
+            showNotification(`Getting directions to ${hospitalName}...`, 'info');
+            // Simulate opening directions
+            setTimeout(() => {
+                showNotification('Directions opened in maps app!', 'success');
+            }, 1000);
+        }
+
+        function callHospital(phoneNumber) {
+            showNotification(`Calling ${phoneNumber}...`, 'info');
+            // In a real app, this would initiate a phone call
+            setTimeout(() => {
+                showNotification('Call initiated!', 'success');
+            }, 500);
+        }
+
+        // Map Functions
+        let mapZoom = 1;
+        
+        function zoomIn() {
+            mapZoom = Math.min(mapZoom + 0.2, 3);
+            const map = document.getElementById('hospitalMap').querySelector('svg');
+            map.style.transform = `scale(${mapZoom})`;
+            showNotification('Zoomed in', 'info');
+        }
+
+        function zoomOut() {
+            mapZoom = Math.max(mapZoom - 0.2, 0.5);
+            const map = document.getElementById('hospitalMap').querySelector('svg');
+            map.style.transform = 'scale(1)';
+            showNotification('Zoomed out', 'info');
+        }
+
+        function centerMap() {
+            mapZoom = 1;
+            const map = document.getElementById('hospitalMap').querySelector('svg');
+            map.style.transform = 'scale(1)';
+            showNotification('Map centered', 'info');
+        }
+
+        function filterHospitals(filterType) {
+            showNotification(`Filtering hospitals by: ${filterType}`, 'info');
+            
+            // Update filter button states
+            const filterButtons = document.querySelectorAll('[onclick^="filterHospitals"]');
+            filterButtons.forEach(btn => {
+                btn.className = btn.className.replace('bg-blue-500', 'bg-gray-500');
+            });
+            
+            // Highlight active filter
+            event.target.className = event.target.className.replace('bg-gray-500', 'bg-blue-500');
+            
+            // In a real app, this would filter the hospital list
+            setTimeout(() => {
+                showNotification(`Showing ${filterType} hospitals`, 'success');
+            }, 500);
+        }
+
+        // Enter key support for chat
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatInput = document.getElementById('chatInput');
+            if (chatInput) {
+                chatInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        sendMessage();
+                    }
+                });
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'985e0423168933a8',t:'MTc1OTAwNzcyNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

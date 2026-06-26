@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sell on ReThread | Second-Hand Clothing Marketplace</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1D3557;       /* Dark blue */
+            --secondary: #457B9D;     /* Medium blue */
+            --accent: #E63946;       /* Red */
+            --light: #F1FAEE;        /* Light cream */
+            --highlight: #A8DADC;    /* Light teal */
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light);
+            color: var(--primary);
+            line-height: 1.6;
+        }
+        
+        /* Header Styles */
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--light);
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--highlight);
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .user-actions a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .user-actions i {
+            font-size: 20px;
+            margin-bottom: 3px;
+        }
+        
+        .user-actions a:hover {
+            color: var(--highlight);
+        }
+        
+        /* Main Content */
+        .main-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        /* Seller Dashboard Header */
+        .seller-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--highlight);
+        }
+        
+        .seller-header h1 {
+            font-size: 32px;
+            margin: 0;
+            color: var(--primary);
+        }
+        
+        .seller-stats {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            min-width: 150px;
+        }
+        
+        .stat-card .number {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 5px;
+        }
+        
+        .stat-card .label {
+            font-size: 14px;
+            color: var(--secondary);
+        }
+        
+        /* Two Column Layout */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 30px;
+        }
+        
+        /* Sidebar Navigation */
+        .seller-sidebar {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+        
+        .seller-menu h3 {
+            margin-top: 0;
+            color: var(--secondary);
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .seller-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .seller-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .seller-menu a {
+            display: block;
+            padding: 10px;
+            color: var(--primary);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        .seller-menu a:hover, .seller-menu a.active {
+            background-color: var(--highlight);
+            color: var(--primary);
+        }
+        
+        .seller-menu a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content Area */
+        .seller-content {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .content-header h2 {
+            margin: 0;
+            color: var(--primary);
+        }
+        
+        .cta-button {
+            background-color: var(--accent);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .cta-button:hover {
+            background-color: #C1121F;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        /* Listings Table */
+        .listings-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .listings-table th {
+            text-align: left;
+            padding: 12px 15px;
+            background-color: var(--light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .listings-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+        
+        .listing-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .listing-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 4px;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+        
+        .listing-info h4 {
+            margin: 0 0 5px;
+            font-size: 16px;
+        }
+        
+        .listing-info p {
+            margin: 0;
+            color: var(--secondary);
+            font-size: 14px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background-color: #e6f7ee;
+            color: #00a05a;
+        }
+        
+        .status-pending {
+            background-color: #fff8e6;
+            color: #ffb700;
+        }
+        
+        .status-sold {
+            background-color: #f5e6e8;
+            color: var(--accent);
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--secondary);
+            cursor: pointer;
+            margin: 0 5px;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+        
+        .action-btn:hover {
+            color: var(--accent);
+        }
+        
+        /* Listing Form */
+        .listing-form {
+            max-width: 800px;
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+        }
+        
+        .form-section h3 {
+            margin-top: 0;
+            color: var(--secondary);
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--primary);
+        }
+        
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        .form-group input[type="text"]:focus,
+        .form-group input[type="number"]:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--secondary);
+            outline: none;
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .image-upload {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .image-upload:hover {
+            border-color: var(--secondary);
+        }
+        
+        .image-upload i {
+            font-size: 40px;
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+        
+        .image-upload p {
+            margin: 0;
+            color: var(--secondary);
+        }
+        
+        .image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .preview-thumbnail {
+            width: 100px;
+            height: 100px;
+            border-radius: 4px;
+            object-fit: cover;
+            position: relative;
+        }
+        
+        .remove-image {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: var(--accent);
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .seller-sidebar {
+                margin-bottom: 30px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .seller-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+            
+            .seller-stats {
+                width: 100%;
+                justify-content: space-between;
+                gap: 15px;
+            }
+            
+            .stat-card {
+                min-width: auto;
+                padding: 15px;
+                flex: 1;
+            }
+            
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .listings-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .seller-stats {
+                flex-direction: column;
+            }
+            
+            .stat-card {
+                width: 100%;
+            }
+            
+            .listing-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .listing-image {
+                margin-bottom: 10px;
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="logo">
+                <style> a {
+                    text-decoration:  none;
+                    color: white;}</style>
+                <a href="index.html">
+                <i class="fas fa-recycle"></i>
+                ReThread
+                </a>
+            </div>
+            
+            <div class="user-actions">
+                <a href="#">
+                    <i class="fas fa-home"></i>
+                    <span>Back to Shop</span>
+                </a>
+                <a href="#">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                </a>
+                <a href="#">
+                    <i class="fas fa-user"></i>
+                    <span>Account</span>
+                </a>
+            </div>
+        </div>
+    </header>
+    
+    <div class="main-container">
+        <div class="seller-header">
+            <h1>Seller Dashboard</h1>
+            <div class="seller-stats">
+                <div class="stat-card">
+                    <div class="number">24</div>
+                    <div class="label">Active Listings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">$1,245</div>
+                    <div class="label">Total Earnings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">48</div>
+                    <div class="label">Items Sold</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-layout">
+            <div class="seller-sidebar">
+                <div class="seller-menu">
+                    <h3>Seller Menu</h3>
+                    <ul>
+                        <li><a href="#" class="active"><i class="fas fa-list"></i> My Listings</a></li>
+                        <li><a href="#"><i class="fas fa-plus-circle"></i> Add New Item</a></li>
+                        <li><a href="#"><i class="fas fa-chart-line"></i> Sales Analytics</a></li>
+                        <li><a href="#"><i class="fas fa-money-bill-wave"></i> Payouts</a></li>
+                        <li><a href="#"><i class="fas fa-truck"></i> Shipping</a></li>
+                        <li><a href="#"><i class="fas fa-cog"></i> Account Settings</a></li>
+                        <li><a href="#"><i class="fas fa-question-circle"></i> Help Center</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="seller-content">
+                <div class="content-header">
+                    <h2>Your Listings</h2>
+                    <button class="cta-button"><i class="fas fa-plus"></i> Add New Item</button>
+                </div>
+                
+                <table class="listings-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Views</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="listing-item">
+                                    <img src="https://images.unsplash.com/photo-1539533018447-63fcce2678e4?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Designer Dress" class="listing-image">
+                                    <div class="listing-info">
+                                        <h4>Michael Kors Floral Dress</h4>
+                                        <p>Women • Size M • Listed 3 days ago</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>$45.99</td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td>124</td>
+                            <td>
+                                <button class="action-btn" title="Edit"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn" title="Promote"><i class="fas fa-bullhorn"></i></button>
+                                <button class="action-btn" title="Delete"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="listing-item">
+                                    <img src="https://images.unsplash.com/photo-1590874103328-eac38a683ce7?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Denim Jacket" class="listing-image">
+                                    <div class="listing-info">
+                                        <h4>Levi's Vintage Denim Jacket</h4>
+                                        <p>Men • Size L • Listed 1 week ago</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>$39.99</td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td>87</td>
+                            <td>
+                                <button class="action-btn" title="Edit"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn" title="Promote"><i class="fas fa-bullhorn"></i></button>
+                                <button class="action-btn" title="Delete"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="listing-item">
+                                    <img src="https://images.unsplash.com/photo-1600269452121-4f2416e55c28?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Sneakers" class="listing-image">
+                                    <div class="listing-info">
+                                        <h4>Nike Air Max 270 Sneakers</h4>
+                                        <p>Men • Size 10 • Listed 2 weeks ago</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>$75.50</td>
+                            <td><span class="status-badge status-pending">Pending Approval</span></td>
+                            <td>0</td>
+                            <td>
+                                <button class="action-btn" title="Edit"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn" title="Promote"><i class="fas fa-bullhorn"></i></button>
+                                <button class="action-btn" title="Delete"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="listing-item">
+                                    <img src="https://images.unsplash.com/photo-1543076447-215ad9ba6923?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Handbag" class="listing-image">
+                                    <div class="listing-info">
+                                        <h4>Coach Signature Handbag</h4>
+                                        <p>Women • One Size • Sold</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>$129.99</td>
+                            <td><span class="status-badge status-sold">Sold</span></td>
+                            <td>215</td>
+                            <td>
+                                <button class="action-btn" title="Relist"><i class="fas fa-redo"></i></button>
+                                <button class="action-btn" title="View Details"><i class="fas fa-eye"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <!-- Listing Form (Hidden by default, would be shown when "Add New Item" is clicked) -->
+                <div class="listing-form" style="display: none;">
+                    <div class="form-section">
+                        <h3>Item Details</h3>
+                        <div class="form-group">
+                            <label for="item-title">Item Title*</label>
+                            <input type="text" id="item-title" placeholder="e.g. Michael Kors Floral Summer Dress">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="item-category">Category*</label>
+                                <select id="item-category">
+                                    <option value="">Select a category</option>
+                                    <option value="women">Women's Clothing</option>
+                                    <option value="men">Men's Clothing</option>
+                                    <option value="kids">Kids & Baby</option>
+                                    <option value="shoes">Shoes</option>
+                                    <option value="accessories">Accessories</option>
+                                    <option value="designer">Designer</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="item-brand">Brand</label>
+                                <input type="text" id="item-brand" placeholder="e.g. Michael Kors">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="item-size">Size*</label>
+                                <input type="text" id="item-size" placeholder="e.g. M, 10, 28x32">
+                            </div>
+                            <div class="form-group">
+                                <label for="item-condition">Condition*</label>
+                                <select id="item-condition">
+                                    <option value="">Select condition</option>
+                                    <option value="new">New with tags</option>
+                                    <option value="like-new">Like new</option>
+                                    <option value="excellent">Excellent</option>
+                                    <option value="good">Good</option>
+                                    <option value="fair">Fair</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="item-description">Description*</label>
+                            <textarea id="item-description" placeholder="Describe your item in detail including any flaws, measurements, etc."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>Pricing</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="item-price">Price ($)*</label>
+                                <input type="number" id="item-price" placeholder="0.00" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="item-original-price">Original Price ($)</label>
+                                <input type="number" id="item-original-price" placeholder="0.00" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>Photos</h3>
+                        <p>Upload clear photos from multiple angles. First image will be the cover photo.</p>
+                        <div class="image-upload">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Click to upload or drag and drop</p>
+                            <p>JPEG or PNG, up to 5MB each</p>
+                        </div>
+                        <div class="image-preview">
+                            <!-- Images would appear here after upload -->
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>Shipping</h3>
+                        <div class="form-group">
+                            <p>We provide prepaid shipping labels for all sales. Just package your item and drop it off!</p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button class="cta-button">Publish Listing</button>
+                        <button class="cta-button" style="background-color: var(--secondary); margin-left: 15px;">Save Draft</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Simple interactivity for the seller dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle listing form when "Add New Item" is clicked
+            const addItemBtn = document.querySelector('.cta-button');
+            const listingForm = document.querySelector('.listing-form');
+            const listingsTable = document.querySelector('.listings-table');
+            
+            addItemBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                listingForm.style.display = 'block';
+                listingsTable.style.display = 'none';
+                addItemBtn.style.display = 'none';
+                document.querySelector('.content-header h2').textContent = 'Add New Listing';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            
+            // Simulate image upload (in a real app, this would handle file uploads)
+            const imageUpload = document.querySelector('.image-upload');
+            const imagePreview = document.querySelector('.image-preview');
+            
+            imageUpload.addEventListener('click', function() {
+                // In a real app, this would open a file dialog
+                // For demo purposes, we'll just add some placeholder images
+                if(imagePreview.children.length === 0) {
+                    const sampleImages = [
+                        'https://images.unsplash.com/photo-1539533018447-63fcce2678e4?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
+                        'https://images.unsplash.com/photo-1551232864-3f0890e580d9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
+                        'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80'
+                    ];
+                    
+                    sampleImages.forEach(imgSrc => {
+                        const imgContainer = document.createElement('div');
+                        imgContainer.style.position = 'relative';
+                        imgContainer.style.display = 'inline-block';
+                        
+                        const img = document.createElement('img');
+                        img.src = imgSrc;
+                        img.className = 'preview-thumbnail';
+                        
+                        const removeBtn = document.createElement('button');
+                        removeBtn.className = 'remove-image';
+                        removeBtn.innerHTML = '&times;';
+                        removeBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            imgContainer.remove();
+                        });
+                        
+                        imgContainer.appendChild(img);
+                        imgContainer.appendChild(removeBtn);
+                        imagePreview.appendChild(imgContainer);
+                    });
+                }
+            });
+            
+            // Action buttons for listings
+            const actionButtons = document.querySelectorAll('.action-btn');
+            actionButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const action = this.title;
+                    const itemName = this.closest('tr').querySelector('h4').textContent;
+                    alert(`${action} action clicked for ${itemName}`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

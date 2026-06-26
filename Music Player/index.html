@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SongFlix</title>
+    <link rel="icon" href="cover/download.jpeg" type="image/jpeg">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="music-player">
+        <div class="player-header">
+            <img class="logo" src="cover/download.jpeg"><h1>Song Flix Music Player</h1>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="Search songs...">
+        </div>
+
+        
+
+        <div class="song-info">
+            <h2 id="song-title">No song selected</h2>
+            <p id="song-artist">Artist</p>
+        </div>
+
+        <div class ="sidebyside"><div class="album-art">
+            <img id="album-art" src="https://via.placeholder.com/200" alt="Album Art">
+        </div><div class="playlist" id="playlist"></div></div>
+    </div>
+
+<div class="controller">
+    <div class="progress-container">
+        <div class="progress-bar" id="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+        <div class="time-info">
+            <span id="current-time">0:00</span>
+            <span id="duration">0:00</span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="shuffle-btn" title="Shuffle">
+            <i class="fas fa-random"></i>
+        </button>
+        <button id="prev-btn" title="Previous">
+            <i class="fas fa-step-backward"></i>
+        </button>
+        <button class="play-btn" id="play-btn" title="Play">
+            <i class="fas fa-play"></i>
+        </button>
+        <button id="next-btn" title="Next">
+            <i class="fas fa-step-forward"></i>
+        </button>
+        <button id="repeat-btn" title="Repeat">
+            <i class="fas fa-redo"></i>
+        </button>
+    </div>
+
+    <div class="mode-controls">
+        <button id="repeat-mode-btn" class="active" title="Repeat Current Song">
+            <i class="fas fa-redo"></i>
+        </button>
+        <button id="shuffle-mode-btn" title="Shuffle Play">
+            <i class="fas fa-random"></i>
+        </button>
+    </div>
+</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
