@@ -1,0 +1,15 @@
+[submodule "Spotify"]
+    path = Spotify
+    url = https://github.com/AshishSharma0704/Spotify-clone.git
+
+[submodule "Tic Tac Toe"]
+    path = Tic Tac Toe
+    url = https://github.com/AshishSharma0704/TicTacToe.git
+
+[submodule "Waste_food_Manage"]
+    path = Waste_food_Manage
+    url = https://github.com/AshishSharma0704/Waste_food_Manage.git
+
+[submodule "W3 School Template"]
+    path = W3 School Template
+    url = https://github.com/AshishSharma0704/Coding-Blocks-WEB-DEV.git
