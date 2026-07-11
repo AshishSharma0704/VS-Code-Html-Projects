@@ -43,13 +43,13 @@
             width:12%; /* Decrease width */
         }
         th:nth-child(3), td:nth-child(3) { /* Name column */
-            width: 25%; /* Increase width */
+            width: 20%; /* Increase width */
         }
         th:nth-child(4), td:nth-child(4) { /* Particulars column */
             width: 30%; /* Adjust width */
         }
         th:nth-child(5), td:nth-child(5) { /* Name column */
-            width: 20%; /* Increase width */
+            width: 25%; /* Increase width */
         }
         th:nth-child(6), td:nth-child(6) { /* Rate column */
             width: 0%; /* Decrease width */
@@ -80,6 +80,7 @@
             width: 100%;
             box-sizing: border-box;
             background: transparent;
+            word-break: break-word;
         }
         input:focus {
             outline: none; 
@@ -99,7 +100,6 @@
         .bill-details input {
             width: 100%;
             padding: 5px;
-            margin-bottom: 10px;
         }
         .contact{
             width:75%;
@@ -275,6 +275,38 @@
     outline: none; /* Remove default focus outline */
     border-color: #0efff3; /* Highlight input border on focus */
 }
+#modeBtn{
+    width:100%;
+    padding:6px;
+    border:none;
+    background:#0efff3;
+    cursor:pointer;
+    border-radius:5px;
+    font-weight:bold;
+}
+.auto-expand{
+    width:100%;
+    min-height:24px;
+    border:none;
+    resize:none;
+    overflow:hidden;
+    background:transparent;
+    font:inherit;
+    box-sizing:border-box;
+    line-height:18px;
+}
+
+.auto-expand:focus{
+    outline:none;
+}
+
+.bill-table td{
+    vertical-align:top;
+}
+
+#modeBtn:hover{
+    background:#059da2cd;
+}
         @media print {
             .add-row-btn, .print-btn, .delete-row-btn {
                 display: none;
@@ -324,6 +356,7 @@
             <div class="left">
                 <p><input type="text" placeholder="Enter Bill Number"></p> 
                 <p>Dr. <input type="text" placeholder="Enter Doctor's Name"></p>
+		<p><input type="text" placeholder="Enter Hospital's name"></p>
             </div>
             <div class="right">
                 <p> </p>
@@ -349,7 +382,7 @@
                 <tr>
                     <td>1</td>
                     <td><input type="text"></td>
-                    <td><input type="text-area" placeholder="Enter Name"></td>
+                    <td><input type="textarea" placeholder="Enter Name"></td>
                     <td>
                         <input type="text">
                         <div class="quadrant-container">
@@ -360,8 +393,8 @@
                             <div class="cross-divider"></div>
                         </div>
                     </td>
-                    <td><input type="text" placeholder="Enter work"></td>
-                    <td><input type="text" placeholder="Enter Quantity"></td>
+                    <td><textarea class="auto-expand" placeholder="Enter work"></textarea></td>
+                    <td><textarea class="auto-expand unit" placeholder="Enter Unit"style="font-size:14px;"></textarea></td>
                     <td><input type="text" placeholder="Enter Rate"></td>
                     <td><input type="text" class="amount" placeholder="Enter Amount" oninput="calculateTotal()"></td>
                 </tr>
@@ -381,8 +414,17 @@
                         <input id="finalAmount" type="text" placeholder="0.00"readonly>
                     </td>
                     <td class="due">
-                        <p>Due:</p>
-                        <input id="due" type="number" placeholder="0.00" oninput="calculateTotal()">
+                        <p>
+                            <button type="button" id="modeBtn" onclick="toggleMode()">
+                                Due
+                            </button>
+                        </p>
+
+                        <input
+                            id="due"
+                            type="number"
+                            placeholder="0.00"
+                            oninput="calculateTotal()">
                     </td>
                     <td class="total">
                         <p>To Pay:</p>
@@ -440,22 +482,45 @@
         }
 
         // JavaScript function to calculate the total amount
+        let paymentMode = "due";   // due or advance
+
         function calculateTotal() {
-            const amounts = document.querySelectorAll('.amount'); // Get all amount inputs
+
+            const amounts = document.querySelectorAll(".amount");
+
             let total = 0;
 
-            // Sum up all the amounts
             amounts.forEach(input => {
-                const value = parseFloat(input.value) || 0; // Convert to number or default to 0
-                total += value;
+                total += parseFloat(input.value) || 0;
             });
 
-            // Update the final amount
-            document.getElementById('finalAmount').value = total.toFixed(2);
+            document.getElementById("finalAmount").value = total.toFixed(2);
 
-            // Calculate the total including due
-            let due = parseFloat(document.getElementById('due').value) || 0;
-            document.getElementById('totalAmount').value = (total + due).toFixed(2);
+            let value = parseFloat(document.getElementById("due").value) || 0;
+
+            let payable;
+
+            if(paymentMode === "due"){
+                payable = total + value;
+            }else{
+                payable = total - value;
+            }
+
+            document.getElementById("totalAmount").value = payable.toFixed(2);
+        }
+        function toggleMode(){
+
+            const btn = document.getElementById("modeBtn");
+
+            if(paymentMode === "due"){
+                paymentMode = "advance";
+                btn.innerText = "Advance";
+            }else{
+                paymentMode = "due";
+                btn.innerText = "Due";
+            }
+
+            calculateTotal();
         }
 
 
