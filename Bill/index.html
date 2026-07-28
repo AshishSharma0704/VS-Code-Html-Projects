@@ -332,6 +332,62 @@
                 margin: 20 auto;
             }
         }
+        @media print {
+
+    @page {
+        size: A4 portrait;
+        margin: 15mm 10mm 15mm 10mm; /* Top Right Bottom Left */
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        width: auto;
+        height: auto;
+    }
+
+    .add-row-btn,
+    .delete-row-btn,
+    .print-btn {
+        display: none;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        page-break-inside: auto;
+    }
+
+    thead {
+        display: table-header-group; /* Repeat header on each page */
+    }
+
+    tfoot {
+        display: table-footer-group;
+    }
+
+    tr {
+        page-break-inside: avoid;   /* Don't split rows */
+        break-inside: avoid;
+        page-break-after: auto;
+    }
+
+    td,
+    th {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .quadrant-container {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .bill-footer {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+}
     </style>
 </head>
 <body>
