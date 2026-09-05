@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java DSA + SQL Assessment</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #7d8590;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+    --purple: #bc8cff;
+    --orange: #ffa657;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: -0.3px;
+  }
+
+  .logo span { color: var(--purple); }
+
+  .progress-bar-wrap {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--purple));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-label {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+  }
+
+  /* Layout */
+  .main {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    flex: 1;
+    height: calc(100vh - 53px);
+    overflow: hidden;
+  }
+
+  /* Problem Panel */
+  .problem-panel {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Problem Tabs */
+  .problem-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .problem-tabs::-webkit-scrollbar { display: none; }
+
+  .ptab {
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.15s;
+    font-family: 'JetBrains Mono', monospace;
+    user-select: none;
+  }
+  .ptab:hover { color: var(--text); }
+  .ptab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .ptab.done { color: var(--green); }
+  .ptab.done.active { border-bottom-color: var(--green); }
+
+  /* Problem Content */
+  .problem-content {
+    padding: 24px;
+    flex: 1;
+  }
+
+  .problem-header {
+    margin-bottom: 20px;
+  }
+
+  .problem-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .problem-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .difficulty {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .easy { background: rgba(63,185,80,.15); color: var(--green); }
+  .medium { background: rgba(210,153,34,.15); color: var(--yellow); }
+
+  .tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: var(--surface2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .problem-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .problem-body {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #c9d1d9;
+  }
+
+  .problem-body p { margin-bottom: 12px; }
+
+  .problem-body pre {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    overflow-x: auto;
+    margin: 10px 0 14px;
+    line-height: 1.6;
+  }
+
+  .problem-body strong { color: var(--text); }
+
+  .section-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 16px 0 8px;
+  }
+
+  .constraint {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    color: #8b949e;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .constraint::before {
+    content: '•';
+    color: var(--border);
+    flex-shrink: 0;
+  }
+
+  /* Editor Panel */
+  .editor-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .editor-toolbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .lang-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--orange);
+  }
+
+  .btn {
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.15s, transform 0.1s;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-run {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    margin-left: auto;
+  }
+
+  .btn-submit {
+    background: var(--green);
+    color: #000;
+  }
+
+  .btn-next {
+    background: var(--accent);
+    color: #000;
+    display: none;
+  }
+
+  .editor-area {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+
+  textarea.code-editor {
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.7;
+    padding: 20px;
+    border: none;
+    outline: none;
+    resize: none;
+    tab-size: 4;
+    caret-color: var(--accent);
+  }
+
+  /* Output / Feedback */
+  .output-panel {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    height: 240px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .output-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+  }
+
+  .otab {
+    font-size: 12px;
+    padding: 8px 12px;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .otab.active { color: var(--text); border-bottom-color: var(--accent); }
+
+  .output-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #8b949e;
+  }
+
+  .feedback-loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+  }
+
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .feedback-ok { color: var(--green); }
+  .feedback-warn { color: var(--yellow); }
+  .feedback-err { color: var(--red); }
+  .feedback-text { color: #c9d1d9; white-space: pre-wrap; }
+
+  /* Score Screen */
+  .score-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 40px;
+    text-align: center;
+  }
+
+  .score-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 4px solid var(--accent);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    background: var(--surface2);
+  }
+
+  .score-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .score-label { font-size: 12px; color: var(--muted); }
+
+  .score-title { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
+  .score-sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+
+  .score-breakdown {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+
+  .score-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 20px;
+    min-width: 130px;
+  }
+
+  .sc-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .sc-val { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 600; }
+
+  .btn-restart {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.15s;
+  }
+  .btn-restart:hover { border-color: var(--accent); }
+
+  /* Timer */
+  .timer-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 12px;
+    white-space: nowrap;
+    transition: color 0.3s, border-color 0.3s;
+  }
+  .timer-wrap.warn { color: var(--yellow); border-color: var(--yellow); }
+  .timer-wrap.danger { color: var(--red); border-color: var(--red); animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+  .timer-icon { font-size: 13px; }
+
+  /* Time-up overlay */
+  .timeup-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(13,17,23,0.92);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  .timeup-overlay.show { display: flex; }
+  .timeup-title { font-size: 32px; font-weight: 700; color: var(--red); }
+  .timeup-sub { color: var(--muted); font-size: 15px; max-width: 360px; line-height: 1.6; }
+  .timeup-btn {
+    margin-top: 8px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 28px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Start screen */
+  .start-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+  .start-screen.hidden { display: none; }
+  .start-logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .start-logo span { color: var(--purple); }
+  .start-title { font-size: 28px; font-weight: 700; }
+  .start-sub { color: var(--muted); font-size: 14px; max-width: 400px; line-height: 1.7; }
+  .start-rules {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 28px;
+    text-align: left;
+    max-width: 420px;
+    width: 100%;
+  }
+  .start-rules li {
+    font-size: 13px;
+    color: #c9d1d9;
+    margin-bottom: 10px;
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    gap: 10px;
+  }
+  .start-rules li::before { content: '→'; color: var(--accent); flex-shrink: 0; }
+  .start-btn {
+    background: var(--green);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 36px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: opacity 0.15s;
+  }
+  .start-btn:hover { opacity: 0.85; }
+
+  /* Utility */
+  .hidden { display: none !important; }
+  .inline-code {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Start Screen -->
+<div class="start-screen" id="startScreen">
+  <div class="start-logo">code<span>assess</span>.dev</div>
+  <div class="start-title">Java DSA + SQL Assessment</div>
+  <div class="start-sub">5 problems · 1 hour time limit · AI-powered feedback</div>
+  <div class="start-rules">
+    <ul>
+      <li>3 Java problems (Array / String) — Easy to Medium</li>
+      <li>2 SQL problems — Easy to Medium, no window functions</li>
+      <li>Timer starts the moment you click Start</li>
+      <li>Submit each solution for AI review and verdict</li>
+      <li>Assessment auto-submits when the timer hits 00:00</li>
+    </ul>
+  </div>
+  <button class="start-btn" onclick="startAssessment()">▶ Start Assessment</button>
+</div>
+
+<!-- Time-up Overlay -->
+<div class="timeup-overlay" id="timeupOverlay">
+  <div style="font-size:48px">⏰</div>
+  <div class="timeup-title">Time's Up!</div>
+  <div class="timeup-sub">Your 1-hour assessment window has ended. Your progress has been saved and results are being calculated.</div>
+  <button class="timeup-btn" onclick="finishAfterTimeout()">View My Results →</button>
+</div>
+
+<header>
+  <div class="logo">code<span>assess</span>.dev</div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+  </div>
+  <div class="progress-label" id="progressLabel">0 / 5 solved</div>
+  <div class="timer-wrap" id="timerWrap">
+    <span class="timer-icon">⏱</span>
+    <span id="timerDisplay">60:00</span>
+  </div>
+</header>
+
+<div class="main" id="mainLayout">
+
+  <!-- Problem Panel -->
+  <div class="problem-panel">
+    <div class="problem-tabs" id="problemTabs"></div>
+    <div class="problem-content" id="problemContent"></div>
+  </div>
+
+  <!-- Editor Panel -->
+  <div class="editor-panel">
+    <div class="editor-toolbar">
+      <span class="lang-badge" id="langBadge">Java</span>
+      <button class="btn btn-run" onclick="runCode()">▶ Run</button>
+      <button class="btn btn-submit" onclick="submitCode()">Submit</button>
+      <button class="btn btn-next" id="btnNext" onclick="nextProblem()">Next →</button>
+    </div>
+
+    <div class="editor-area">
+      <textarea class="code-editor" id="codeEditor" spellcheck="false"></textarea>
+    </div>
+
+    <div class="output-panel">
+      <div class="output-tabs">
+        <div class="otab active" onclick="switchOTab(this, 'output')">Output</div>
+        <div class="otab" onclick="switchOTab(this, 'feedback')">AI Feedback</div>
+      </div>
+      <div class="output-content" id="outputContent">
+        <span style="color:var(--muted)">// Run your code to see output here</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Score Screen -->
+<div class="score-screen" id="scoreScreen">
+  <div class="score-circle">
+    <div class="score-num" id="scoreNum">0/5</div>
+    <div class="score-label">submitted</div>
+  </div>
+  <div class="score-title" id="scoreTitle">Assessment Complete</div>
+  <div class="score-sub">Here's how you did across all 5 problems</div>
+  <div class="score-breakdown" id="scoreBreakdown"></div>
+  <button class="btn-restart" onclick="restartAssessment()">↺ Restart Assessment</button>
+</div>
+
+<script>
+const PROBLEMS = [
+  {
+    id: 1,
+    title: "Two Sum",
+    difficulty: "Easy",
+    tags: ["Array", "HashMap"],
+    type: "java",
+    description: `Given an array of integers <code>nums</code> and an integer <code>target</code>, return <strong>indices of the two numbers</strong> such that they add up to <code>target</code>.<br><br>You may assume that each input would have <strong>exactly one solution</strong>, and you may not use the same element twice. You can return the answer in any order.`,
+    examples: [
+      { input: "nums = [2,7,11,15], target = 9", output: "[0,1]", explanation: "nums[0] + nums[1] == 9, return [0, 1]" },
+      { input: "nums = [3,2,4], target = 6", output: "[1,2]" },
+      { input: "nums = [3,3], target = 6", output: "[0,1]" }
+    ],
+    constraints: ["2 <= nums.length <= 10^4", "-10^9 <= nums[i] <= 10^9", "-10^9 <= target <= 10^9", "Only one valid answer exists."],
+    starter: `import java.util.HashMap;
+
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        // Write your solution here
+        
+    }
+}`
+  },
+  {
+    id: 2,
+    title: "Longest Substring Without Repeating Characters",
+    difficulty: "Medium",
+    tags: ["String", "Sliding Window"],
+    type: "java",
+    description: `Given a string <code>s</code>, find the length of the <strong>longest substring</strong> without repeating characters.`,
+    examples: [
+      { input: 's = "abcabcbb"', output: "3", explanation: 'The answer is "abc", with the length of 3.' },
+      { input: 's = "bbbbb"', output: "1", explanation: 'The answer is "b", with the length of 1.' },
+      { input: 's = "pwwkew"', output: "3", explanation: 'The answer is "wke", with the length of 3.' }
+    ],
+    constraints: ["0 <= s.length <= 5 * 10^4", "s consists of English letters, digits, symbols and spaces."],
+    starter: `import java.util.HashMap;
+
+class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        // Write your solution here
+        
+    }
+}`
+  },
+  {
+    id: 3,
+    title: "Best Time to Buy and Sell Stock",
+    difficulty: "Easy",
+    tags: ["Array", "Greedy"],
+    type: "java",
+    description: `You are given an array <code>prices</code> where <code>prices[i]</code> is the price of a given stock on the <code>i</code>th day.<br><br>You want to maximize your profit by choosing a <strong>single day</strong> to buy one stock and choosing a <strong>different day in the future</strong> to sell that stock.<br><br>Return <em>the maximum profit you can achieve from this transaction</em>. If you cannot achieve any profit, return <code>0</code>.`,
+    examples: [
+      { input: "prices = [7,1,5,3,6,4]", output: "5", explanation: "Buy on day 2 (price=1), sell on day 5 (price=6). Profit = 6-1 = 5." },
+      { input: "prices = [7,6,4,3,1]", output: "0", explanation: "No transaction is done, i.e., max profit = 0." }
+    ],
+    constraints: ["1 <= prices.length <= 10^5", "0 <= prices[i] <= 10^4"],
+    starter: `class Solution {
+    public int maxProfit(int[] prices) {
+        // Write your solution here
+        
+    }
+}`
+  },
+  {
+    id: 4,
+    title: "Employees Earning More Than Their Manager",
+    difficulty: "Easy",
+    tags: ["SQL", "Self Join"],
+    type: "sql",
+    description: `Table: <strong>Employee</strong><br><br>
+<pre>+-------------+---------+
+| Column Name | Type    |
++-------------+---------+
+| id          | int     |
+| name        | varchar |
+| salary      | int     |
+| managerId   | int     |
++-------------+---------+</pre>
+<code>id</code> is the primary key. Each row contains the id, name, salary, and manager's id of an employee. <code>managerId</code> is null for the top manager.<br><br>
+Write a SQL query to find the employees who earn <strong>more than their managers</strong>. Return the result table in any order.`,
+    examples: [
+      {
+        input: `Employee table:\n+----+-------+--------+-----------+\n| id | name  | salary | managerId |\n+----+-------+--------+-----------+\n| 1  | Joe   | 70000  | 3         |\n| 2  | Henry | 80000  | 4         |\n| 3  | Sam   | 60000  | NULL      |\n| 4  | Max   | 90000  | NULL      |\n+----+-------+--------+-----------+`,
+        output: `+----------+\n| Employee |\n+----------+\n| Joe      |\n+----------+`,
+        explanation: "Joe is the only employee who earns more than his manager (Sam)."
+      }
+    ],
+    constraints: ["No window functions allowed.", "Use a self-join or subquery approach."],
+    starter: `-- Write your SQL query here
+SELECT e1.name AS Employee
+FROM Employee e1
+-- JOIN or subquery here
+`
+  },
+  {
+    id: 5,
+    title: "Customers Who Never Order",
+    difficulty: "Easy",
+    tags: ["SQL", "LEFT JOIN"],
+    type: "sql",
+    description: `Table: <strong>Customers</strong><br><br>
+<pre>+-------------+---------+
+| Column Name | Type    |
++-------------+---------+
+| id          | int     |
+| name        | varchar |
++-------------+---------+</pre>
+Table: <strong>Orders</strong><br><br>
+<pre>+-------------+------+
+| Column Name | Type |
++-------------+------+
+| id          | int  |
+| customerId  | int  |
++-------------+------+</pre>
+<code>customerId</code> references <code>Customers.id</code>.<br><br>
+Write a SQL query to report all customers who <strong>never order anything</strong>. Return the result in any order.`,
+    examples: [
+      {
+        input: `Customers:\n+----+-------+\n| id | name  |\n+----+-------+\n| 1  | Joe   |\n| 2  | Henry |\n| 3  | Sam   |\n| 4  | Max   |\n+----+-------+\n\nOrders:\n+----+------------+\n| id | customerId |\n+----+------------+\n| 1  | 3          |\n| 2  | 1          |\n+----+------------+`,
+        output: `+-----------+\n| Customers |\n+-----------+\n| Henry     |\n| Max       |\n+-----------+`,
+        explanation: "Henry and Max have no orders."
+      }
+    ],
+    constraints: ["No window functions allowed.", "Use LEFT JOIN or NOT IN / NOT EXISTS."],
+    starter: `-- Write your SQL query here
+SELECT c.name AS Customers
+FROM Customers c
+-- Your JOIN or subquery here
+`
+  }
+];
+
+let currentProblem = 0;
+let solved = new Array(5).fill(false);
+let codes = PROBLEMS.map(p => p.starter);
+let activeOTab = 'output';
+let outputStore = new Array(5).fill('');
+let feedbackStore = new Array(5).fill('');
+
+// Timer
+const TOTAL_SECONDS = 60 * 60; // 1 hour
+let secondsLeft = TOTAL_SECONDS;
+let timerInterval = null;
+let timerStarted = false;
+let timedOut = false;
+
+function startAssessment() {
+  document.getElementById('startScreen').classList.add('hidden');
+  startTimer();
+}
+
+function startTimer() {
+  timerStarted = true;
+  secondsLeft = TOTAL_SECONDS;
+  renderTimer();
+  timerInterval = setInterval(() => {
+    secondsLeft--;
+    renderTimer();
+    updateTimerStyle();
+    if (secondsLeft <= 0) {
+      clearInterval(timerInterval);
+      timedOut = true;
+      onTimeUp();
+    }
+  }, 1000);
+}
+
+function renderTimer() {
+  const m = Math.floor(secondsLeft / 60);
+  const s = secondsLeft % 60;
+  document.getElementById('timerDisplay').textContent =
+    String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+function updateTimerStyle() {
+  const wrap = document.getElementById('timerWrap');
+  wrap.classList.remove('warn', 'danger');
+  if (secondsLeft <= 300) wrap.classList.add('danger');       // last 5 min
+  else if (secondsLeft <= 600) wrap.classList.add('warn');    // last 10 min
+}
+
+function onTimeUp() {
+  // Save current editor state
+  codes[currentProblem] = document.getElementById('codeEditor').value;
+  document.getElementById('timeupOverlay').classList.add('show');
+}
+
+function finishAfterTimeout() {
+  document.getElementById('timeupOverlay').classList.remove('show');
+  showScoreScreen(true);
+}
+
+function buildTabs() {
+  const tabsEl = document.getElementById('problemTabs');
+  tabsEl.innerHTML = '';
+  PROBLEMS.forEach((p, i) => {
+    const t = document.createElement('div');
+    t.className = 'ptab' + (i === currentProblem ? ' active' : '') + (solved[i] ? ' done' : '');
+    t.textContent = `${i+1}. ${p.title.split(' ').slice(0,2).join(' ')}`;
+    t.onclick = () => switchProblem(i);
+    tabsEl.appendChild(t);
+  });
+}
+
+function buildProblemContent(i) {
+  const p = PROBLEMS[i];
+  let html = `
+    <div class="problem-header">
+      <div class="problem-meta">
+        <span class="problem-num">#${p.id}</span>
+        <span class="difficulty ${p.difficulty.toLowerCase()}">${p.difficulty}</span>
+        ${p.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+      </div>
+      <div class="problem-title">${p.title}</div>
+    </div>
+    <div class="problem-body">
+      <p>${p.description}</p>
+      <div class="section-label">Examples</div>
+  `;
+  p.examples.forEach((ex, idx) => {
+    html += `<pre><strong>Example ${idx+1}:</strong>\nInput:  ${ex.input}\nOutput: ${ex.output}${ex.explanation ? '\nExplanation: ' + ex.explanation : ''}</pre>`;
+  });
+  html += `<div class="section-label">Constraints</div>`;
+  p.constraints.forEach(c => {
+    html += `<div class="constraint">${c}</div>`;
+  });
+  html += `</div>`;
+  document.getElementById('problemContent').innerHTML = html;
+}
+
+function switchProblem(i) {
+  codes[currentProblem] = document.getElementById('codeEditor').value;
+  currentProblem = i;
+  buildTabs();
+  buildProblemContent(i);
+  const p = PROBLEMS[i];
+  document.getElementById('langBadge').textContent = p.type === 'sql' ? 'SQL' : 'Java';
+  document.getElementById('codeEditor').value = codes[i];
+  showOutput();
+  updateProgress();
+  document.getElementById('btnNext').style.display = solved[i] ? 'inline-block' : 'none';
+}
+
+function switchOTab(el, tab) {
+  document.querySelectorAll('.otab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  activeOTab = tab;
+  showOutput();
+}
+
+function showOutput() {
+  const el = document.getElementById('outputContent');
+  if (activeOTab === 'output') {
+    el.innerHTML = outputStore[currentProblem] || '<span style="color:var(--muted)">// Run your code to see output here</span>';
+  } else {
+    el.innerHTML = feedbackStore[currentProblem] || '<span style="color:var(--muted)">// Submit to get AI feedback</span>';
+  }
+}
+
+function updateProgress() {
+  const count = solved.filter(Boolean).length;
+  document.getElementById('progressFill').style.width = (count / 5 * 100) + '%';
+  document.getElementById('progressLabel').textContent = `${count} / 5 solved`;
+}
+
+function runCode() {
+  const code = document.getElementById('codeEditor').value.trim();
+  if (!code) { setOutput('<span class="feedback-err">// Editor is empty.</span>'); return; }
+  setOutput('<div class="feedback-loading"><div class="spinner"></div><span>Compiling...</span></div>');
+  const p = PROBLEMS[currentProblem];
+  const note = p.type === 'sql'
+    ? '// SQL cannot be executed client-side. Use Submit for AI feedback on your query logic.'
+    : `// Java runtime not available in browser.\n// Your code structure looks ready — use Submit for full AI feedback.\n// Make sure your solution handles edge cases!`;
+  setTimeout(() => {
+    outputStore[currentProblem] = `<span class="feedback-warn">${note}</span>`;
+    if (activeOTab === 'output') showOutput();
+  }, 600);
+}
+
+async function submitCode() {
+  codes[currentProblem] = document.getElementById('codeEditor').value;
+  const code = codes[currentProblem].trim();
+  if (!code) { alert('Please write your solution first.'); return; }
+
+  // Switch to feedback tab
+  document.querySelectorAll('.otab').forEach((t,i) => t.classList.toggle('active', i===1));
+  activeOTab = 'feedback';
+  feedbackStore[currentProblem] = '<div class="feedback-loading"><div class="spinner"></div><span>Claude is reviewing your solution…</span></div>';
+  showOutput();
+
+  const p = PROBLEMS[currentProblem];
+  const prompt = `You are a senior software engineer reviewing a coding assessment submission.
+
+Problem: "${p.title}" (${p.difficulty})
+Type: ${p.type === 'sql' ? 'SQL' : 'Java'}
+Tags: ${p.tags.join(', ')}
+
+Problem Description: ${p.description.replace(/<[^>]+>/g, '')}
+
+Constraints: ${p.constraints.join('; ')}
+
+Student's Solution:
+\`\`\`${p.type === 'sql' ? 'sql' : 'java'}
+${code}
+\`\`\`
+
+Provide a concise, structured review covering:
+1. ✅ Correctness — does the logic solve the problem?
+2. ⏱ Time Complexity — Big-O analysis
+3. 🧠 Space Complexity — Big-O analysis
+4. 💡 Improvement — one concrete suggestion if any
+5. 🏆 Verdict — Accepted / Needs Work / Wrong Approach
+
+Keep each point to 1-2 lines. Be specific, not generic. If the code is blank/starter, say so directly.`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.find(b => b.type === 'text')?.text || "No feedback received.";
+
+    // Determine if accepted
+    const accepted = /verdict.*accepted|accepted/i.test(text) && !/needs work|wrong approach/i.test(text);
+    if (accepted) {
+      solved[currentProblem] = true;
+      document.getElementById('btnNext').style.display = 'inline-block';
+      updateProgress();
+      buildTabs();
+      if (solved.every(Boolean)) setTimeout(() => showScoreScreen(false), 1000);
+    }
+
+    feedbackStore[currentProblem] = `<span class="feedback-text">${escHtml(text)}</span>`;
+    showOutput();
+
+    if (accepted) {
+      feedbackStore[currentProblem] += `\n<span class="feedback-ok" style="margin-top:10px;display:block">✔ Marked as solved!</span>`;
+      showOutput();
+    }
+  } catch(e) {
+    feedbackStore[currentProblem] = `<span class="feedback-err">Error getting feedback. Check your connection.</span>`;
+    showOutput();
+  }
+}
+
+function nextProblem() {
+  const next = currentProblem + 1;
+  if (next < 5) switchProblem(next);
+  else showScoreScreen(false);
+}
+
+function showScoreScreen(fromTimeout = false) {
+  clearInterval(timerInterval);
+  document.getElementById('mainLayout').style.display = 'none';
+  const ss = document.getElementById('scoreScreen');
+  ss.style.display = 'flex';
+
+  const count = solved.filter(Boolean).length;
+  document.getElementById('scoreNum').textContent = `${count}/5`;
+  document.getElementById('scoreTitle').textContent = count === 5 ? '🏆 All Problems Solved!' : count >= 3 ? '👍 Good Effort!' : '📚 Keep Practicing!';
+
+  const javaScore = solved.slice(0,3).filter(Boolean).length;
+  const sqlScore = solved.slice(3,5).filter(Boolean).length;
+
+  const usedSecs = TOTAL_SECONDS - secondsLeft;
+  const usedM = Math.floor(usedSecs / 60);
+  const usedS = usedSecs % 60;
+  const timeUsed = fromTimeout ? '60:00 (Time Up)' : `${String(usedM).padStart(2,'0')}:${String(usedS).padStart(2,'0')}`;
+
+  document.getElementById('scoreBreakdown').innerHTML = `
+    <div class="score-card">
+      <div class="sc-label">Java DSA</div>
+      <div class="sc-val" style="color:var(--orange)">${javaScore}/3</div>
+    </div>
+    <div class="score-card">
+      <div class="sc-label">SQL</div>
+      <div class="sc-val" style="color:var(--purple)">${sqlScore}/2</div>
+    </div>
+    <div class="score-card">
+      <div class="sc-label">Total Score</div>
+      <div class="sc-val" style="color:var(--accent)">${Math.round(count/5*100)}%</div>
+    </div>
+    <div class="score-card">
+      <div class="sc-label">Time Used</div>
+      <div class="sc-val" style="color:var(--muted);font-size:14px">${timeUsed}</div>
+    </div>
+  `;
+}
+
+function restartAssessment() {
+  clearInterval(timerInterval);
+  timerStarted = false;
+  timedOut = false;
+  secondsLeft = TOTAL_SECONDS;
+  renderTimer();
+  document.getElementById('timerWrap').classList.remove('warn','danger');
+  currentProblem = 0;
+  solved = new Array(5).fill(false);
+  codes = PROBLEMS.map(p => p.starter);
+  outputStore = new Array(5).fill('');
+  feedbackStore = new Array(5).fill('');
+  document.getElementById('scoreScreen').style.display = 'none';
+  document.getElementById('mainLayout').style.display = 'grid';
+  document.getElementById('startScreen').classList.remove('hidden');
+  switchProblem(0);
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Tab key in editor
+document.getElementById('codeEditor').addEventListener('keydown', function(e) {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const s = this.selectionStart, end = this.selectionEnd;
+    this.value = this.value.substring(0, s) + '    ' + this.value.substring(end);
+    this.selectionStart = this.selectionEnd = s + 4;
+  }
+});
+
+// Init
+buildTabs();
+buildProblemContent(0);
+document.getElementById('codeEditor').value = codes[0];
+updateProgress();
+</script>
+</body>
+</html>
